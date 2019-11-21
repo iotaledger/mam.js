@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "strict": true,
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "outDir": "./es",
+      "esModuleInterop": true,
+      "inlineSourceMap": true
+    },
+    "include": [
+      "src"
+    ]
+  }
+  

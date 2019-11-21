@@ -1,0 +1,9 @@
+{
+    "name": "simple",
+    "version": "1.0.0",
+    "main": "index.js",
+    "dependencies": {
+        "@iota/core": "^1.0.0-beta.21",
+        "@iota/mam.js": "file:../.."
+    }
+}
