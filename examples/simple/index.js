@@ -1,22 +1,36 @@
 const { composeAPI } = require('@iota/core');
+const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
 const { createChannel, createMessage, parseMessage, mamAttach, mamFetch } = require('@iota/mam.js');
+const crypto = require('crypto');
 const fs = require('fs');
 
-async function run() {
+const generateSeed = (length = 81) => {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
+    let seed = '';
+    while (seed.length < length) {
+        const byte = crypto.randomBytes(1)
+        if (byte[0] < 243) {
+            seed += charset.charAt(byte[0] % 27);
+        }
+    }
+    return seed;
+};
+
+async function run(message) {
     // Setup the details for the channel.
-    const seed = 'ENTER YOUR SEED HERE';
     const mode = 'restricted';
     const sideKey = 'MYKEY';
-    const message = 'MY9MESSAGE';
+    const seed = generateSeed();
+    const trytes = asciiToTrytes(JSON.stringify(message))
     let channelState;
 
     // Try and load the channel state from json file
-    try { 
+    try {
         const currentState = fs.readFileSync('./channelState.json');
         if (currentState) {
             channelState = JSON.parse(currentState.toString());
         }
-    } catch {}
+    } catch(e) {}
 
     // If we couldn't load the details then create a new channel.
     if (!channelState) {
@@ -24,30 +38,31 @@ async function run() {
     }
 
     // Create a MAM message using the channel state.
-    const mamMessage = createMessage(channelState, message);
+    const mamMessage = createMessage(channelState, trytes);
 
     // Display the details for the MAM message.
     console.log('Address:', mamMessage.address);
     console.log('Root:', mamMessage.root);
     console.log('NextRoot:', mamMessage.nextRoot);
-    console.log('Payload:', mamMessage.payload);
+    console.log('Seed:', seed);
 
     // Decode the message using the root and sideKey.
-    // This is only for demonstration purposes, there is no reason to decode at this point
     const decodedMessage = parseMessage(mamMessage.payload, mamMessage.root, sideKey);
 
     // Display the decoded data.
     console.log('Decoded NextRoot', decodedMessage.nextRoot);
     console.log('Decoded Message', decodedMessage.message);
 
-    // Store the updated channel state.
-    try { 
+    // Store the channel state.
+    try {
         fs.writeFileSync('./channelState.json', JSON.stringify(channelState, undefined, "\t"));
-    } catch {}
+    } catch(e) {
+        console.error(e)
+    }
 
     // So far we have shown how to create and parse a message
     // but now we actually want to attach the message to the tangle
-    const api = composeAPI({ provider: "https://altnodes.devnet.iota.org:443" });
+    const api = composeAPI({ provider: "http://bare01.devnet.iota.cafe:14265" });
 
     // Attach the message.
     console.log('Attaching to tangle, please wait...')
@@ -57,9 +72,14 @@ async function run() {
     // Try fetching it as well.
     console.log('Fetching from tangle, please wait...');
     const fetched = await mamFetch(api, mamMessage.root, mode, sideKey)
-    console.log('Fetched', fetched);
+    fetched && console.log('Fetched', JSON.parse(trytesToAscii(fetched.message)));
 }
 
-run()
-    .then(() => console.log("done"))
-    .catch((err) => console.error(err));
+const message = {
+  message: 'MY9MESSAGE',
+  timestamp: (new Date()).toLocaleString()
+}
+
+run(message)
+  .then(() => console.log("done"))
+  .catch((err) => console.error(err));
