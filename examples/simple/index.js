@@ -4,10 +4,9 @@ const fs = require('fs');
 
 async function run() {
     // Setup the details for the channel.
+    const seed = 'ENTER YOUR SEED HERE';
     const mode = 'restricted';
     const sideKey = 'MYKEY';
-    // Replace this with your own test seed
-    const seed = 'THIS9IS9MY9EXAMPLE9FOR9MAM9THIS9IS9MY9EXAMPLE9FOR9MAM9THIS9IS9MY9EXAMPLE9FOR9MAMD';
     const message = 'MY9MESSAGE';
     let channelState;
 

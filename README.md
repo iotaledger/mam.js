@@ -38,9 +38,9 @@ npm install iotaledger/mam.js
 const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam.js');
 
 // Setup the details for the channel.
+const seed = 'ENTER A SEED';
 const mode = 'restricted';
 const sideKey = 'MYKEY';
-const seed = 'THIS9IS9MY9EXAMPLE9FOR9MAM9THIS9IS9MY9EXAMPLE9FOR9MAM9THIS9IS9MY9EXAMPLE9FOR9MAMD';
 
 // Create a new channel using the details
 // You could also load the state from persistence.
