@@ -4,7 +4,7 @@ const { createChannel, createMessage, parseMessage, mamAttach, mamFetch } = requ
 const crypto = require('crypto');
 const fs = require('fs');
 
-async function run(asciiMessage) {
+async function run(payload) {
     // Setup the details for the channel.
     const mode = 'restricted';
     const sideKey = 'MYKEY';
@@ -24,7 +24,7 @@ async function run(asciiMessage) {
     }
 
     // Create a MAM message using the channel state.
-    const mamMessage = createMessage(channelState, asciiToTrytes(asciiMessage));
+    const mamMessage = createMessage(channelState, asciiToTrytes(JSON.stringify(payload)));
 
     // Display the details for the MAM message.
     console.log('Seed:', channelState.seed);
@@ -60,7 +60,7 @@ async function run(asciiMessage) {
     console.log('Fetching from tangle, please wait...');
     const fetched = await mamFetch(api, mamMessage.root, mode, sideKey)
     if (fetched) {
-        console.log('Fetched', trytesToAscii(fetched.message));
+        console.log('Fetched', JSON.parse(trytesToAscii(fetched.message)));
     } else {
         console.log('Nothing was fetched from the MAM channel');
     }
@@ -78,6 +78,11 @@ function generateSeed(length) {
     return seed;
 }
 
-run("Hello MAM World!")
+const payload = {
+    message: 'MY9MESSAGE',
+    timestamp: (new Date()).toLocaleString()
+};
+
+run(payload)
     .then(() => console.log("done"))
     .catch((err) => console.error(err));

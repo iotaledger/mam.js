@@ -1,4 +1,4 @@
 .history
 node_modules
 coverage
-examples/simple/channelState.json
+channelState.json
