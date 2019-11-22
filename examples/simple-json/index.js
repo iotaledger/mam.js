@@ -79,7 +79,7 @@ function generateSeed(length) {
 }
 
 const payload = {
-    message: 'MY9MESSAGE',
+    message: 'Hello MAM World!',
     timestamp: (new Date()).toLocaleString()
 };
 
