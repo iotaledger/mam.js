@@ -53,7 +53,7 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
     // Check the security level is valid
     const securityLevel = checksumSecurity(hmac);
     if (securityLevel === 0) {
-        throw new Error("Message Hash did not have any hamming weight of zero");
+        throw new Error("Message Hash did not have a hamming weight of zero, security level is invalid");
     }
 
     // Decrypt the rest of the payload

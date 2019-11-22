@@ -1041,7 +1041,7 @@
         // Check the security level is valid
         var securityLevel = checksumSecurity(hmac);
         if (securityLevel === 0) {
-            throw new Error("Message Hash did not have any hamming weight of zero");
+            throw new Error("Message Hash did not have a hamming weight of zero, security level is invalid");
         }
         // Decrypt the rest of the payload
         var decryptedMetadata = unmask(payloadTrits.slice(messageEnd + nonce.length), sponge);
@@ -1095,8 +1095,7 @@
                         return [4 /*yield*/, api.prepareTransfers("9".repeat(81), transfers)];
                     case 1:
                         preparedTrytes = _a.sent();
-                        return [4 /*yield*/, api.sendTrytes(preparedTrytes, depth, mwm)];
-                    case 2: return [2 /*return*/, _a.sent()];
+                        return [2 /*return*/, api.sendTrytes(preparedTrytes, depth, mwm)];
                 }
             });
         });

@@ -31,7 +31,7 @@ export async function mamAttach(
     ];
     const preparedTrytes = await api.prepareTransfers("9".repeat(81), transfers);
 
-    return await api.sendTrytes(preparedTrytes, depth, mwm);
+    return api.sendTrytes(preparedTrytes, depth, mwm);
 }
 
 /**
