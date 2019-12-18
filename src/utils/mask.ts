@@ -1,12 +1,11 @@
-import { trits } from "@iota/converter";
 import Curl from "@iota/curl";
 import { concatenate } from "./arrayHelper";
 import { curlRate } from "./curlHelper";
 
 /**
- * Create the mask hash for the key and salt it if provided.
+ * Create the mask hash for the key.
  * @param keyTrits The key to create the mask hash for.
- * @returns The mask hash.
+ * @returns The masked hash.
  */
 export function maskHash(keyTrits: Int8Array): Int8Array {
     const sponge = new Curl(81);

@@ -33,7 +33,7 @@ test("createChannel() fails restricted mode and sidekey too long", () => {
 });
 
 test("createChannel() fails with non restricted mode and sidekey", () => {
-    expect(() => createChannel("A".repeat(81), 3, "public", "S".repeat(82))).toThrow("Sidekey is only");
+    expect(() => createChannel("A".repeat(81), 3, "public", "S".repeat(82))).toThrow("sideKey is only");
 });
 
 test("createChannel() succeed with public mode", () => {

@@ -18,11 +18,15 @@ export declare function mamAttach(api: API, mamMessage: IMamMessage, depth: numb
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
- * @returns The decoded message and the nextRoot if successful, undefined if no message.
+ * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
+ * throws exception if transactions found on address are invalid.
  */
 export declare function mamFetch(api: API, root: string, mode: MamMode, sideKey?: string): Promise<IMamFetchedMessage | undefined>;
 /**
  * Fetch all the mam message from a channel.
+ * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
+ * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
+ * same amount of messages as your limit you should probably read again.
  * @param api The api to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.

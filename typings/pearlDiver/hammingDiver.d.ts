@@ -49,12 +49,12 @@ export declare class HammingDiver {
     /**
      * Search for the nonce.
      * @param trits The trits to calculate the nonce.
-     * @param mwm The security level to calculate at.
+     * @param securityLevel The security level to calculate at.
      * @param length The length of the data to search.
      * @param offset The offset to start the search.
      * @returns The trits of the nonce.
      */
-    search(trits: Int8Array, mwm: number, length: number, offset: number): Int8Array;
+    search(trits: Int8Array, securityLevel: number, length: number, offset: number): Int8Array;
     /**
      * Prepare the trits for calculation.
      * @param trits The trits.
@@ -90,23 +90,17 @@ export declare class HammingDiver {
     private bitWiseNot;
     /**
      * Check if we have found the nonce.
-     * @param mwm The mwm.
+     * @param securityLevel The security level to check.
      * @param low The low bits.
      * @param high The high bits.
      * @returns The nonce if found.
      */
     private check;
     /**
-     * Calculate the trinary length of the bit data.
-     * @param low The low bits.
-     * @param high The high bits.
-     * @returns The length.
-     */
-    private trinaryLength;
-    /**
      * Get data from the tinary bits.
      * @param low The low bits.
      * @param high The high bits.
+     * @param arrLength The array length to get from.
      * @param index The index to get the values.
      * @returns The values stored at the index.
      */

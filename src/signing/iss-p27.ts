@@ -24,7 +24,7 @@ export function subseed(seed: Int8Array, index: number): Int8Array {
 
     while (localIndex-- > 0) {
         for (let i = 0; i < subseedPreimage.length; i++) {
-            if (++subseedPreimage[i] > MAX_TRIT_VALUE) {
+            if (subseedPreimage[i]++ >= MAX_TRIT_VALUE) {
                 subseedPreimage[i] = MIN_TRIT_VALUE;
             } else {
                 break;
@@ -52,10 +52,6 @@ export function digestFromSubseed(subSeed: Int8Array, securityLevel: number): In
 
     const length = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH / Curl.HASH_LENGTH;
     const digest = new Int8Array(Curl.HASH_LENGTH);
-
-    curl1.reset();
-    curl2.reset();
-    curl3.reset();
 
     curl1.absorb(subSeed, 0, subSeed.length);
 
@@ -85,7 +81,6 @@ export function address(digests: Int8Array): Int8Array {
     const sponge = new Curl(27);
     const hashLength = Curl.HASH_LENGTH;
 
-    sponge.initialize();
     sponge.absorb(digests, 0, digests.length);
 
     const addressTrits = new Int8Array(hashLength);
@@ -103,12 +98,10 @@ export function address(digests: Int8Array): Int8Array {
 export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number): Int8Array {
     const keyLength = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH;
     const keyTrits = new Int8Array(keyLength);
-    const actualKeyTrits = [];
+    const actualKeyTrits: Int8Array[] = [];
 
     const sponge = new Curl(27);
 
-    sponge.initialize();
-    sponge.reset();
     sponge.absorb(subSeed, 0, subSeed.length);
     sponge.squeeze(keyTrits, 0, keyTrits.length);
 
@@ -131,9 +124,8 @@ export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number)
  * @returns The signature trits.
  */
 export function signature(hashTrits: Int8Array, key: Int8Array): Int8Array {
-    const sponge = new Curl(27);
-
     const signatures: Int8Array[] = [];
+    const sponge = new Curl(27);
 
     for (let i = 0; i < key.length / Curl.HASH_LENGTH; i++) {
         let buffer = key.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);

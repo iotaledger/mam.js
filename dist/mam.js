@@ -61,7 +61,7 @@
         var localIndex = index;
         while (localIndex-- > 0) {
             for (var i = 0; i < subseedPreimage.length; i++) {
-                if (++subseedPreimage[i] > MAX_TRIT_VALUE) {
+                if (subseedPreimage[i]++ >= MAX_TRIT_VALUE) {
                     subseedPreimage[i] = MIN_TRIT_VALUE;
                 }
                 else {
@@ -86,9 +86,6 @@
         var curl3 = new Curl(27);
         var length = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH / Curl.HASH_LENGTH;
         var digest = new Int8Array(Curl.HASH_LENGTH);
-        curl1.reset();
-        curl2.reset();
-        curl3.reset();
         curl1.absorb(subSeed, 0, subSeed.length);
         for (var i = 0; i < length; i++) {
             curl1.squeeze(digest, 0, digest.length);
@@ -110,7 +107,6 @@
     function address(digests) {
         var sponge = new Curl(27);
         var hashLength = Curl.HASH_LENGTH;
-        sponge.initialize();
         sponge.absorb(digests, 0, digests.length);
         var addressTrits = new Int8Array(hashLength);
         sponge.squeeze(addressTrits, 0, addressTrits.length);
@@ -127,8 +123,6 @@
         var keyTrits = new Int8Array(keyLength);
         var actualKeyTrits = [];
         var sponge = new Curl(27);
-        sponge.initialize();
-        sponge.reset();
         sponge.absorb(subSeed, 0, subSeed.length);
         sponge.squeeze(keyTrits, 0, keyTrits.length);
         for (var i = 0; i < keyLength / Curl.HASH_LENGTH; i++) {
@@ -146,8 +140,8 @@
      * @returns The signature trits.
      */
     function signature(hashTrits, key) {
-        var sponge = new Curl(27);
         var signatures = [];
+        var sponge = new Curl(27);
         for (var i = 0; i < key.length / Curl.HASH_LENGTH; i++) {
             var buffer = key.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
             for (var k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + hashTrits[i * 3 + 1] * 3 + hashTrits[i * 3 + 2] * 9); k++) {
@@ -514,30 +508,26 @@
         /**
          * Search for the nonce.
          * @param trits The trits to calculate the nonce.
-         * @param mwm The security level to calculate at.
+         * @param securityLevel The security level to calculate at.
          * @param length The length of the data to search.
          * @param offset The offset to start the search.
          * @returns The trits of the nonce.
          */
-        HammingDiver.prototype.search = function (trits, mwm, length, offset) {
-            var ulongTrits = this.prepareTrits(trits, offset);
-            var curl = {
-                low: ulongTrits.low,
-                high: ulongTrits.high
-            };
+        HammingDiver.prototype.search = function (trits, securityLevel, length, offset) {
+            var state = this.prepareTrits(trits, offset);
             var size = Math.min(length, Curl.HASH_LENGTH) - offset;
             var index = 0;
             while (index === 0) {
-                var incrementResult = this.increment(curl, offset + size * 2 / 3, offset + size);
+                var incrementResult = this.increment(state, offset + size * 2 / 3, offset + size);
                 size = Math.min(roundThird(offset + size * 2 / 3 + incrementResult), Curl.HASH_LENGTH) - offset;
                 var curlCopy = {
-                    low: curl.low.slice(),
-                    high: curl.high.slice()
+                    low: state.low.slice(),
+                    high: state.high.slice()
                 };
                 this.transform(curlCopy);
-                index = this.check(mwm, curlCopy.low.slice(0, Curl.HASH_LENGTH), curlCopy.high.slice(0, Curl.HASH_LENGTH));
+                index = this.check(securityLevel, curlCopy.low, curlCopy.high);
             }
-            return this.trinaryGet(curl.low.slice(0, size), curl.high.slice(0, size), index);
+            return this.trinaryGet(state.low, state.high, size, index);
         };
         /**
          * Prepare the trits for calculation.
@@ -546,16 +536,16 @@
          * @returns The prepared trits.
          */
         HammingDiver.prototype.prepareTrits = function (trits, offset) {
-            var ulongTrits = this.tritsToBigInt(trits, STATE_LENGTH);
-            ulongTrits.low[offset] = HammingDiver.LOW_0;
-            ulongTrits.low[offset + 1] = HammingDiver.LOW_1;
-            ulongTrits.low[offset + 2] = HammingDiver.LOW_2;
-            ulongTrits.low[offset + 3] = HammingDiver.LOW_3;
-            ulongTrits.high[offset] = HammingDiver.HIGH_0;
-            ulongTrits.high[offset + 1] = HammingDiver.HIGH_1;
-            ulongTrits.high[offset + 2] = HammingDiver.HIGH_2;
-            ulongTrits.high[offset + 3] = HammingDiver.HIGH_3;
-            return ulongTrits;
+            var initialState = this.tritsToBigInt(trits, STATE_LENGTH);
+            initialState.low[offset] = HammingDiver.LOW_0;
+            initialState.low[offset + 1] = HammingDiver.LOW_1;
+            initialState.low[offset + 2] = HammingDiver.LOW_2;
+            initialState.low[offset + 3] = HammingDiver.LOW_3;
+            initialState.high[offset] = HammingDiver.HIGH_0;
+            initialState.high[offset + 1] = HammingDiver.HIGH_1;
+            initialState.high[offset + 2] = HammingDiver.HIGH_2;
+            initialState.high[offset + 3] = HammingDiver.HIGH_3;
+            return initialState;
         };
         /**
          * Convert the trits to bigint form.
@@ -606,7 +596,7 @@
                 var high = states.high[i];
                 states.low[i] = high.xor(low);
                 states.high[i] = low;
-                if ((high.and(low.not())).toJSNumber() === 0) {
+                if ((high.and(low.not())).equals(0)) {
                     return toIndex - fromIndex;
                 }
             }
@@ -653,19 +643,25 @@
         };
         /**
          * Check if we have found the nonce.
-         * @param mwm The mwm.
+         * @param securityLevel The security level to check.
          * @param low The low bits.
          * @param high The high bits.
          * @returns The nonce if found.
          */
-        HammingDiver.prototype.check = function (mwm, low, high) {
-            var trinaryLength = this.trinaryLength(low, high);
-            for (var i = 0; i < trinaryLength; i++) {
+        HammingDiver.prototype.check = function (securityLevel, low, high) {
+            for (var i = 0; i < 64; i++) {
                 var sum = 0;
-                for (var j = 0; j < mwm; j++) {
-                    var dmg = this.trinaryGet(low, high, i);
-                    sum += dmg.slice(j * Curl.HASH_LENGTH / 3, (j + 1) * Curl.HASH_LENGTH / 3).reduce(function (a, b) { return a + b; }, 0);
-                    if (sum === 0 && j < mwm - 1) {
+                for (var j = 0; j < securityLevel; j++) {
+                    for (var k = j * 243 / 3; k < (j + 1) * 243 / 3; k++) {
+                        var bIndex = bigInt(1).shiftLeft(i);
+                        if (low[k].and(bIndex).equals(0)) {
+                            sum--;
+                        }
+                        else if (high[k].and(bIndex).equals(0)) {
+                            sum++;
+                        }
+                    }
+                    if (sum === 0 && j < securityLevel - 1) {
                         sum = 1;
                         break;
                     }
@@ -677,32 +673,23 @@
             return 0;
         };
         /**
-         * Calculate the trinary length of the bit data.
-         * @param low The low bits.
-         * @param high The high bits.
-         * @returns The length.
-         */
-        HammingDiver.prototype.trinaryLength = function (low, high) {
-            var l = low[0].toString(2).padStart(64, "0");
-            var h = high[0].toString(2).padStart(64, "0");
-            return 64 - Math.min(l.split("1")[0].length, h.split("1")[0].length);
-        };
-        /**
          * Get data from the tinary bits.
          * @param low The low bits.
          * @param high The high bits.
+         * @param arrLength The array length to get from.
          * @param index The index to get the values.
          * @returns The values stored at the index.
          */
-        HammingDiver.prototype.trinaryGet = function (low, high, index) {
-            var result = new Int8Array(low.length);
-            for (var i = 0; i < low.length; i++) {
-                var l = (low[i].shiftRight(bigInt(index))).and(1).toJSNumber();
-                var h = (high[i].shiftRight(bigInt(index))).and(1).toJSNumber();
-                if (l === 1 && h === 0) {
+        HammingDiver.prototype.trinaryGet = function (low, high, arrLength, index) {
+            var result = new Int8Array(arrLength);
+            for (var i = 0; i < arrLength; i++) {
+                var bIndex = bigInt(index);
+                var l = low[i].shiftRight(bIndex).and(1);
+                var h = high[i].shiftRight(bIndex).and(1);
+                if (l.equals(1) && h.equals(0)) {
                     result[i] = -1;
                 }
-                else if (l === 0 && h === 1) {
+                else if (l.equals(0) && h.equals(1)) {
                     result[i] = 1;
                 }
                 else {
@@ -759,9 +746,34 @@
     }());
 
     /**
-     * Create the mask hash for the key and salt it if provided.
+     * Validate the mode and key.
+     * @param mode The mamMode to validate.
+     * @param sideKey The sideKey to validate.
+     */
+    function validateModeKey(mode, sideKey) {
+        if (mode !== "public" && mode !== "private" && mode !== "restricted") {
+            throw new Error("The mode must be public, private or restricted, it is '" + mode + "'");
+        }
+        if (mode === "restricted") {
+            if (!sideKey) {
+                throw new Error("You must provide a sideKey for restricted mode");
+            }
+            if (!validators.isTrytes(sideKey)) {
+                throw new Error("The sideKey must be in trytes");
+            }
+            if (sideKey.length > 81) {
+                throw new Error("The sideKey must be maximum length 81 trytes");
+            }
+        }
+        if (mode !== "restricted" && sideKey) {
+            throw new Error("sideKey is only used in restricted mode");
+        }
+    }
+
+    /**
+     * Create the mask hash for the key.
      * @param keyTrits The key to create the mask hash for.
-     * @returns The mask hash.
+     * @returns The masked hash.
      */
     function maskHash(keyTrits) {
         var sponge = new Curl(81);
@@ -844,23 +856,7 @@
         if (security < 1 || security > 3) {
             throw new Error("Security must be between 1 and 3, it is " + security);
         }
-        if (mode !== "public" && mode !== "private" && mode !== "restricted") {
-            throw new Error("The mode must be public, private or restricted, it is '" + mode + "'");
-        }
-        if (mode === "restricted") {
-            if (!sideKey) {
-                throw new Error("You must provide a sideKey for restricted mode");
-            }
-            if (!validators.isTrytes(sideKey)) {
-                throw new Error("The sideKey must be in trytes");
-            }
-            if (sideKey.length > 81) {
-                throw new Error("The sideKey must be maximum length 81 trytes");
-            }
-        }
-        if (mode !== "restricted" && sideKey) {
-            throw new Error("Sidekey is only used in restricted mode");
-        }
+        validateModeKey(mode, sideKey);
         return {
             seed: seed,
             mode: mode,
@@ -878,6 +874,18 @@
      * @returns The root.
      */
     function channelRoot(channelState) {
+        if (!channelState) {
+            throw new Error("channelState must be provided");
+        }
+        if (channelState.start < 0) {
+            throw new Error("channelState.start must be >= 0");
+        }
+        if (channelState.count <= 0) {
+            throw new Error("channelState.count must be > 0");
+        }
+        if (channelState.security < 1 || channelState.security > 3) {
+            throw new Error("channelState.security must be between 1 and 3, it is " + channelState.security);
+        }
         var tree = new MerkleTree(channelState.seed, channelState.start, channelState.count, channelState.security);
         return converter.trytes(tree.root.addressTrits);
     }
@@ -899,7 +907,6 @@
         var messageLengthTrits = pascalEncode(messageTrits.length);
         var subtree = tree.getSubtree(channelState.index);
         var sponge = new Curl(27);
-        sponge.reset();
         var sideKeyTrits = converter.trits(channelState.sideKey || "9".repeat(81));
         sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
         sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
@@ -924,11 +931,8 @@
         if (nextThird !== 0) {
             payload = concatenate([payload, new Int8Array(3 - nextThird).fill(0)]);
         }
-        sponge.reset();
-        var messageAddress = tree.root.addressTrits;
-        if (channelState.mode !== "public") {
-            messageAddress = maskHash(tree.root.addressTrits);
-        }
+        var messageAddress = channelState.mode === "public" ?
+            tree.root.addressTrits : maskHash(tree.root.addressTrits);
         var maskedAuthenticatedMessage = {
             payload: converter.trytes(payload),
             root: converter.trytes(tree.root.addressTrits),
@@ -1027,9 +1031,8 @@
         var nextRootStart = indexData.end + messageData.end;
         var messageStart = nextRootStart + Curl.HASH_LENGTH;
         var messageEnd = messageStart + messageLength;
-        var sponge = new Curl(27);
         // Hash the key, root and payload
-        sponge.reset();
+        var sponge = new Curl(27);
         sponge.absorb(channelKeyTrits, 0, channelKeyTrits.length);
         sponge.absorb(rootTrits, 0, rootTrits.length);
         sponge.absorb(payloadTrits, 0, nextRootStart);
@@ -1106,7 +1109,8 @@
      * @param root The root within the mam channel to fetch the message.
      * @param mode The mode to use for fetching.
      * @param sideKey The sideKey if mode is restricted.
-     * @returns The decoded message and the nextRoot if successful, undefined if no message.
+     * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
+     * throws exception if transactions found on address are invalid.
      */
     function mamFetch(api, root, mode, sideKey) {
         return __awaiter(this, void 0, Promise, function () {
@@ -1114,7 +1118,8 @@
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        messageAddress = rootToAddress(root, mode);
+                        validateModeKey(mode, sideKey);
+                        messageAddress = mode === "public" ? root : converter.trytes(maskHash(converter.trits(root)));
                         return [4 /*yield*/, api.findTransactionObjects({ addresses: [messageAddress] })];
                     case 1:
                         txObjects = _a.sent();
@@ -1129,18 +1134,21 @@
                             for (var j = 0; j < tails[i].lastIndex; j++) {
                                 var nextTx = notTails.find(function (tx) { return tx.hash === currentTx.trunkTransaction; });
                                 if (!nextTx) {
+                                    // This is an incomplete transaction chain so move onto
+                                    // the next tail
                                     break;
                                 }
                                 msg += nextTx.signatureMessageFragment;
                                 currentTx = nextTx;
+                                // If we now have all the transactions which make up this message
+                                // try and parse the message
                                 if (j === tails[i].lastIndex - 1) {
                                     try {
                                         var parsed = parseMessage(msg, root, sideKey);
-                                        if (parsed) {
-                                            return { value: __assign(__assign({}, parsed), { tag: tails[i].tag }) };
-                                        }
+                                        return { value: __assign(__assign({}, parsed), { tag: tails[i].tag }) };
                                     }
-                                    catch (_a) {
+                                    catch (err) {
+                                        throw new Error("Failed while trying to read MAM channel from address " + messageAddress + ".\n" + err.message);
                                     }
                                 }
                             }
@@ -1157,6 +1165,9 @@
     }
     /**
      * Fetch all the mam message from a channel.
+     * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
+     * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
+     * same amount of messages as your limit you should probably read again.
      * @param api The api to use for fetching.
      * @param root The root within the mam channel to fetch the message.
      * @param mode The mode to use for fetching.
@@ -1170,6 +1181,7 @@
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        validateModeKey(mode, sideKey);
                         localLimit = limit === undefined ? Number.MAX_VALUE : limit;
                         messages = [];
                         fetchRoot = root;
@@ -1192,18 +1204,6 @@
                 }
             });
         });
-    }
-    /**
-     * Convert the root to an address for fetching.
-     * @param root The root within the mam channel to fetch the message.
-     * @param mode The mode to use for fetching.
-     * @returns The address based on the root and mode.
-     */
-    function rootToAddress(root, mode) {
-        if (mode === "public") {
-            return root;
-        }
-        return converter.trytes(maskHash(converter.trits(root)));
     }
 
     exports.channelRoot = channelRoot;

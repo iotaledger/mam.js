@@ -30,4 +30,3 @@ test("search() returns correct nonce for trits with security level 3", () => {
         0);
     expect(trytes(res)).toBe("DZL9SMYRV");
 });
-

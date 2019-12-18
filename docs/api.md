@@ -31,10 +31,10 @@
 <dd><p>Fetch a mam message from a channel.</p>
 </dd>
 <dt><a href="#mamFetchAll">mamFetchAll(api, root, mode, sideKey, limit)</a> ⇒</dt>
-<dd><p>Fetch all the mam message from a channel.</p>
-</dd>
-<dt><a href="#rootToAddress">rootToAddress(root, mode)</a> ⇒</dt>
-<dd><p>Convert the root to an address for fetching.</p>
+<dd><p>Fetch all the mam message from a channel.
+If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
+It is preferable to specify the limit so you read the data in chunks, then if you read and get the
+same amount of messages as your limit you should probably read again.</p>
 </dd>
 <dt><a href="#parseMessage">parseMessage(payload, root, channelKey)</a> ⇒</dt>
 <dd><p>Parse the trytes back to the original message.</p>
@@ -69,8 +69,11 @@
 <dt><a href="#curlRate">curlRate(sponge, len)</a> ⇒</dt>
 <dd><p>Extract the state from the curl sponge.</p>
 </dd>
+<dt><a href="#validateModeKey">validateModeKey(mode, sideKey)</a></dt>
+<dd><p>Validate the mode and key.</p>
+</dd>
 <dt><a href="#maskHash">maskHash(keyTrits)</a> ⇒</dt>
-<dd><p>Create the mask hash for the key and salt it if provided.</p>
+<dd><p>Create the mask hash for the key.</p>
 </dd>
 <dt><a href="#mask">mask(payload, sponge)</a> ⇒</dt>
 <dd><p>Apply mask to the payload.</p>
@@ -201,15 +204,14 @@ Class to perform Hamming calculation for nonce.
 
 * [HammingDiver](#HammingDiver)
     * _instance_
-        * [.search(trits, mwm, length, offset)](#HammingDiver+search) ⇒
+        * [.search(trits, securityLevel, length, offset)](#HammingDiver+search) ⇒
         * [.prepareTrits(trits, offset)](#HammingDiver+prepareTrits) ⇒
         * [.tritsToBigInt(input, length)](#HammingDiver+tritsToBigInt) ⇒
         * [.increment(states, fromIndex, toIndex)](#HammingDiver+increment) ⇒
         * [.transform(searchStates)](#HammingDiver+transform)
         * [.bitWiseNot(value)](#HammingDiver+bitWiseNot) ⇒
-        * [.check(mwm, low, high)](#HammingDiver+check) ⇒
-        * [.trinaryLength(low, high)](#HammingDiver+trinaryLength) ⇒
-        * [.trinaryGet(low, high, index)](#HammingDiver+trinaryGet) ⇒
+        * [.check(securityLevel, low, high)](#HammingDiver+check) ⇒
+        * [.trinaryGet(low, high, arrLength, index)](#HammingDiver+trinaryGet) ⇒
     * _static_
         * [.MAX_VALUE](#HammingDiver.MAX_VALUE)
         * [.MIN_VALUE](#HammingDiver.MIN_VALUE)
@@ -225,7 +227,7 @@ Class to perform Hamming calculation for nonce.
 
 <a name="HammingDiver+search"></a>
 
-### hammingDiver.search(trits, mwm, length, offset) ⇒
+### hammingDiver.search(trits, securityLevel, length, offset) ⇒
 Search for the nonce.
 
 **Kind**: instance method of [<code>HammingDiver</code>](#HammingDiver)  
@@ -234,7 +236,7 @@ Search for the nonce.
 | Param | Description |
 | --- | --- |
 | trits | The trits to calculate the nonce. |
-| mwm | The security level to calculate at. |
+| securityLevel | The security level to calculate at. |
 | length | The length of the data to search. |
 | offset | The offset to start the search. |
 
@@ -303,7 +305,7 @@ Perform a bitwise not for 64 bit, not twos complement.
 
 <a name="HammingDiver+check"></a>
 
-### hammingDiver.check(mwm, low, high) ⇒
+### hammingDiver.check(securityLevel, low, high) ⇒
 Check if we have found the nonce.
 
 **Kind**: instance method of [<code>HammingDiver</code>](#HammingDiver)  
@@ -311,26 +313,13 @@ Check if we have found the nonce.
 
 | Param | Description |
 | --- | --- |
-| mwm | The mwm. |
-| low | The low bits. |
-| high | The high bits. |
-
-<a name="HammingDiver+trinaryLength"></a>
-
-### hammingDiver.trinaryLength(low, high) ⇒
-Calculate the trinary length of the bit data.
-
-**Kind**: instance method of [<code>HammingDiver</code>](#HammingDiver)  
-**Returns**: The length.  
-
-| Param | Description |
-| --- | --- |
+| securityLevel | The security level to check. |
 | low | The low bits. |
 | high | The high bits. |
 
 <a name="HammingDiver+trinaryGet"></a>
 
-### hammingDiver.trinaryGet(low, high, index) ⇒
+### hammingDiver.trinaryGet(low, high, arrLength, index) ⇒
 Get data from the tinary bits.
 
 **Kind**: instance method of [<code>HammingDiver</code>](#HammingDiver)  
@@ -340,6 +329,7 @@ Get data from the tinary bits.
 | --- | --- |
 | low | The low bits. |
 | high | The high bits. |
+| arrLength | The array length to get from. |
 | index | The index to get the values. |
 
 <a name="HammingDiver.MAX_VALUE"></a>
@@ -470,7 +460,7 @@ Attach the mam message to the tangle.
 Fetch a mam message from a channel.
 
 **Kind**: global function  
-**Returns**: The decoded message and the nextRoot if successful, undefined if no message.  
+**Returns**: The decoded message and the nextRoot if successful, undefined if no messages found,throws exception if transactions found on address are invalid.  
 
 | Param | Description |
 | --- | --- |
@@ -482,7 +472,7 @@ Fetch a mam message from a channel.
 <a name="mamFetchAll"></a>
 
 ## mamFetchAll(api, root, mode, sideKey, limit) ⇒
-Fetch all the mam message from a channel.
+Fetch all the mam message from a channel.If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.It is preferable to specify the limit so you read the data in chunks, then if you read and get thesame amount of messages as your limit you should probably read again.
 
 **Kind**: global function  
 **Returns**: The array of retrieved messages.  
@@ -494,19 +484,6 @@ Fetch all the mam message from a channel.
 | mode | The mode to use for fetching. |
 | sideKey | The sideKey if mode is restricted. |
 | limit | Limit the number of messages retrieved. |
-
-<a name="rootToAddress"></a>
-
-## rootToAddress(root, mode) ⇒
-Convert the root to an address for fetching.
-
-**Kind**: global function  
-**Returns**: The address based on the root and mode.  
-
-| Param | Description |
-| --- | --- |
-| root | The root within the mam channel to fetch the message. |
-| mode | The mode to use for fetching. |
 
 <a name="parseMessage"></a>
 
@@ -650,13 +627,25 @@ Extract the state from the curl sponge.
 | sponge | The sponge to extract the state from. |
 | len | The length of the state to extract. |
 
+<a name="validateModeKey"></a>
+
+## validateModeKey(mode, sideKey)
+Validate the mode and key.
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| mode | The mamMode to validate. |
+| sideKey | The sideKey to validate. |
+
 <a name="maskHash"></a>
 
 ## maskHash(keyTrits) ⇒
-Create the mask hash for the key and salt it if provided.
+Create the mask hash for the key.
 
 **Kind**: global function  
-**Returns**: The mask hash.  
+**Returns**: The masked hash.  
 
 | Param | Description |
 | --- | --- |

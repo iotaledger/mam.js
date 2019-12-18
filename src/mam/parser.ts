@@ -36,10 +36,8 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
     const messageStart = nextRootStart + Curl.HASH_LENGTH;
     const messageEnd = messageStart + messageLength;
 
-    const sponge = new Curl(27);
-
     // Hash the key, root and payload
-    sponge.reset();
+    const sponge = new Curl(27);
     sponge.absorb(channelKeyTrits, 0, channelKeyTrits.length);
     sponge.absorb(rootTrits, 0, rootTrits.length);
     sponge.absorb(payloadTrits, 0, nextRootStart);

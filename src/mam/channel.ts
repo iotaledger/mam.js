@@ -9,6 +9,7 @@ import { HammingDiver } from "../pearlDiver/hammingDiver";
 import { signature } from "../signing/iss-p27";
 import { concatenate } from "../utils/arrayHelper";
 import { curlRate, STATE_LENGTH } from "../utils/curlHelper";
+import { validateModeKey } from "../utils/guards";
 import { mask, maskHash } from "../utils/mask";
 import { pascalEncode } from "../utils/pascal";
 
@@ -27,23 +28,7 @@ export function createChannel(seed: string, security: number, mode: MamMode, sid
     if (security < 1 || security > 3) {
         throw new Error(`Security must be between 1 and 3, it is ${security}`);
     }
-    if (mode !== "public" && mode !== "private" && mode !== "restricted") {
-        throw new Error(`The mode must be public, private or restricted, it is '${mode}'`);
-    }
-    if (mode === "restricted") {
-        if (!sideKey) {
-            throw new Error(`You must provide a sideKey for restricted mode`);
-        }
-        if (!isTrytes(sideKey)) {
-            throw new Error(`The sideKey must be in trytes`);
-        }
-        if (sideKey.length > 81) {
-            throw new Error(`The sideKey must be maximum length 81 trytes`);
-        }
-    }
-    if (mode !== "restricted" && sideKey) {
-        throw new Error(`Sidekey is only used in restricted mode`);
-    }
+    validateModeKey(mode, sideKey);
 
     return {
         seed,
@@ -63,6 +48,19 @@ export function createChannel(seed: string, security: number, mode: MamMode, sid
  * @returns The root.
  */
 export function channelRoot(channelState: IMamChannelState): string {
+    if (!channelState) {
+        throw new Error("channelState must be provided");
+    }
+    if (channelState.start < 0) {
+        throw new Error("channelState.start must be >= 0");
+    }
+    if (channelState.count <= 0) {
+        throw new Error("channelState.count must be > 0");
+    }
+    if (channelState.security < 1 || channelState.security > 3) {
+        throw new Error(`channelState.security must be between 1 and 3, it is ${channelState.security}`);
+    }
+
     const tree = new MerkleTree(
         channelState.seed,
         channelState.start,
@@ -103,8 +101,6 @@ export function createMessage(channelState: IMamChannelState, message: string): 
 
     const sponge = new Curl(27);
 
-    sponge.reset();
-
     const sideKeyTrits = trits(channelState.sideKey || "9".repeat(81));
     sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
     sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
@@ -141,13 +137,8 @@ export function createMessage(channelState: IMamChannelState, message: string): 
         payload = concatenate([payload, new Int8Array(3 - nextThird).fill(0)]);
     }
 
-    sponge.reset();
-
-    let messageAddress = tree.root.addressTrits;
-
-    if (channelState.mode !== "public") {
-        messageAddress = maskHash(tree.root.addressTrits);
-    }
+    const messageAddress = channelState.mode === "public" ?
+        tree.root.addressTrits : maskHash(tree.root.addressTrits);
 
     const maskedAuthenticatedMessage: IMamMessage = {
         payload: trytes(payload),

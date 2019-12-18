@@ -1,8 +1,8 @@
 import Curl from "@iota/curl";
 /**
- * Create the mask hash for the key and salt it if provided.
+ * Create the mask hash for the key.
  * @param keyTrits The key to create the mask hash for.
- * @returns The mask hash.
+ * @returns The masked hash.
  */
 export declare function maskHash(keyTrits: Int8Array): Int8Array;
 /**

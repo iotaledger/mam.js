@@ -57,36 +57,32 @@ export class HammingDiver {
     /**
      * Search for the nonce.
      * @param trits The trits to calculate the nonce.
-     * @param mwm The security level to calculate at.
+     * @param securityLevel The security level to calculate at.
      * @param length The length of the data to search.
      * @param offset The offset to start the search.
      * @returns The trits of the nonce.
      */
-    public search(trits: Int8Array, mwm: number, length: number, offset: number): Int8Array {
-        const ulongTrits = this.prepareTrits(trits, offset);
-        const curl: PearlDiverSearchStates = {
-            low: ulongTrits.low,
-            high: ulongTrits.high
-        };
+    public search(trits: Int8Array, securityLevel: number, length: number, offset: number): Int8Array {
+        const state = this.prepareTrits(trits, offset);
         let size = Math.min(length, Curl.HASH_LENGTH) - offset;
 
         let index = 0;
 
         while (index === 0) {
-            const incrementResult = this.increment(curl, offset + size * 2 / 3, offset + size);
+            const incrementResult = this.increment(state, offset + size * 2 / 3, offset + size);
             size = Math.min(roundThird(offset + size * 2 / 3 + incrementResult), Curl.HASH_LENGTH) - offset;
 
             const curlCopy: PearlDiverSearchStates = {
-                low: curl.low.slice(),
-                high: curl.high.slice()
+                low: state.low.slice(),
+                high: state.high.slice()
             };
 
             this.transform(curlCopy);
 
-            index = this.check(mwm, curlCopy.low.slice(0, Curl.HASH_LENGTH), curlCopy.high.slice(0, Curl.HASH_LENGTH));
+            index = this.check(securityLevel, curlCopy.low, curlCopy.high);
         }
 
-        return this.trinaryGet(curl.low.slice(0, size), curl.high.slice(0, size), index);
+        return this.trinaryGet(state.low, state.high, size, index);
     }
 
     /**
@@ -96,19 +92,19 @@ export class HammingDiver {
      * @returns The prepared trits.
      */
     private prepareTrits(trits: Int8Array, offset: number): PearlDiverSearchStates {
-        const ulongTrits = this.tritsToBigInt(trits, STATE_LENGTH);
+        const initialState = this.tritsToBigInt(trits, STATE_LENGTH);
 
-        ulongTrits.low[offset] = HammingDiver.LOW_0;
-        ulongTrits.low[offset + 1] = HammingDiver.LOW_1;
-        ulongTrits.low[offset + 2] = HammingDiver.LOW_2;
-        ulongTrits.low[offset + 3] = HammingDiver.LOW_3;
+        initialState.low[offset] = HammingDiver.LOW_0;
+        initialState.low[offset + 1] = HammingDiver.LOW_1;
+        initialState.low[offset + 2] = HammingDiver.LOW_2;
+        initialState.low[offset + 3] = HammingDiver.LOW_3;
 
-        ulongTrits.high[offset] = HammingDiver.HIGH_0;
-        ulongTrits.high[offset + 1] = HammingDiver.HIGH_1;
-        ulongTrits.high[offset + 2] = HammingDiver.HIGH_2;
-        ulongTrits.high[offset + 3] = HammingDiver.HIGH_3;
+        initialState.high[offset] = HammingDiver.HIGH_0;
+        initialState.high[offset + 1] = HammingDiver.HIGH_1;
+        initialState.high[offset + 2] = HammingDiver.HIGH_2;
+        initialState.high[offset + 3] = HammingDiver.HIGH_3;
 
-        return ulongTrits;
+        return initialState;
     }
 
     /**
@@ -167,7 +163,7 @@ export class HammingDiver {
             states.low[i] = high.xor(low);
             states.high[i] = low;
 
-            if ((high.and(low.not())).toJSNumber() === 0) {
+            if ((high.and(low.not())).equals(0)) {
                 return toIndex - fromIndex;
             }
         }
@@ -219,20 +215,29 @@ export class HammingDiver {
 
     /**
      * Check if we have found the nonce.
-     * @param mwm The mwm.
+     * @param securityLevel The security level to check.
      * @param low The low bits.
      * @param high The high bits.
      * @returns The nonce if found.
      */
-    private check(mwm: number, low: bigInt.BigInteger[], high: bigInt.BigInteger[]): number {
-        const trinaryLength = this.trinaryLength(low, high);
-        for (let i = 0; i < trinaryLength; i++) {
-            let sum = 0;
-            for (let j = 0; j < mwm; j++) {
-                const dmg = this.trinaryGet(low, high, i);
-                sum += dmg.slice(j * Curl.HASH_LENGTH / 3, (j + 1) * Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0);
+    private check(
+        securityLevel: number, low: bigInt.BigInteger[], high: bigInt.BigInteger[]): number {
 
-                if (sum === 0 && j < mwm - 1) {
+        for (let i = 0; i < 64; i++) {
+            let sum = 0;
+
+            for (let j = 0; j < securityLevel; j++) {
+                for (let k = j * 243 / 3; k < (j + 1) * 243 / 3; k++) {
+                    const bIndex = bigInt(1).shiftLeft(i);
+
+                    if (low[k].and(bIndex).equals(0)) {
+                        sum--;
+                    } else if (high[k].and(bIndex).equals(0)) {
+                        sum++;
+                    }
+                }
+
+                if (sum === 0 && j < securityLevel - 1) {
                     sum = 1;
                     break;
                 }
@@ -247,35 +252,25 @@ export class HammingDiver {
     }
 
     /**
-     * Calculate the trinary length of the bit data.
-     * @param low The low bits.
-     * @param high The high bits.
-     * @returns The length.
-     */
-    private trinaryLength(low: bigInt.BigInteger[], high: bigInt.BigInteger[]): number {
-        const l = low[0].toString(2).padStart(64, "0");
-        const h = high[0].toString(2).padStart(64, "0");
-
-        return 64 - Math.min(l.split("1")[0].length, h.split("1")[0].length);
-    }
-
-    /**
      * Get data from the tinary bits.
      * @param low The low bits.
      * @param high The high bits.
+     * @param arrLength The array length to get from.
      * @param index The index to get the values.
      * @returns The values stored at the index.
      */
-    private trinaryGet(low: bigInt.BigInteger[], high: bigInt.BigInteger[], index: number): Int8Array {
-        const result: Int8Array = new Int8Array(low.length);
+    private trinaryGet(
+        low: bigInt.BigInteger[], high: bigInt.BigInteger[], arrLength: number, index: number): Int8Array {
+        const result: Int8Array = new Int8Array(arrLength);
 
-        for (let i = 0; i < low.length; i++) {
-            const l = (low[i].shiftRight(bigInt(index))).and(1).toJSNumber();
-            const h = (high[i].shiftRight(bigInt(index))).and(1).toJSNumber();
+        for (let i = 0; i < arrLength; i++) {
+            const bIndex = bigInt(index);
+            const l = low[i].shiftRight(bIndex).and(1);
+            const h = high[i].shiftRight(bIndex).and(1);
 
-            if (l === 1 && h === 0) {
+            if (l.equals(1) && h.equals(0)) {
                 result[i] = -1;
-            } else if (l === 0 && h === 1) {
+            } else if (l.equals(0) && h.equals(1)) {
                 result[i] = 1;
             } else {
                 result[i] = 0;

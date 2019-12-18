@@ -3,6 +3,7 @@ import { API, Transaction } from "@iota/core";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
+import { validateModeKey } from "../utils/guards";
 import { maskHash } from "../utils/mask";
 import { parseMessage } from "./parser";
 
@@ -26,7 +27,7 @@ export async function mamAttach(
             address: mamMessage.address,
             value: 0,
             message: mamMessage.payload,
-            tag: tag
+            tag
         }
     ];
     const preparedTrytes = await api.prepareTransfers("9".repeat(81), transfers);
@@ -40,14 +41,17 @@ export async function mamAttach(
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
- * @returns The decoded message and the nextRoot if successful, undefined if no message.
+ * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
+ * throws exception if transactions found on address are invalid.
  */
 export async function mamFetch(
     api: API,
     root: string,
     mode: MamMode,
     sideKey?: string): Promise<IMamFetchedMessage | undefined> {
-    const messageAddress = rootToAddress(root, mode);
+    validateModeKey(mode, sideKey);
+
+    const messageAddress = mode === "public" ? root : trytes(maskHash(trits(root)));
 
     const txObjects = await api.findTransactionObjects({ addresses: [messageAddress] });
 
@@ -65,22 +69,25 @@ export async function mamFetch(
         for (let j = 0; j < tails[i].lastIndex; j++) {
             const nextTx = notTails.find(tx => tx.hash === currentTx.trunkTransaction);
             if (!nextTx) {
+                // This is an incomplete transaction chain so move onto
+                // the next tail
                 break;
             }
 
             msg += nextTx.signatureMessageFragment;
             currentTx = nextTx;
 
+            // If we now have all the transactions which make up this message
+            // try and parse the message
             if (j === tails[i].lastIndex - 1) {
                 try {
                     const parsed = parseMessage(msg, root, sideKey);
-                    if (parsed) {
-                        return {
-                            ...parsed,
-                            tag: tails[i].tag
-                        };
-                    }
-                } catch {
+                    return {
+                        ...parsed,
+                        tag: tails[i].tag
+                    };
+                } catch (err) {
+                    throw new Error(`Failed while trying to read MAM channel from address ${messageAddress}.\n${err.message}`);
                 }
             }
         }
@@ -91,6 +98,9 @@ export async function mamFetch(
 
 /**
  * Fetch all the mam message from a channel.
+ * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
+ * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
+ * same amount of messages as your limit you should probably read again.
  * @param api The api to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
@@ -104,6 +114,8 @@ export async function mamFetchAll(
     mode: MamMode,
     sideKey?: string,
     limit?: number): Promise<IMamFetchedMessage[]> {
+    validateModeKey(mode, sideKey);
+
     const localLimit = limit === undefined ? Number.MAX_VALUE : limit;
     const messages: IMamFetchedMessage[] = [];
 
@@ -120,18 +132,4 @@ export async function mamFetchAll(
     } while (fetchRoot && messages.length < localLimit);
 
     return messages;
-}
-
-/**
- * Convert the root to an address for fetching.
- * @param root The root within the mam channel to fetch the message.
- * @param mode The mode to use for fetching.
- * @returns The address based on the root and mode.
- */
-function rootToAddress(root: string, mode: MamMode): string {
-    if (mode === "public") {
-        return root;
-    }
-
-    return trytes(maskHash(trits(root)));
 }
