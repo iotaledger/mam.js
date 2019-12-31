@@ -29,5 +29,5 @@ export default {
         compact: process.env.MINIFY
     },
     plugins,
-    external: ["@iota/converter", "@iota/curl", "@iota/core", "@iota/validators", "big-integer"]
+    external: ["@iota/converter", "@iota/core", "@iota/validators", "big-integer"]
 }

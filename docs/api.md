@@ -10,6 +10,9 @@
 <dt><a href="#HammingDiver">HammingDiver</a></dt>
 <dd><p>Class to perform Hamming calculation for nonce.</p>
 </dd>
+<dt><a href="#Curl">Curl</a></dt>
+<dd><p>Class to implement Curl sponge.</p>
+</dd>
 </dl>
 
 ## Functions
@@ -65,9 +68,6 @@ same amount of messages as your limit you should probably read again.</p>
 </dd>
 <dt><a href="#concatenate">concatenate(arrays)</a> ⇒</dt>
 <dd><p>Concatentate a list of arrays.</p>
-</dd>
-<dt><a href="#curlRate">curlRate(sponge, len)</a> ⇒</dt>
-<dd><p>Extract the state from the curl sponge.</p>
 </dd>
 <dt><a href="#validateModeKey">validateModeKey(mode, sideKey)</a></dt>
 <dd><p>Validate the mode and key.</p>
@@ -398,6 +398,111 @@ Low 3
 Number of rounds
 
 **Kind**: static property of [<code>HammingDiver</code>](#HammingDiver)  
+<a name="Curl"></a>
+
+## Curl
+Class to implement Curl sponge.
+
+**Kind**: global class  
+
+* [Curl](#Curl)
+    * [new Curl(rounds)](#new_Curl_new)
+    * _instance_
+        * [.reset()](#Curl+reset)
+        * [.rate(len)](#Curl+rate) ⇒
+        * [.absorb(trits, offset, length)](#Curl+absorb)
+        * [.squeeze(trits, offset, length)](#Curl+squeeze)
+        * [.transform()](#Curl+transform)
+    * _static_
+        * [.HASH_LENGTH](#Curl.HASH_LENGTH)
+        * [.STATE_LENGTH](#Curl.STATE_LENGTH)
+        * [.NUMBER_OF_ROUNDS](#Curl.NUMBER_OF_ROUNDS)
+        * [.TRUTH_TABLE](#Curl.TRUTH_TABLE)
+
+<a name="new_Curl_new"></a>
+
+### new Curl(rounds)
+Create a new instance of Curl.
+
+
+| Param | Description |
+| --- | --- |
+| rounds | The number of rounds to perform. |
+
+<a name="Curl+reset"></a>
+
+### curl.reset()
+Resets the state
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+<a name="Curl+rate"></a>
+
+### curl.rate(len) ⇒
+Get the state of the sponge.
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+**Returns**: The state.  
+
+| Param | Description |
+| --- | --- |
+| len | The length of the state to get. |
+
+<a name="Curl+absorb"></a>
+
+### curl.absorb(trits, offset, length)
+Absorbs trits given an offset and length
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+
+| Param | Description |
+| --- | --- |
+| trits | The trits to absorb. |
+| offset | The offset to start abororbing from the array. |
+| length | The length of trits to absorb. |
+
+<a name="Curl+squeeze"></a>
+
+### curl.squeeze(trits, offset, length)
+Squeezes trits given an offset and length
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+
+| Param | Description |
+| --- | --- |
+| trits | The trits to squeeze. |
+| offset | The offset to start squeezing from the array. |
+| length | The length of trits to squeeze. |
+
+<a name="Curl+transform"></a>
+
+### curl.transform()
+Sponge transform function
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+<a name="Curl.HASH_LENGTH"></a>
+
+### Curl.HASH\_LENGTH
+The Hash Length
+
+**Kind**: static property of [<code>Curl</code>](#Curl)  
+<a name="Curl.STATE_LENGTH"></a>
+
+### Curl.STATE\_LENGTH
+The State Length.
+
+**Kind**: static property of [<code>Curl</code>](#Curl)  
+<a name="Curl.NUMBER_OF_ROUNDS"></a>
+
+### Curl.NUMBER\_OF\_ROUNDS
+The default number of rounds.
+
+**Kind**: static property of [<code>Curl</code>](#Curl)  
+<a name="Curl.TRUTH_TABLE"></a>
+
+### Curl.TRUTH\_TABLE
+Truth Table.
+
+**Kind**: static property of [<code>Curl</code>](#Curl)  
 <a name="createChannel"></a>
 
 ## createChannel(seed, security, mode, sideKey) ⇒
@@ -613,19 +718,6 @@ Concatentate a list of arrays.
 | Param | Description |
 | --- | --- |
 | arrays | The arrays to concatenate. |
-
-<a name="curlRate"></a>
-
-## curlRate(sponge, len) ⇒
-Extract the state from the curl sponge.
-
-**Kind**: global function  
-**Returns**: The extracted state.  
-
-| Param | Description |
-| --- | --- |
-| sponge | The sponge to extract the state from. |
-| len | The length of the state to extract. |
 
 <a name="validateModeKey"></a>
 

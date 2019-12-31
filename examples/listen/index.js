@@ -22,21 +22,9 @@ async function run(root, mode, sideKey, interval) {
 
 // Try and load the channel state from json file
 try {
-    const currentState = fs.readFileSync('../simple/channelState.json');
-    if (currentState) {
-        channelState = JSON.parse(currentState.toString());
-
-        // To start reading from the beginning of the channel clone the channel details
-        let root = channelRoot(createChannel(channelState.seed, channelState.security, channelState.mode, channelState.sideKey));
-        // Or to read from its current position just use the channel state
-        // let root = channelRoot(channelState);
-
-        run(root, channelState.mode, channelState.sideKey, 5000)
-            .then(() => console.log("Running in background"))
-            .catch((err) => console.error(err));
-    } else {
-        throw new Error("The simple example has not been run so there is no channel to listen to");
-    }
+    run("VTXFAIPQDISPWZAUSLAZWIMFZNOYLCJTKMPS9EPOIIQDNGJJXYBMFRAFUMEB9MMCWSFMXJAPKEOZQWVFF", "public", undefined, 5000)
+        .then(() => console.log("Running in background"))
+        .catch((err) => console.error(err));
 } catch (e) { 
     console.error(e);
 }

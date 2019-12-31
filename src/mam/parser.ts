@@ -1,8 +1,7 @@
 import { trits, trytes } from "@iota/converter";
-import Curl from "@iota/curl";
 import { MerkleTree } from "../merkle/merkleTree";
+import { Curl } from "../signing/curl";
 import { checksumSecurity, digestFromSignature, PRIVATE_KEY_FRAGMENT_LENGTH } from "../signing/iss-p27";
-import { curlRate } from "../utils/curlHelper";
 import { unmask } from "../utils/mask";
 import { pascalDecode } from "../utils/pascal";
 
@@ -46,7 +45,7 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
     const nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + Curl.HASH_LENGTH), sponge);
     const message = unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
     const nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + Curl.HASH_LENGTH / 3), sponge);
-    const hmac = curlRate(sponge);
+    const hmac = sponge.rate();
 
     // Check the security level is valid
     const securityLevel = checksumSecurity(hmac);
@@ -66,7 +65,7 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
     // Get the sibling information and validate it
     const siblingsCountData = pascalDecode(decryptedMetadata.slice(securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH));
     const siblingsCount = siblingsCountData.value;
-    let recalculatedRoot = curlRate(sponge);
+    let recalculatedRoot = sponge.rate();
     if (siblingsCount !== 0) {
         const siblingsStart = (securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH) + siblingsCountData.end;
         const siblings = decryptedMetadata.slice(siblingsStart, siblingsStart + (siblingsCount * Curl.HASH_LENGTH));

@@ -1,6 +1,5 @@
-import Curl from "@iota/curl";
 import bigInt from "big-integer";
-import { STATE_LENGTH } from "../utils/curlHelper";
+import { Curl } from "../signing/curl";
 import { roundThird } from "../utils/pascal";
 import { PearlDiverSearchStates } from "./pearlDiverSearchStates";
 
@@ -92,7 +91,7 @@ export class HammingDiver {
      * @returns The prepared trits.
      */
     private prepareTrits(trits: Int8Array, offset: number): PearlDiverSearchStates {
-        const initialState = this.tritsToBigInt(trits, STATE_LENGTH);
+        const initialState = this.tritsToBigInt(trits, Curl.STATE_LENGTH);
 
         initialState.low[offset] = HammingDiver.LOW_0;
         initialState.low[offset + 1] = HammingDiver.LOW_1;
@@ -179,11 +178,11 @@ export class HammingDiver {
         let curlScratchpadIndex = 0;
         for (let round = 0; round < HammingDiver.ROUNDS; round++) {
             const curlScratchpad: PearlDiverSearchStates = {
-                low: searchStates.low.slice(0, STATE_LENGTH),
-                high: searchStates.high.slice(0, STATE_LENGTH)
+                low: searchStates.low.slice(0, Curl.STATE_LENGTH),
+                high: searchStates.high.slice(0, Curl.STATE_LENGTH)
             };
 
-            for (let stateIndex = 0; stateIndex < STATE_LENGTH; stateIndex++) {
+            for (let stateIndex = 0; stateIndex < Curl.STATE_LENGTH; stateIndex++) {
                 const alpha = curlScratchpad.low[curlScratchpadIndex];
                 const beta = curlScratchpad.high[curlScratchpadIndex];
                 if (curlScratchpadIndex < 365) {

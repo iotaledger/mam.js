@@ -1,6 +1,6 @@
 const { composeAPI } = require('@iota/core');
 const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
-const {channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam.js');
+const { createChannel, createMessage, parseMessage, mamAttach, mamFetch } = require('@iota/mam.js');
 const crypto = require('crypto');
 const fs = require('fs');
 

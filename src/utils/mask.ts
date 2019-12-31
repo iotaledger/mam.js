@@ -1,6 +1,4 @@
-import Curl from "@iota/curl";
-import { concatenate } from "./arrayHelper";
-import { curlRate } from "./curlHelper";
+import { Curl } from "../signing/curl";
 
 /**
  * Create the mask hash for the key.
@@ -10,7 +8,6 @@ import { curlRate } from "./curlHelper";
 export function maskHash(keyTrits: Int8Array): Int8Array {
     const sponge = new Curl(81);
 
-    sponge.reset();
     sponge.absorb(keyTrits, 0, keyTrits.length);
 
     const finalKeyTrits = new Int8Array(Curl.HASH_LENGTH);
@@ -26,7 +23,7 @@ export function maskHash(keyTrits: Int8Array): Int8Array {
  * @returns The masked payload.
  */
 export function mask(payload: Int8Array, sponge: Curl): Int8Array {
-    const keyChunk = curlRate(sponge);
+    const keyChunk = sponge.rate();
 
     const numChunks = Math.ceil(payload.length / Curl.HASH_LENGTH);
     for (let c = 0; c < numChunks; c++) {
@@ -34,7 +31,7 @@ export function mask(payload: Int8Array, sponge: Curl): Int8Array {
 
         sponge.absorb(chunk, 0, chunk.length);
 
-        const state = curlRate(sponge);
+        const state = sponge.rate();
         for (let i = 0; i < chunk.length; i++) {
             payload[(c * Curl.HASH_LENGTH) + i] = tritSum(chunk[i], keyChunk[i]);
             keyChunk[i] = state[i];
@@ -51,23 +48,27 @@ export function mask(payload: Int8Array, sponge: Curl): Int8Array {
  * @returns The unmasked payload.
  */
 export function unmask(payload: Int8Array, sponge: Curl): Int8Array {
-    const unmasked: Int8Array[] = [];
+    const unmasked: Int8Array = new Int8Array(payload);
 
-    const numChunks = Math.ceil(payload.length / Curl.HASH_LENGTH);
-    for (let c = 0; c < numChunks; c++) {
-        const chunk = payload.slice(c * Curl.HASH_LENGTH, (c + 1) * Curl.HASH_LENGTH);
+    const limit = Math.ceil(unmasked.length / Curl.HASH_LENGTH) * Curl.HASH_LENGTH;
+    let state;
+    for (let c = 0; c < limit; c++) {
+        const indexInChunk = c % Curl.HASH_LENGTH;
 
-        const state = curlRate(sponge);
-
-        for (let i = 0; i < chunk.length; i++) {
-            chunk[i] = tritSum(chunk[i], -state[i]);
+        if (indexInChunk === 0) {
+            state = sponge.rate();
         }
 
-        unmasked.push(chunk);
-        sponge.absorb(chunk, 0, chunk.length);
+        if (state) {
+            unmasked[c] = tritSum(unmasked[c], -state[indexInChunk]);
+        }
+
+        if (indexInChunk === Curl.HASH_LENGTH - 1) {
+            sponge.absorb(unmasked, Math.floor(c / Curl.HASH_LENGTH) * Curl.HASH_LENGTH, Curl.HASH_LENGTH);
+        }
     }
 
-    return concatenate(unmasked);
+    return unmasked;
 }
 
 /**

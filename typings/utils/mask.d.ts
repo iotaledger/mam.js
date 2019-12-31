@@ -1,4 +1,4 @@
-import Curl from "@iota/curl";
+import { Curl } from "../signing/curl";
 /**
  * Create the mask hash for the key.
  * @param keyTrits The key to create the mask hash for.

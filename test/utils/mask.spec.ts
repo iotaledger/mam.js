@@ -1,6 +1,6 @@
 import { trits, TRYTE_ALPHABET, trytes } from "@iota/converter";
-import Curl from "@iota/curl";
 import * as crypto from "crypto";
+import { Curl } from "../../src/signing/curl";
 import { mask, maskHash, unmask } from "../../src/utils/mask";
 
 test("maskHash() returns correct hashed version of trits", () => {
@@ -22,6 +22,22 @@ test("mask() returns trits with key trits absorbed", () => {
     expect(trytes(res)).toBe("CZO9HNDIEENBMHRRFESCS9OYZSBSFDCIIPLGDVXJFOKIEESNQCRRSZPKNAATFUJKQMMZDYIFNANIOUCMK");
 });
 
+test("mask() returns trits with key trits absorbed double payload", () => {
+    const curl = new Curl(81);
+    const keyTrits = trits("A".repeat(81));
+    curl.absorb(keyTrits, 0, keyTrits.length);
+    const res = mask(trits("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNPABCDEFGRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP"), curl);
+    expect(trytes(res)).toBe("CZO9HNDIEENBMHRRFESCS9OYZSBSFDCIIPLGDVXJFOKIEESNQCRRSZPKNAATFUJKQMMZDYIFNANIOUCMK9SX9AC9HHQUMLFA9LUVNPAWZLBEOIKHOQSMNGOFCIRJPOVTVJGZCSHFBZMAD9PTYHPXVQJBL9XMJBVSIS");
+});
+
+test("mask() returns trits with key trits absorbed non boundary payload", () => {
+    const curl = new Curl(81);
+    const keyTrits = trits("A".repeat(81));
+    curl.absorb(keyTrits, 0, keyTrits.length);
+    const res = mask(trits("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNPABCDEFGRVVMYNSIIUVHXXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP"), curl);
+    expect(trytes(res)).toBe("CZO9HNDIEENBMHRRFESCS9OYZSBSFDCIIPLGDVXJFOKIEESNQCRRSZPKNAATFUJKQMMZDYIFNANIOUCMK9SX9AC9HHQUMLFA9LUVNKSKHZEFURWWIOWHPSTVJXOBWGPPHZNK9AWKCLLYQXDGHKQV9RD9");
+});
+
 test("unmask() returns same trits with no other trits absorbed", () => {
     const curl = new Curl(81);
     const res = unmask(
@@ -38,8 +54,26 @@ test("unmask() returns trits with key trits absorbed", () => {
     expect(trytes(res)).toBe("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP");
 });
 
-test("mask() and unkask() with multiple random trytes", () => {
-    for (let i = 0; i < 1000; i++) {
+test("unmask() returns trits with key trits absorbed double payload", () => {
+    const curl = new Curl(81);
+    const keyTrits = trits("A".repeat(81));
+    curl.absorb(keyTrits, 0, keyTrits.length);
+    const res = unmask(
+        trits("CZO9HNDIEENBMHRRFESCS9OYZSBSFDCIIPLGDVXJFOKIEESNQCRRSZPKNAATFUJKQMMZDYIFNANIOUCMK9SX9AC9HHQUMLFA9LUVNPAWZLBEOIKHOQSMNGOFCIRJPOVTVJGZCSHFBZMAD9PTYHPXVQJBL9XMJBVSIS"), curl);
+    expect(trytes(res)).toBe("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNPABCDEFGRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP");
+});
+
+test("unmask() returns trits with key trits absorbed non boundary payload", () => {
+    const curl = new Curl(81);
+    const keyTrits = trits("A".repeat(81));
+    curl.absorb(keyTrits, 0, keyTrits.length);
+    const res = unmask(
+        trits("CZO9HNDIEENBMHRRFESCS9OYZSBSFDCIIPLGDVXJFOKIEESNQCRRSZPKNAATFUJKQMMZDYIFNANIOUCMK9SX9AC9HHQUMLFA9LUVNKSKHZEFURWWIOWHPSTVJXOBWGPPHZNK9AWKCLLYQXDGHKQV9RD9"), curl);
+    expect(trytes(res)).toBe("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNPABCDEFGRVVMYNSIIUVHXXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP");
+});
+
+test("mask() and unmask() with multiple random trytes", () => {
+    for (let i = 0; i < 100; i++) {
         // tslint:disable-next-line: insecure-random
         const val = generateHash();
         const valTrits = trits(val);
@@ -49,7 +83,7 @@ test("mask() and unkask() with multiple random trytes", () => {
         curl.absorb(keyTrits, 0, keyTrits.length);
         const masked = mask(valTrits, curl);
 
-        curl.initialize();
+        curl.reset();
         curl.absorb(keyTrits, 0, keyTrits.length);
         const unmasked = unmask(masked, curl);
         expect(trytes(unmasked)).toBe(val);

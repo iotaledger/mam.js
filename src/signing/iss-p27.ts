@@ -1,6 +1,4 @@
-import Curl from "@iota/curl";
-import { concatenate } from "../utils/arrayHelper";
-import { curlRate } from "../utils/curlHelper";
+import { Curl } from "../signing/curl";
 
 const PRIVATE_KEY_NUM_FRAGMENTS: number = 27;
 export const PRIVATE_KEY_FRAGMENT_LENGTH: number = PRIVATE_KEY_NUM_FRAGMENTS * Curl.HASH_LENGTH;
@@ -17,7 +15,6 @@ const MAX_TRIT_VALUE: number = 1;
  */
 export function subseed(seed: Int8Array, index: number): Int8Array {
     const sponge = new Curl(27);
-    sponge.initialize();
 
     const subseedPreimage = seed.slice();
     let localIndex = index;
@@ -79,11 +76,10 @@ export function digestFromSubseed(subSeed: Int8Array, securityLevel: number): In
  */
 export function address(digests: Int8Array): Int8Array {
     const sponge = new Curl(27);
-    const hashLength = Curl.HASH_LENGTH;
 
     sponge.absorb(digests, 0, digests.length);
 
-    const addressTrits = new Int8Array(hashLength);
+    const addressTrits = new Int8Array(Curl.HASH_LENGTH);
     sponge.squeeze(addressTrits, 0, addressTrits.length);
 
     return addressTrits;
@@ -98,7 +94,7 @@ export function address(digests: Int8Array): Int8Array {
 export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number): Int8Array {
     const keyLength = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH;
     const keyTrits = new Int8Array(keyLength);
-    const actualKeyTrits: Int8Array[] = [];
+    const actualKeyTrits: Int8Array = new Int8Array(keyLength);
 
     const sponge = new Curl(27);
 
@@ -111,10 +107,10 @@ export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number)
         sponge.reset();
         sponge.absorb(keyTrits, offset, Curl.HASH_LENGTH);
 
-        actualKeyTrits.push(curlRate(sponge));
+        actualKeyTrits.set(sponge.rate(), offset);
     }
 
-    return concatenate(actualKeyTrits);
+    return actualKeyTrits;
 }
 
 /**
@@ -124,23 +120,24 @@ export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number)
  * @returns The signature trits.
  */
 export function signature(hashTrits: Int8Array, key: Int8Array): Int8Array {
-    const signatures: Int8Array[] = [];
+    const signatures: Int8Array = new Int8Array(key.length);
     const sponge = new Curl(27);
 
     for (let i = 0; i < key.length / Curl.HASH_LENGTH; i++) {
-        let buffer = key.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
+        let buffer = key.subarray(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
+
         for (let k = 0;
             k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + hashTrits[i * 3 + 1] * 3 + hashTrits[i * 3 + 2] * 9);
             k++) {
             sponge.reset();
             sponge.absorb(buffer, 0, buffer.length);
-            buffer = curlRate(sponge);
+            buffer = sponge.rate();
         }
 
-        signatures.push(buffer);
+        signatures.set(buffer, i * Curl.HASH_LENGTH);
     }
 
-    return concatenate(signatures);
+    return signatures;
 }
 
 /**
@@ -168,7 +165,7 @@ export function checksumSecurity(hash: Int8Array): number {
  */
 export function digestFromSignature(hash: Int8Array, sig: Int8Array): Int8Array {
     const sponge = new Curl(27);
-    const buffer: Int8Array[] = [];
+    const buffer: Int8Array = new Int8Array(sig.length);
 
     for (let i = 0; i < (sig.length / Curl.HASH_LENGTH); i++) {
         let innerBuffer = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
@@ -176,15 +173,14 @@ export function digestFromSignature(hash: Int8Array, sig: Int8Array): Int8Array 
         for (let j = 0; j < (hash[i * 3] + hash[i * 3 + 1] * 3 + hash[i * 3 + 2] * 9) - MIN_TRYTE_VALUE; j++) {
             sponge.reset();
             sponge.absorb(innerBuffer, 0, innerBuffer.length);
-            innerBuffer = curlRate(sponge);
+            innerBuffer = sponge.rate();
         }
 
-        buffer.push(innerBuffer);
+        buffer.set(innerBuffer, i * Curl.HASH_LENGTH);
     }
 
     sponge.reset();
-    const final = concatenate(buffer);
-    sponge.absorb(final, 0, final.length);
+    sponge.absorb(buffer, 0, buffer.length);
 
-    return curlRate(sponge);
+    return sponge.rate();
 }

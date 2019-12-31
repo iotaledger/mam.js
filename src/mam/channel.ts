@@ -1,14 +1,13 @@
 import { trits, trytes } from "@iota/converter";
-import Curl from "@iota/curl";
 import { isTrytes, isTrytesOfExactLength } from "@iota/validators";
 import { MerkleTree } from "../merkle/merkleTree";
 import { IMamChannelState } from "../models/IMamChannelState";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
 import { HammingDiver } from "../pearlDiver/hammingDiver";
+import { Curl } from "../signing/curl";
 import { signature } from "../signing/iss-p27";
 import { concatenate } from "../utils/arrayHelper";
-import { curlRate, STATE_LENGTH } from "../utils/curlHelper";
 import { validateModeKey } from "../utils/guards";
 import { mask, maskHash } from "../utils/mask";
 import { pascalEncode } from "../utils/pascal";
@@ -116,7 +115,7 @@ export function createMessage(channelState: IMamChannelState, message: string): 
     // Calculate the nonce for the message so far
     const hammingDiver = new HammingDiver();
     const nonceTrits = hammingDiver.search(
-        curlRate(sponge, STATE_LENGTH),
+        sponge.rate(Curl.STATE_LENGTH),
         channelState.security,
         Curl.HASH_LENGTH / 3, 0
     );
@@ -124,7 +123,7 @@ export function createMessage(channelState: IMamChannelState, message: string): 
     payload = concatenate([payload, nonceTrits]);
 
     // Create the signature and add the sibling information
-    const sig = signature(curlRate(sponge), subtree.key);
+    const sig = signature(sponge.rate(), subtree.key);
     const subtreeTrits = concatenate(subtree.leaves.map(l => l.addressTrits));
     const siblingsCount = subtreeTrits.length / Curl.HASH_LENGTH;
 

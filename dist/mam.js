@@ -1,46 +1,104 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@iota/converter'), require('@iota/curl'), require('@iota/validators'), require('big-integer')) :
-    typeof define === 'function' && define.amd ? define(['exports', '@iota/converter', '@iota/curl', '@iota/validators', 'big-integer'], factory) :
-    (global = global || self, factory(global.mam = {}, global.converter, global.Curl, global.validators, global.bigInt));
-}(this, (function (exports, converter, Curl, validators, bigInt) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@iota/converter'), require('@iota/validators'), require('big-integer')) :
+    typeof define === 'function' && define.amd ? define(['exports', '@iota/converter', '@iota/validators', 'big-integer'], factory) :
+    (global = global || self, factory(global.mam = {}, global.converter, global.validators, global.bigInt));
+}(this, (function (exports, converter, validators, bigInt) { 'use strict';
 
-    Curl = Curl && Curl.hasOwnProperty('default') ? Curl['default'] : Curl;
     bigInt = bigInt && bigInt.hasOwnProperty('default') ? bigInt['default'] : bigInt;
 
-    var STATE_LENGTH = 3 * Curl.HASH_LENGTH;
     /**
-     * Extract the state from the curl sponge.
-     * @param sponge The sponge to extract the state from.
-     * @param len The length of the state to extract.
-     * @returns The extracted state.
+     * Class to implement Curl sponge.
      */
-    function curlRate(sponge, len) {
-        if (len === void 0) { len = Curl.HASH_LENGTH; }
-        // We have to cast to any as the state is not accesible
-        // tslint:disable-next-line: no-any
-        return sponge.state.slice(0, len);
-    }
-
-    /**
-     * Concatentate a list of arrays.
-     * @param arrays The arrays to concatenate.
-     * @returns The concatenated arrays.
-     */
-    function concatenate(arrays) {
-        var totalLength = 0;
-        for (var _i = 0, arrays_1 = arrays; _i < arrays_1.length; _i++) {
-            var arr = arrays_1[_i];
-            totalLength += arr.length;
+    var Curl = /** @class */ (function () {
+        /**
+         * Create a new instance of Curl.
+         * @param rounds The number of rounds to perform.
+         */
+        function Curl(rounds) {
+            if (rounds === void 0) { rounds = Curl.NUMBER_OF_ROUNDS; }
+            if (rounds !== 27 && rounds !== 81) {
+                throw new Error("Illegal number of rounds. Only `27` and `81` rounds are supported.");
+            }
+            this._state = new Int8Array(Curl.STATE_LENGTH);
+            this._rounds = rounds;
         }
-        var result = new Int8Array(totalLength);
-        var offset = 0;
-        for (var _a = 0, arrays_2 = arrays; _a < arrays_2.length; _a++) {
-            var arr = arrays_2[_a];
-            result.set(arr, offset);
-            offset += arr.length;
-        }
-        return result;
-    }
+        /**
+         * Resets the state
+         */
+        Curl.prototype.reset = function () {
+            this._state = new Int8Array(Curl.STATE_LENGTH);
+        };
+        /**
+         * Get the state of the sponge.
+         * @param len The length of the state to get.
+         * @returns The state.
+         */
+        Curl.prototype.rate = function (len) {
+            if (len === void 0) { len = Curl.HASH_LENGTH; }
+            return this._state.slice(0, len);
+        };
+        /**
+         * Absorbs trits given an offset and length
+         * @param trits The trits to absorb.
+         * @param offset The offset to start abororbing from the array.
+         * @param length The length of trits to absorb.
+         */
+        Curl.prototype.absorb = function (trits, offset, length) {
+            do {
+                var limit = length < Curl.HASH_LENGTH ? length : Curl.HASH_LENGTH;
+                this._state.set(trits.subarray(offset, offset + limit));
+                this.transform();
+                length -= Curl.HASH_LENGTH;
+                offset += limit;
+            } while (length > 0);
+        };
+        /**
+         * Squeezes trits given an offset and length
+         * @param trits The trits to squeeze.
+         * @param offset The offset to start squeezing from the array.
+         * @param length The length of trits to squeeze.
+         */
+        Curl.prototype.squeeze = function (trits, offset, length) {
+            do {
+                var limit = length < Curl.HASH_LENGTH ? length : Curl.HASH_LENGTH;
+                trits.set(this._state.subarray(0, limit), offset);
+                this.transform();
+                length -= Curl.HASH_LENGTH;
+                offset += limit;
+            } while (length > 0);
+        };
+        /**
+         * Sponge transform function
+         */
+        Curl.prototype.transform = function () {
+            var stateCopy;
+            var index = 0;
+            for (var round = 0; round < this._rounds; round++) {
+                stateCopy = this._state.slice();
+                for (var i = 0; i < Curl.STATE_LENGTH; i++) {
+                    this._state[i] =
+                        Curl.TRUTH_TABLE[stateCopy[index] + (stateCopy[(index += index < 365 ? 364 : -365)] << 2) + 5];
+                }
+            }
+        };
+        /**
+         * The Hash Length
+         */
+        Curl.HASH_LENGTH = 243;
+        /**
+         * The State Length.
+         */
+        Curl.STATE_LENGTH = 3 * Curl.HASH_LENGTH;
+        /**
+         * The default number of rounds.
+         */
+        Curl.NUMBER_OF_ROUNDS = 81;
+        /**
+         * Truth Table.
+         */
+        Curl.TRUTH_TABLE = [1, 0, -1, 2, 1, -1, 0, 2, -1, 1, 0];
+        return Curl;
+    }());
 
     var PRIVATE_KEY_NUM_FRAGMENTS = 27;
     var PRIVATE_KEY_FRAGMENT_LENGTH = PRIVATE_KEY_NUM_FRAGMENTS * Curl.HASH_LENGTH;
@@ -56,7 +114,6 @@
      */
     function subseed(seed, index) {
         var sponge = new Curl(27);
-        sponge.initialize();
         var subseedPreimage = seed.slice();
         var localIndex = index;
         while (localIndex-- > 0) {
@@ -106,9 +163,8 @@
      */
     function address(digests) {
         var sponge = new Curl(27);
-        var hashLength = Curl.HASH_LENGTH;
         sponge.absorb(digests, 0, digests.length);
-        var addressTrits = new Int8Array(hashLength);
+        var addressTrits = new Int8Array(Curl.HASH_LENGTH);
         sponge.squeeze(addressTrits, 0, addressTrits.length);
         return addressTrits;
     }
@@ -121,7 +177,7 @@
     function privateKeyFromSubseed(subSeed, securityLevel) {
         var keyLength = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH;
         var keyTrits = new Int8Array(keyLength);
-        var actualKeyTrits = [];
+        var actualKeyTrits = new Int8Array(keyLength);
         var sponge = new Curl(27);
         sponge.absorb(subSeed, 0, subSeed.length);
         sponge.squeeze(keyTrits, 0, keyTrits.length);
@@ -129,9 +185,9 @@
             var offset = i * Curl.HASH_LENGTH;
             sponge.reset();
             sponge.absorb(keyTrits, offset, Curl.HASH_LENGTH);
-            actualKeyTrits.push(curlRate(sponge));
+            actualKeyTrits.set(sponge.rate(), offset);
         }
-        return concatenate(actualKeyTrits);
+        return actualKeyTrits;
     }
     /**
      * Create a signature for the trits.
@@ -140,18 +196,18 @@
      * @returns The signature trits.
      */
     function signature(hashTrits, key) {
-        var signatures = [];
+        var signatures = new Int8Array(key.length);
         var sponge = new Curl(27);
         for (var i = 0; i < key.length / Curl.HASH_LENGTH; i++) {
-            var buffer = key.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
+            var buffer = key.subarray(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
             for (var k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + hashTrits[i * 3 + 1] * 3 + hashTrits[i * 3 + 2] * 9); k++) {
                 sponge.reset();
                 sponge.absorb(buffer, 0, buffer.length);
-                buffer = curlRate(sponge);
+                buffer = sponge.rate();
             }
-            signatures.push(buffer);
+            signatures.set(buffer, i * Curl.HASH_LENGTH);
         }
-        return concatenate(signatures);
+        return signatures;
     }
     /**
      * Check the security level.
@@ -175,20 +231,19 @@
      */
     function digestFromSignature(hash, sig) {
         var sponge = new Curl(27);
-        var buffer = [];
+        var buffer = new Int8Array(sig.length);
         for (var i = 0; i < (sig.length / Curl.HASH_LENGTH); i++) {
             var innerBuffer = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
             for (var j = 0; j < (hash[i * 3] + hash[i * 3 + 1] * 3 + hash[i * 3 + 2] * 9) - MIN_TRYTE_VALUE; j++) {
                 sponge.reset();
                 sponge.absorb(innerBuffer, 0, innerBuffer.length);
-                innerBuffer = curlRate(sponge);
+                innerBuffer = sponge.rate();
             }
-            buffer.push(innerBuffer);
+            buffer.set(innerBuffer, i * Curl.HASH_LENGTH);
         }
         sponge.reset();
-        var final = concatenate(buffer);
-        sponge.absorb(final, 0, final.length);
-        return curlRate(sponge);
+        sponge.absorb(buffer, 0, buffer.length);
+        return sponge.rate();
     }
 
     /**
@@ -272,9 +327,9 @@
                     sponge.absorb(rate, 0, rate.length);
                 }
                 i <<= 1;
-                rate = curlRate(sponge);
+                rate = sponge.rate();
             }
-            return curlRate(sponge);
+            return sponge.rate();
         };
         /**
          * Get a sub tree.
@@ -329,7 +384,6 @@
                 var addressTrits = void 0;
                 if (right) {
                     var sponge = new Curl(27);
-                    sponge.initialize();
                     sponge.absorb(left.addressTrits, 0, left.addressTrits.length);
                     sponge.absorb(right.addressTrits, 0, right.addressTrits.length);
                     addressTrits = new Int8Array(Curl.HASH_LENGTH);
@@ -536,7 +590,7 @@
          * @returns The prepared trits.
          */
         HammingDiver.prototype.prepareTrits = function (trits, offset) {
-            var initialState = this.tritsToBigInt(trits, STATE_LENGTH);
+            var initialState = this.tritsToBigInt(trits, Curl.STATE_LENGTH);
             initialState.low[offset] = HammingDiver.LOW_0;
             initialState.low[offset + 1] = HammingDiver.LOW_1;
             initialState.low[offset + 2] = HammingDiver.LOW_2;
@@ -610,10 +664,10 @@
             var curlScratchpadIndex = 0;
             for (var round = 0; round < HammingDiver.ROUNDS; round++) {
                 var curlScratchpad = {
-                    low: searchStates.low.slice(0, STATE_LENGTH),
-                    high: searchStates.high.slice(0, STATE_LENGTH)
+                    low: searchStates.low.slice(0, Curl.STATE_LENGTH),
+                    high: searchStates.high.slice(0, Curl.STATE_LENGTH)
                 };
-                for (var stateIndex = 0; stateIndex < STATE_LENGTH; stateIndex++) {
+                for (var stateIndex = 0; stateIndex < Curl.STATE_LENGTH; stateIndex++) {
                     var alpha = curlScratchpad.low[curlScratchpadIndex];
                     var beta = curlScratchpad.high[curlScratchpadIndex];
                     if (curlScratchpadIndex < 365) {
@@ -746,6 +800,27 @@
     }());
 
     /**
+     * Concatentate a list of arrays.
+     * @param arrays The arrays to concatenate.
+     * @returns The concatenated arrays.
+     */
+    function concatenate(arrays) {
+        var totalLength = 0;
+        for (var _i = 0, arrays_1 = arrays; _i < arrays_1.length; _i++) {
+            var arr = arrays_1[_i];
+            totalLength += arr.length;
+        }
+        var result = new Int8Array(totalLength);
+        var offset = 0;
+        for (var _a = 0, arrays_2 = arrays; _a < arrays_2.length; _a++) {
+            var arr = arrays_2[_a];
+            result.set(arr, offset);
+            offset += arr.length;
+        }
+        return result;
+    }
+
+    /**
      * Validate the mode and key.
      * @param mode The mamMode to validate.
      * @param sideKey The sideKey to validate.
@@ -777,7 +852,6 @@
      */
     function maskHash(keyTrits) {
         var sponge = new Curl(81);
-        sponge.reset();
         sponge.absorb(keyTrits, 0, keyTrits.length);
         var finalKeyTrits = new Int8Array(Curl.HASH_LENGTH);
         sponge.squeeze(finalKeyTrits, 0, finalKeyTrits.length);
@@ -790,12 +864,12 @@
      * @returns The masked payload.
      */
     function mask(payload, sponge) {
-        var keyChunk = curlRate(sponge);
+        var keyChunk = sponge.rate();
         var numChunks = Math.ceil(payload.length / Curl.HASH_LENGTH);
         for (var c = 0; c < numChunks; c++) {
             var chunk = payload.slice(c * Curl.HASH_LENGTH, (c + 1) * Curl.HASH_LENGTH);
             sponge.absorb(chunk, 0, chunk.length);
-            var state = curlRate(sponge);
+            var state = sponge.rate();
             for (var i = 0; i < chunk.length; i++) {
                 payload[(c * Curl.HASH_LENGTH) + i] = tritSum(chunk[i], keyChunk[i]);
                 keyChunk[i] = state[i];
@@ -810,18 +884,22 @@
      * @returns The unmasked payload.
      */
     function unmask(payload, sponge) {
-        var unmasked = [];
-        var numChunks = Math.ceil(payload.length / Curl.HASH_LENGTH);
-        for (var c = 0; c < numChunks; c++) {
-            var chunk = payload.slice(c * Curl.HASH_LENGTH, (c + 1) * Curl.HASH_LENGTH);
-            var state = curlRate(sponge);
-            for (var i = 0; i < chunk.length; i++) {
-                chunk[i] = tritSum(chunk[i], -state[i]);
+        var unmasked = new Int8Array(payload);
+        var limit = Math.ceil(unmasked.length / Curl.HASH_LENGTH) * Curl.HASH_LENGTH;
+        var state;
+        for (var c = 0; c < limit; c++) {
+            var indexInChunk = c % Curl.HASH_LENGTH;
+            if (indexInChunk === 0) {
+                state = sponge.rate();
             }
-            unmasked.push(chunk);
-            sponge.absorb(chunk, 0, chunk.length);
+            if (state) {
+                unmasked[c] = tritSum(unmasked[c], -state[indexInChunk]);
+            }
+            if (indexInChunk === Curl.HASH_LENGTH - 1) {
+                sponge.absorb(unmasked, Math.floor(c / Curl.HASH_LENGTH) * Curl.HASH_LENGTH, Curl.HASH_LENGTH);
+            }
         }
-        return concatenate(unmasked);
+        return unmasked;
     }
     /**
      * Sum the parts of a trit.
@@ -917,11 +995,11 @@
         payload = concatenate([payload, maskedNextRoot]);
         // Calculate the nonce for the message so far
         var hammingDiver = new HammingDiver();
-        var nonceTrits = hammingDiver.search(curlRate(sponge, STATE_LENGTH), channelState.security, Curl.HASH_LENGTH / 3, 0);
+        var nonceTrits = hammingDiver.search(sponge.rate(Curl.STATE_LENGTH), channelState.security, Curl.HASH_LENGTH / 3, 0);
         mask(nonceTrits, sponge);
         payload = concatenate([payload, nonceTrits]);
         // Create the signature and add the sibling information
-        var sig = signature(curlRate(sponge), subtree.key);
+        var sig = signature(sponge.rate(), subtree.key);
         var subtreeTrits = concatenate(subtree.leaves.map(function (l) { return l.addressTrits; }));
         var siblingsCount = subtreeTrits.length / Curl.HASH_LENGTH;
         var encryptedSignature = mask(concatenate([sig, pascalEncode(siblingsCount), subtreeTrits]), sponge);
@@ -1040,7 +1118,7 @@
         var nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + Curl.HASH_LENGTH), sponge);
         var message = unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
         var nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + Curl.HASH_LENGTH / 3), sponge);
-        var hmac = curlRate(sponge);
+        var hmac = sponge.rate();
         // Check the security level is valid
         var securityLevel = checksumSecurity(hmac);
         if (securityLevel === 0) {
@@ -1056,7 +1134,7 @@
         // Get the sibling information and validate it
         var siblingsCountData = pascalDecode(decryptedMetadata.slice(securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH));
         var siblingsCount = siblingsCountData.value;
-        var recalculatedRoot = curlRate(sponge);
+        var recalculatedRoot = sponge.rate();
         if (siblingsCount !== 0) {
             var siblingsStart = (securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH) + siblingsCountData.end;
             var siblings = decryptedMetadata.slice(siblingsStart, siblingsStart + (siblingsCount * Curl.HASH_LENGTH));

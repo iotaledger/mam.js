@@ -1,6 +1,5 @@
 import { trits } from "@iota/converter";
-import Curl from "@iota/curl";
-import { curlRate } from "../utils/curlHelper";
+import { Curl } from "../signing/curl";
 import { generateAddress } from "./merkleHashGenerator";
 import { MerkleNode } from "./merkleNode";
 
@@ -58,10 +57,10 @@ export class MerkleTree {
 
             i <<= 1;
 
-            rate = curlRate(sponge);
+            rate = sponge.rate();
         }
 
-        return curlRate(sponge);
+        return sponge.rate();
     }
     /**
      * Get a sub tree.
@@ -132,7 +131,6 @@ export class MerkleTree {
 
             if (right) {
                 const sponge = new Curl(27);
-                sponge.initialize();
 
                 sponge.absorb(left.addressTrits, 0, left.addressTrits.length);
                 sponge.absorb(right.addressTrits, 0, right.addressTrits.length);

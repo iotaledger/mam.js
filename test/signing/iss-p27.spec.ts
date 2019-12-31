@@ -1,15 +1,19 @@
-import { trits, TRYTE_ALPHABET, trytes } from "@iota/converter";
-import * as crypto from "crypto";
+import { trits, trytes } from "@iota/converter";
 import { address, checksumSecurity, digestFromSignature, digestFromSubseed, privateKeyFromSubseed, signature, subseed } from "../../src/signing/iss-p27";
 
-test("subseed() returns correct hashed version of trits index 0", () => {
+test("subseed() returns correct hashed version of trits securityLevel 0", () => {
     const res = subseed(trits("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP"), 0);
     expect(trytes(res)).toBe("YRXSRVLUUSQHFMQQHIQOYDYOTPYUOY9SHFOHHN9GQEFVBMBSRHT9UQRRGHZNVXBZOTTDABNA9TANIF9AG");
 });
 
-test("subseed() returns correct hashed version of trits index 1", () => {
+test("subseed() returns correct hashed version of trits securityLevel 1", () => {
     const res = subseed(trits("MFCK9SDUFIOHDDMLCTMSULXXNCPKDVFOFKHOALA9EJFIZZA9TKKBWPQDXHEHHXXYXVSEDUEHVGOAEKABM"), 1);
     expect(trytes(res)).toBe("YULGY9GJAXQDAORVFCMGZQEHGDDRZPUKZBZ9RDPENUEGBTUTX9QZCOMMIXFU9OHFLJZF9YKGKJVLCQLHZ");
+});
+
+test("subseed() returns correct hashed version of trits securityLevel 2", () => {
+    const res = subseed(trits("MFCK9SDUFIOHDDMLCTMSULXXNCPKDVFOFKHOALA9EJFIZZA9TKKBWPQDXHEHHXXYXVSEDUEHVGOAEKABM"), 2);
+    expect(trytes(res)).toBe("AQPHUPQHMVPYXDYRGZKVGIOLJNC9KAAFRCPQBMULBWSVCJDWSVBAFFWEJWRAAHWYOLMCDASALLGRYSANW");
 });
 
 test("digestFromSubseed() returns correct hashed version of trits security level 1", () => {
@@ -54,6 +58,13 @@ test("signature() returns correct hashed version of trits", () => {
     expect(trytes(res)).toBe("MVCTKZFR9JBYYGKQXS9PMZ9QYALUIDTDWHQPZKI9XDYOHWSC9FZBRAVRHNEXA9A9ZCVAIXS9PLTSDF9SB");
 });
 
+test("signature() returns correct hashed version of trits double length key", () => {
+    const res = signature(
+        trits("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP"),
+        trits("A".repeat(162)));
+    expect(trytes(res)).toBe("MVCTKZFR9JBYYGKQXS9PMZ9QYALUIDTDWHQPZKI9XDYOHWSC9FZBRAVRHNEXA9A9ZCVAIXS9PLTSDF9SBGRXHGNUHVKNODWHZEXPUTWUZERKCCJ9DWYLXVOOQGWUFSPJGUKYGL9ICQMSHUMUMXNLZOOTMFGKVRKUNN");
+});
+
 test("checksumSecurity() returns security level 1", () => {
     const arr = new Int8Array(81);
     arr.fill(0);
@@ -94,4 +105,11 @@ test("digestFromSignature() returns correct hashed version of trits", () => {
         trits("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP"),
         trits("A".repeat(81)));
     expect(trytes(res)).toBe("KR9VGZNJMJZLNBKTJ9JMKLQRJPDKCTCJZLYVRKCNRCNAIQIFRPGMBBTFGWSVZGKXZCYUGGSSVPIMQHLVI");
+});
+
+test("digestFromSignature() returns correct hashed version of trits double length", () => {
+    const res = digestFromSignature(
+        trits("XAL9SMWRVVMYNSIIUVHXH9LBAHYHUWXRRKOTWECQULPRVVHMJXIIHAKPMZZGUFQPJNNAWBRUMZMRLFXNP"),
+        trits("A".repeat(162)));
+    expect(trytes(res)).toBe("SMKEXRDFQCJDYQUUUOMBX9IFKGHPVC9GJRGSTWWEXRJJWOFSGXSTZMCVDPPRWLSYVBAUONMXEDYSIZ9FF");
 });
