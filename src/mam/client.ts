@@ -51,10 +51,115 @@ export async function mamFetch(
     sideKey?: string): Promise<IMamFetchedMessage | undefined> {
     validateModeKey(mode, sideKey);
 
-    const messageAddress = mode === "public" ? root : trytes(maskHash(trits(root)));
+    const messageAddress =
+        mode === "public"
+            ? root
+            : trytes(maskHash(trits(root)));
 
     const txObjects = await api.findTransactionObjects({ addresses: [messageAddress] });
 
+    return decodeTransactions(txObjects, messageAddress, root, sideKey);
+}
+
+/**
+ * Fetch all the mam message from a channel.
+ * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
+ * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
+ * same amount of messages as your limit you should probably read again.
+ * @param api The api to use for fetching.
+ * @param root The root within the mam channel to fetch the message.
+ * @param mode The mode to use for fetching.
+ * @param sideKey The sideKey if mode is restricted.
+ * @param limit Limit the number of messages retrieved.
+ * @returns The array of retrieved messages.
+ */
+export async function mamFetchAll(
+    api: API,
+    root: string,
+    mode: MamMode,
+    sideKey?: string,
+    limit?: number): Promise<IMamFetchedMessage[]> {
+    validateModeKey(mode, sideKey);
+
+    const localLimit = limit === undefined ? Number.MAX_VALUE : limit;
+    const messages: IMamFetchedMessage[] = [];
+
+    let fetchRoot: string | undefined = root;
+
+    do {
+        const fetched: IMamFetchedMessage | undefined = await mamFetch(api, fetchRoot, mode, sideKey);
+        if (fetched) {
+            messages.push(fetched);
+            fetchRoot = fetched.nextRoot;
+        } else {
+            fetchRoot = undefined;
+        }
+    } while (fetchRoot && messages.length < localLimit);
+
+    return messages;
+}
+
+/**
+ * Fetch the next message from a list of channels.
+ * @param api The api to use for fetching.
+ * @param channels The list of channel details to check for new messages.
+ * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
+ * throws exception if transactions found on address are invalid.
+ */
+export async function mamFetchCombined(
+    api: API,
+    channels: {
+        /**
+         * The root within the mam channel to fetch the message.
+         */
+        root: string,
+        /**
+         * The mode to use for fetching.
+         */
+        mode: MamMode,
+        /**
+         * The sideKey if mode is restricted.
+         */
+        sideKey?: string
+    }[]): Promise<(IMamFetchedMessage | undefined)[]> {
+
+    const addresses: string[] = channels.map(c =>
+        c.mode === "public"
+            ? c.root
+            : trytes(maskHash(trits(c.root))));
+
+    const txObjects = await api.findTransactionObjects({ addresses });
+    const messages: (IMamFetchedMessage | undefined)[] = [];
+
+    for (let i = 0; i < addresses.length; i++) {
+        messages.push(
+            await decodeTransactions(
+                txObjects.filter(t => t.address === addresses[i]),
+                addresses[i],
+                channels[i].root,
+                channels[i].sideKey)
+        );
+    }
+
+    return messages;
+}
+
+/**
+ * Decode transactions from an address to try and find a MAM message.
+ * @param txObjects The objects returned from the fetch.
+ * @param address The address that the data was fetched from.
+ * @param root The root within the mam channel to fetch the message.
+ * @param sideKey The sideKey if mode is restricted.
+ * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
+ * throws exception if transactions found on address are invalid.
+ * @private
+ */
+async function decodeTransactions(
+    txObjects: Readonly<Transaction[]>,
+    address: string,
+    root: string,
+    sideKey?: string):
+    Promise<IMamFetchedMessage | undefined> {
     if (txObjects.length === 0) {
         return;
     }
@@ -87,49 +192,9 @@ export async function mamFetch(
                         tag: tails[i].tag
                     };
                 } catch (err) {
-                    throw new Error(`Failed while trying to read MAM channel from address ${messageAddress}.\n${err.message}`);
+                    throw new Error(`Failed while trying to read MAM channel from address ${address}.\n${err.message}`);
                 }
             }
         }
     }
-
-    return;
-}
-
-/**
- * Fetch all the mam message from a channel.
- * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
- * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
- * same amount of messages as your limit you should probably read again.
- * @param api The api to use for fetching.
- * @param root The root within the mam channel to fetch the message.
- * @param mode The mode to use for fetching.
- * @param sideKey The sideKey if mode is restricted.
- * @param limit Limit the number of messages retrieved.
- * @returns The array of retrieved messages.
- */
-export async function mamFetchAll(
-    api: API,
-    root: string,
-    mode: MamMode,
-    sideKey?: string,
-    limit?: number): Promise<IMamFetchedMessage[]> {
-    validateModeKey(mode, sideKey);
-
-    const localLimit = limit === undefined ? Number.MAX_VALUE : limit;
-    const messages: IMamFetchedMessage[] = [];
-
-    let fetchRoot: string | undefined = root;
-
-    do {
-        const fetched: IMamFetchedMessage | undefined  = await mamFetch(api, fetchRoot, mode, sideKey);
-        if (fetched) {
-            messages.push(fetched);
-            fetchRoot = fetched.nextRoot;
-        } else {
-            fetchRoot = undefined;
-        }
-    } while (fetchRoot && messages.length < localLimit);
-
-    return messages;
 }

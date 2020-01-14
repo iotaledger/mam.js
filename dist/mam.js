@@ -8,6 +8,7 @@
 
     /**
      * Class to implement Curl sponge.
+     * @private
      */
     var Curl = /** @class */ (function () {
         /**
@@ -111,6 +112,7 @@
      * @param seed The seed trits.
      * @param index The index for the subseed.
      * @returns The subseed trits.
+     * @private
      */
     function subseed(seed, index) {
         var sponge = new Curl(27);
@@ -136,6 +138,7 @@
      * @param subSeed The subseed to get the digest for.
      * @param securityLevel The security level to get the digest.
      * @returns The digest trits.
+     * @private
      */
     function digestFromSubseed(subSeed, securityLevel) {
         var curl1 = new Curl(27);
@@ -160,6 +163,7 @@
      * Get the address from the digests.
      * @param digests The digests to get the address for.
      * @returns The address trits.
+     * @private
      */
     function address(digests) {
         var sponge = new Curl(27);
@@ -173,6 +177,7 @@
      * @param subSeed The subseed to get the private key for.
      * @param securityLevel The security level for the private key.
      * @returns The private key trits.
+     * @private
      */
     function privateKeyFromSubseed(subSeed, securityLevel) {
         var keyLength = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH;
@@ -194,6 +199,7 @@
      * @param hashTrits The trits to create the signature for.
      * @param key The key to use for signing.
      * @returns The signature trits.
+     * @private
      */
     function signature(hashTrits, key) {
         var signatures = new Int8Array(key.length);
@@ -213,6 +219,7 @@
      * Check the security level.
      * @param hash The hash to check.
      * @returns The security level
+     * @private
      */
     function checksumSecurity(hash) {
         if (hash.slice(0, Curl.HASH_LENGTH / 3).reduce(function (a, b) { return a + b; }, 0) === 0) {
@@ -228,6 +235,7 @@
      * @param hash The hash to get the digest.
      * @param sig The signature.
      * @returns The digest.
+     * @private
      */
     function digestFromSignature(hash, sig) {
         var sponge = new Curl(27);
@@ -252,6 +260,7 @@
      * @param index The index of the address to generate.
      * @param security The security level of the address to generate.
      * @returns The address and the private key.
+     * @private
      */
     function generateAddress(seedTrits, index, security) {
         var ss = subseed(seedTrits, index);
@@ -264,6 +273,7 @@
 
     /**
      * Class to represent a node in a merkle tree.
+     * @private
      */
     var MerkleNode = /** @class */ (function () {
         /**
@@ -285,6 +295,7 @@
 
     /**
      * Class to represent a merkle tree.
+     * @private
      */
     var MerkleTree = /** @class */ (function () {
         /**
@@ -409,6 +420,7 @@
      * Perform pascal encoding of the value.
      * @param value The value to encode.
      * @returns The trits for the encoded value.
+     * @private
      */
     function pascalEncode(value) {
         if (value === 0) {
@@ -448,6 +460,7 @@
      * Decode the pascal encoded trits.
      * @param value The value to decode.
      * @returns The decoded value.
+     * @private
      */
     function pascalDecode(value) {
         if (value.length >= ZERO.length &&
@@ -473,6 +486,7 @@
      * Get the encoded length of the value.
      * @param value The value.
      * @returns The length.
+     * @private
      */
     function encodedLength(value) {
         var length = roundThird(minTrits(Math.abs(value), 1));
@@ -482,6 +496,7 @@
      * Round the number to the third.
      * @param value The value to round.
      * @returns The rounded number.
+     * @private
      */
     function roundThird(value) {
         var rem = value % RADIX;
@@ -495,6 +510,7 @@
      * @param input The input to calculate from.
      * @param basis The basis of the calculation.
      * @returns The number of trits.
+     * @private
      */
     function minTrits(input, basis) {
         if (input <= basis) {
@@ -506,6 +522,7 @@
      * Calculate the end for the input.
      * @param input The input to calculate for.
      * @returns The calculated end.
+     * @private
      */
     function end(input) {
         if (converter.value(input.slice(0, TRITS_PER_TRYTE)) > 0) {
@@ -518,6 +535,7 @@
      * @param input The input value to convert.
      * @param trits The trits.
      * @returns The end conversion.
+     * @private
      */
     function valueToTrits(input, trits) {
         var endWrite = writeTrits(input, trits, 0);
@@ -535,6 +553,7 @@
      * @param trits The trits to write to.
      * @param index The index to write at.
      * @returns The length.
+     * @private
      */
     function writeTrits(input, trits, index) {
         switch (input) {
@@ -555,6 +574,7 @@
 
     /**
      * Class to perform Hamming calculation for nonce.
+     * @private
      */
     var HammingDiver = /** @class */ (function () {
         function HammingDiver() {
@@ -803,6 +823,7 @@
      * Concatentate a list of arrays.
      * @param arrays The arrays to concatenate.
      * @returns The concatenated arrays.
+     * @private
      */
     function concatenate(arrays) {
         var totalLength = 0;
@@ -824,6 +845,7 @@
      * Validate the mode and key.
      * @param mode The mamMode to validate.
      * @param sideKey The sideKey to validate.
+     * @private
      */
     function validateModeKey(mode, sideKey) {
         if (mode !== "public" && mode !== "private" && mode !== "restricted") {
@@ -849,6 +871,7 @@
      * Create the mask hash for the key.
      * @param keyTrits The key to create the mask hash for.
      * @returns The masked hash.
+     * @private
      */
     function maskHash(keyTrits) {
         var sponge = new Curl(81);
@@ -862,6 +885,7 @@
      * @param payload The payload to apply the mask to.
      * @param sponge The sponge to use.
      * @returns The masked payload.
+     * @private
      */
     function mask(payload, sponge) {
         var keyChunk = sponge.rate();
@@ -882,6 +906,7 @@
      * @param payload The payload to unmask.
      * @param sponge The sponge to use.
      * @returns The unmasked payload.
+     * @private
      */
     function unmask(payload, sponge) {
         var unmasked = new Int8Array(payload);
@@ -906,6 +931,7 @@
      * @param left The left part.
      * @param right The right part.
      * @returns The sum.
+     * @private
      */
     function tritSum(left, right) {
         var sum = left + right;
@@ -1192,51 +1218,18 @@
      */
     function mamFetch(api, root, mode, sideKey) {
         return __awaiter(this, void 0, Promise, function () {
-            var messageAddress, txObjects, tails, notTails, _loop_1, i, state_1;
+            var messageAddress, txObjects;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         validateModeKey(mode, sideKey);
-                        messageAddress = mode === "public" ? root : converter.trytes(maskHash(converter.trits(root)));
+                        messageAddress = mode === "public"
+                            ? root
+                            : converter.trytes(maskHash(converter.trits(root)));
                         return [4 /*yield*/, api.findTransactionObjects({ addresses: [messageAddress] })];
                     case 1:
                         txObjects = _a.sent();
-                        if (txObjects.length === 0) {
-                            return [2 /*return*/];
-                        }
-                        tails = txObjects.filter(function (tx) { return tx.currentIndex === 0; });
-                        notTails = txObjects.filter(function (tx) { return tx.currentIndex !== 0; });
-                        _loop_1 = function (i) {
-                            var msg = tails[i].signatureMessageFragment;
-                            var currentTx = tails[i];
-                            for (var j = 0; j < tails[i].lastIndex; j++) {
-                                var nextTx = notTails.find(function (tx) { return tx.hash === currentTx.trunkTransaction; });
-                                if (!nextTx) {
-                                    // This is an incomplete transaction chain so move onto
-                                    // the next tail
-                                    break;
-                                }
-                                msg += nextTx.signatureMessageFragment;
-                                currentTx = nextTx;
-                                // If we now have all the transactions which make up this message
-                                // try and parse the message
-                                if (j === tails[i].lastIndex - 1) {
-                                    try {
-                                        var parsed = parseMessage(msg, root, sideKey);
-                                        return { value: __assign(__assign({}, parsed), { tag: tails[i].tag }) };
-                                    }
-                                    catch (err) {
-                                        throw new Error("Failed while trying to read MAM channel from address " + messageAddress + ".\n" + err.message);
-                                    }
-                                }
-                            }
-                        };
-                        for (i = 0; i < tails.length; i++) {
-                            state_1 = _loop_1(i);
-                            if (typeof state_1 === "object")
-                                return [2 /*return*/, state_1.value];
-                        }
-                        return [2 /*return*/];
+                        return [2 /*return*/, decodeTransactions(txObjects, messageAddress, root, sideKey)];
                 }
             });
         });
@@ -1283,6 +1276,110 @@
             });
         });
     }
+    /**
+     * Fetch the next message from a list of channels.
+     * @param api The api to use for fetching.
+     * @param channels The list of channel details to check for new messages.
+     * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
+     * throws exception if transactions found on address are invalid.
+     */
+    function mamFetchCombined(api, channels) {
+        return __awaiter(this, void 0, Promise, function () {
+            var addresses, txObjects, messages, _loop_1, i;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        addresses = channels.map(function (c) {
+                            return c.mode === "public"
+                                ? c.root
+                                : converter.trytes(maskHash(converter.trits(c.root)));
+                        });
+                        return [4 /*yield*/, api.findTransactionObjects({ addresses: addresses })];
+                    case 1:
+                        txObjects = _a.sent();
+                        messages = [];
+                        _loop_1 = function (i) {
+                            var _a, _b;
+                            return __generator(this, function (_c) {
+                                switch (_c.label) {
+                                    case 0:
+                                        _b = (_a = messages).push;
+                                        return [4 /*yield*/, decodeTransactions(txObjects.filter(function (t) { return t.address === addresses[i]; }), addresses[i], channels[i].root, channels[i].sideKey)];
+                                    case 1:
+                                        _b.apply(_a, [_c.sent()]);
+                                        return [2 /*return*/];
+                                }
+                            });
+                        };
+                        i = 0;
+                        _a.label = 2;
+                    case 2:
+                        if (!(i < addresses.length)) return [3 /*break*/, 5];
+                        return [5 /*yield**/, _loop_1(i)];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        i++;
+                        return [3 /*break*/, 2];
+                    case 5: return [2 /*return*/, messages];
+                }
+            });
+        });
+    }
+    /**
+     * Decode transactions from an address to try and find a MAM message.
+     * @param txObjects The objects returned from the fetch.
+     * @param address The address that the data was fetched from.
+     * @param root The root within the mam channel to fetch the message.
+     * @param sideKey The sideKey if mode is restricted.
+     * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
+     * throws exception if transactions found on address are invalid.
+     * @private
+     */
+    function decodeTransactions(txObjects, address, root, sideKey) {
+        return __awaiter(this, void 0, Promise, function () {
+            var tails, notTails, _loop_2, i, state_1;
+            return __generator(this, function (_a) {
+                if (txObjects.length === 0) {
+                    return [2 /*return*/];
+                }
+                tails = txObjects.filter(function (tx) { return tx.currentIndex === 0; });
+                notTails = txObjects.filter(function (tx) { return tx.currentIndex !== 0; });
+                _loop_2 = function (i) {
+                    var msg = tails[i].signatureMessageFragment;
+                    var currentTx = tails[i];
+                    for (var j = 0; j < tails[i].lastIndex; j++) {
+                        var nextTx = notTails.find(function (tx) { return tx.hash === currentTx.trunkTransaction; });
+                        if (!nextTx) {
+                            // This is an incomplete transaction chain so move onto
+                            // the next tail
+                            break;
+                        }
+                        msg += nextTx.signatureMessageFragment;
+                        currentTx = nextTx;
+                        // If we now have all the transactions which make up this message
+                        // try and parse the message
+                        if (j === tails[i].lastIndex - 1) {
+                            try {
+                                var parsed = parseMessage(msg, root, sideKey);
+                                return { value: __assign(__assign({}, parsed), { tag: tails[i].tag }) };
+                            }
+                            catch (err) {
+                                throw new Error("Failed while trying to read MAM channel from address " + address + ".\n" + err.message);
+                            }
+                        }
+                    }
+                };
+                for (i = 0; i < tails.length; i++) {
+                    state_1 = _loop_2(i);
+                    if (typeof state_1 === "object")
+                        return [2 /*return*/, state_1.value];
+                }
+                return [2 /*return*/];
+            });
+        });
+    }
 
     exports.channelRoot = channelRoot;
     exports.createChannel = createChannel;
@@ -1290,6 +1387,7 @@
     exports.mamAttach = mamAttach;
     exports.mamFetch = mamFetch;
     exports.mamFetchAll = mamFetchAll;
+    exports.mamFetchCombined = mamFetchCombined;
     exports.parseMessage = parseMessage;
 
     Object.defineProperty(exports, '__esModule', { value: true });

@@ -5,6 +5,7 @@ import { PearlDiverSearchStates } from "./pearlDiverSearchStates";
 
 /**
  * Class to perform Hamming calculation for nonce.
+ * @private
  */
 export class HammingDiver {
     /**

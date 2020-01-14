@@ -8,6 +8,7 @@ const TRITS_PER_TRYTE: number = 3;
  * Perform pascal encoding of the value.
  * @param value The value to encode.
  * @returns The trits for the encoded value.
+ * @private
  */
 export function pascalEncode(value: number): Int8Array {
     if (value === 0) {
@@ -57,6 +58,7 @@ export function pascalEncode(value: number): Int8Array {
  * Decode the pascal encoded trits.
  * @param value The value to decode.
  * @returns The decoded value.
+ * @private
  */
 export function pascalDecode(value: Int8Array): {
     /**
@@ -95,6 +97,7 @@ export function pascalDecode(value: Int8Array): {
  * Get the encoded length of the value.
  * @param value The value.
  * @returns The length.
+ * @private
  */
 function encodedLength(value: number): number {
     const length = roundThird(minTrits(Math.abs(value), 1));
@@ -105,6 +108,7 @@ function encodedLength(value: number): number {
  * Round the number to the third.
  * @param value The value to round.
  * @returns The rounded number.
+ * @private
  */
 export function roundThird(value: number): number {
     const rem = value % RADIX;
@@ -120,6 +124,7 @@ export function roundThird(value: number): number {
  * @param input The input to calculate from.
  * @param basis The basis of the calculation.
  * @returns The number of trits.
+ * @private
  */
 function minTrits(input: number, basis: number): number {
     if (input <= basis) {
@@ -133,6 +138,7 @@ function minTrits(input: number, basis: number): number {
  * Calculate the end for the input.
  * @param input The input to calculate for.
  * @returns The calculated end.
+ * @private
  */
 function end(input: Int8Array): number {
     if (tritsValue(input.slice(0, TRITS_PER_TRYTE)) > 0) {
@@ -147,6 +153,7 @@ function end(input: Int8Array): number {
  * @param input The input value to convert.
  * @param trits The trits.
  * @returns The end conversion.
+ * @private
  */
 function valueToTrits(input: number, trits: Int8Array): number {
     const endWrite = writeTrits(input, trits, 0);
@@ -168,6 +175,7 @@ function valueToTrits(input: number, trits: Int8Array): number {
  * @param trits The trits to write to.
  * @param index The index to write at.
  * @returns The length.
+ * @private
  */
 function writeTrits(input: number, trits: Int8Array, index: number): number {
     switch (input) {

@@ -12,6 +12,7 @@ const MAX_TRIT_VALUE: number = 1;
  * @param seed The seed trits.
  * @param index The index for the subseed.
  * @returns The subseed trits.
+ * @private
  */
 export function subseed(seed: Int8Array, index: number): Int8Array {
     const sponge = new Curl(27);
@@ -41,6 +42,7 @@ export function subseed(seed: Int8Array, index: number): Int8Array {
  * @param subSeed The subseed to get the digest for.
  * @param securityLevel The security level to get the digest.
  * @returns The digest trits.
+ * @private
  */
 export function digestFromSubseed(subSeed: Int8Array, securityLevel: number): Int8Array {
     const curl1 = new Curl(27);
@@ -73,6 +75,7 @@ export function digestFromSubseed(subSeed: Int8Array, securityLevel: number): In
  * Get the address from the digests.
  * @param digests The digests to get the address for.
  * @returns The address trits.
+ * @private
  */
 export function address(digests: Int8Array): Int8Array {
     const sponge = new Curl(27);
@@ -90,6 +93,7 @@ export function address(digests: Int8Array): Int8Array {
  * @param subSeed The subseed to get the private key for.
  * @param securityLevel The security level for the private key.
  * @returns The private key trits.
+ * @private
  */
 export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number): Int8Array {
     const keyLength = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH;
@@ -118,6 +122,7 @@ export function privateKeyFromSubseed(subSeed: Int8Array, securityLevel: number)
  * @param hashTrits The trits to create the signature for.
  * @param key The key to use for signing.
  * @returns The signature trits.
+ * @private
  */
 export function signature(hashTrits: Int8Array, key: Int8Array): Int8Array {
     const signatures: Int8Array = new Int8Array(key.length);
@@ -144,6 +149,7 @@ export function signature(hashTrits: Int8Array, key: Int8Array): Int8Array {
  * Check the security level.
  * @param hash The hash to check.
  * @returns The security level
+ * @private
  */
 export function checksumSecurity(hash: Int8Array): number {
     if (hash.slice(0, Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
@@ -162,6 +168,7 @@ export function checksumSecurity(hash: Int8Array): number {
  * @param hash The hash to get the digest.
  * @param sig The signature.
  * @returns The digest.
+ * @private
  */
 export function digestFromSignature(hash: Int8Array, sig: Int8Array): Int8Array {
     const sponge = new Curl(27);

@@ -5,6 +5,7 @@ import { MerkleNode } from "./merkleNode";
 
 /**
  * Class to represent a merkle tree.
+ * @private
  */
 export class MerkleTree {
     /**

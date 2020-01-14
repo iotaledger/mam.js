@@ -1,5 +1,6 @@
 /**
  * Class to perform Hamming calculation for nonce.
+ * @private
  */
 export declare class HammingDiver {
     /**

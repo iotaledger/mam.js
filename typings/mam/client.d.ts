@@ -35,3 +35,24 @@ export declare function mamFetch(api: API, root: string, mode: MamMode, sideKey?
  * @returns The array of retrieved messages.
  */
 export declare function mamFetchAll(api: API, root: string, mode: MamMode, sideKey?: string, limit?: number): Promise<IMamFetchedMessage[]>;
+/**
+ * Fetch the next message from a list of channels.
+ * @param api The api to use for fetching.
+ * @param channels The list of channel details to check for new messages.
+ * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
+ * throws exception if transactions found on address are invalid.
+ */
+export declare function mamFetchCombined(api: API, channels: {
+    /**
+     * The root within the mam channel to fetch the message.
+     */
+    root: string;
+    /**
+     * The mode to use for fetching.
+     */
+    mode: MamMode;
+    /**
+     * The sideKey if mode is restricted.
+     */
+    sideKey?: string;
+}[]): Promise<(IMamFetchedMessage | undefined)[]>;
