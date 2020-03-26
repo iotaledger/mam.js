@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "main": "index.js",
     "dependencies": {
-        "@iota/converter": "^1.0.0-beta.21",
-        "@iota/core": "^1.0.0-beta.21",
+        "@iota/converter": "^1.0.0-beta.23",
+        "@iota/core": "^1.0.0-beta.29",
         "@iota/mam.js": "file:../.."
     }
 }
