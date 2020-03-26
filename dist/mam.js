@@ -4,7 +4,7 @@
     (global = global || self, factory(global.mam = {}, global.converter, global.validators, global.bigInt));
 }(this, (function (exports, converter, validators, bigInt) { 'use strict';
 
-    bigInt = bigInt && bigInt.hasOwnProperty('default') ? bigInt['default'] : bigInt;
+    bigInt = bigInt && Object.prototype.hasOwnProperty.call(bigInt, 'default') ? bigInt['default'] : bigInt;
 
     /**
      * Class to implement Curl sponge.
