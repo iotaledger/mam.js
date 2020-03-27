@@ -25,3 +25,9 @@ Demonstrates a background listener which monitors the channel from the simple ex
 Reads the `channelState.json` from the simple example, so you will need to run that first.
 
 See [./listen/index.js](./listen/index.js) for more details.
+
+## API
+
+Demonstrates how to wrap the mam lib behind and API.
+
+See [./api/index.js](./api/index.js) for more details.

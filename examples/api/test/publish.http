@@ -1,0 +1,47 @@
+### DevNet Public
+POST http://localhost:4000/v0/publish HTTP/1.1
+content-type: application/json
+
+{
+    "provider": "devnet",
+    "mode": "public",
+    "seed": "MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MCCC",
+    "dataType": "trytes",
+    "data": "HELLO",
+    "tag": "FOO"
+}
+
+### MainNet Private
+POST http://localhost:4000/v0/publish HTTP/1.1
+content-type: application/json
+
+{
+    "provider": "mainnet",
+    "mode": "private",
+    "seed": "MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MCCD",
+    "dataType": "text",
+    "data": "hello",
+    "tag": "FOO"
+}
+
+
+### Provider Restricted
+POST http://localhost:4000/v0/publish HTTP/1.1
+content-type: application/json
+
+{
+    "provider": "https://nodes.iota.cafe:443",
+    "depth": 3,
+    "mwm": 14,
+    "mode": "restricted",
+    "key": "ABCDEFG",
+    "seed": "MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MCCE",
+    "index": 1,
+    "dataType": "json",
+    "data": {
+        "a": "hello",
+        "b": 2
+    },
+    "tag": "FOO"
+}
+
