@@ -4,7 +4,6 @@ import { IRoute } from "./models/app/IRoute";
 import { AppHelper } from "./utils/appHelper";
 
 const routes: IRoute[] = [
-    { path: "/init", method: "get", func: "init" },
     { path: "/v0/publish", method: "post", folder: "v0", func: "publish" },
     { path: "/v0/fetch", method: "get", folder: "v0", func: "fetch" }
 ];
