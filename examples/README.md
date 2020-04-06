@@ -28,6 +28,6 @@ See [./listen/index.js](./listen/index.js) for more details.
 
 ## API
 
-Demonstrates how to wrap the mam lib behind and API.
+Demonstrates how to wrap the mam lib behind an API.
 
 See [./api/index.js](./api/index.js) for more details.
