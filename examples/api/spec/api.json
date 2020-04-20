@@ -3,7 +3,7 @@
     "info": {
         "title": "MAM API",
         "version": "1.0.0",
-        "description": "API to wrap MAM client in REST calls. This API is effectively a wrapper around the [https://github.com/iotaledger/mam.client.js](https://github.com/iotaledger/mam.client.js) library."
+        "description": "API to wrap MAM client in REST calls. This API is effectively a wrapper around the [https://github.com/iotaledger/mam.js](https://github.com/iotaledger/mam.js) library."
     },
     "tags": [
         {
