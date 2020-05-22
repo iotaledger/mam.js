@@ -1,9 +1,20 @@
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./mam/channel"));
-__export(require("./mam/client"));
-__export(require("./mam/parser"));
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSxtQ0FBOEI7QUFDOUIsa0NBQTZCO0FBQzdCLGtDQUE2QiJ9
+__exportStar(require("./mam/channel"), exports);
+__exportStar(require("./mam/client"), exports);
+__exportStar(require("./mam/parser"), exports);
+__exportStar(require("./models/IMamChannelState"), exports);
+__exportStar(require("./models/IMamFetchedMessage"), exports);
+__exportStar(require("./models/IMamMessage"), exports);
+__exportStar(require("./models/mamMode"), exports);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBQUEsZ0RBQThCO0FBQzlCLCtDQUE2QjtBQUM3QiwrQ0FBNkI7QUFDN0IsNERBQTBDO0FBQzFDLDhEQUE0QztBQUM1Qyx1REFBcUM7QUFDckMsbURBQWlDIn0=

@@ -32,6 +32,8 @@ or direct from the repo
 npm install iotaledger/mam.js
 ```
 
+If you want to use this module in a browser `<script>` tag see the example Browser [./examples/browser/index.html](./examples/browser/index.html)
+
 ## Example Usage
 
 ```js

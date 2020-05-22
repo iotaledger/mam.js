@@ -1,18 +1,25 @@
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
-import { terser } from "rollup-plugin-terser";
+import replace from 'rollup-plugin-replace';
+import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript';
 
 const plugins = [
     commonjs({
         include: 'node_modules/**',
         namedExports: {
+            "@iota/converter": ['asciiToTrytes', 'trits', 'trytes', 'trytesToAscii', 'value']
         }
     }),
-    resolve(),
+    resolve({
+        browser: process.env.BROWSER
+    }),
     typescript({
-        target: "es5",
-        module: "es2015"
+        target: 'es5',
+        module: 'es2015'
+    }),
+    replace({
+        'process.env.NODE_ENV': JSON.stringify('production')
     })
 ];
 
@@ -21,13 +28,15 @@ if (process.env.MINIFY) {
 }
 
 export default {
-    input: './src/index.ts',
+    input: process.env.BROWSER ? './src/browser.ts' : './src/index.ts',
     output: {
-        file: `dist/mam${process.env.MINIFY ? '.min' : ''}.js`,
+        file: `dist/mam${process.env.BROWSER ? '.browser' : ''}${process.env.MINIFY ? '.min' : ''}.js`,
         format: 'umd',
         name: 'mam',
         compact: process.env.MINIFY
     },
     plugins,
-    external: ["@iota/converter", "@iota/core", "@iota/validators", "big-integer"]
+    external: process.env.BROWSER
+        ? ['big-integer']
+        : ['@iota/converter', '@iota/core', '@iota/validators', 'big-integer']
 }

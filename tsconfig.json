@@ -10,6 +10,9 @@
     },
     "include": [
       "src"
+    ],
+    "exclude": [
+      "src/browser.ts"
     ]
   }
   

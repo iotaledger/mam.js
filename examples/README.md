@@ -26,6 +26,16 @@ Reads the `channelState.json` from the simple example, so you will need to run t
 
 See [./listen/index.js](./listen/index.js) for more details.
 
+## Browser
+
+This example makes use of the variant of the library which includes the iota lib dependencies `mam.browser.js`, you still need to include the `big-integer` package externally from a CDN.
+
+Demonstrates a simple publish and fetch of ascii text data using MAM v0, the channel state is stored in `window.localStorage` between each execution.
+
+A random seed will be generated, which is then stored as part of the state file, so subsequent executions will add to the same channel.
+
+See [./browser/index.html](./browser/index.html) for more details.
+
 ## API
 
 Demonstrates how to wrap the mam lib behind an API.

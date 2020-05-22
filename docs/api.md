@@ -1,3 +1,10 @@
+## Classes
+
+<dl>
+<dt><a href="#Curl">Curl</a></dt>
+<dd></dd>
+</dl>
+
 ## Functions
 
 <dl>
@@ -30,6 +37,79 @@ same amount of messages as your limit you should probably read again.</p>
 </dd>
 </dl>
 
+<a name="Curl"></a>
+
+## Curl
+**Kind**: global class  
+
+* [Curl](#Curl)
+    * [new Curl(rounds)](#new_Curl_new)
+    * [.reset()](#Curl+reset)
+    * [.rate(len)](#Curl+rate) ⇒
+    * [.absorb(trits, offset, length)](#Curl+absorb)
+    * [.squeeze(trits, offset, length)](#Curl+squeeze)
+    * [.transform()](#Curl+transform)
+
+<a name="new_Curl_new"></a>
+
+### new Curl(rounds)
+Create a new instance of Curl.
+
+
+| Param | Description |
+| --- | --- |
+| rounds | The number of rounds to perform. |
+
+<a name="Curl+reset"></a>
+
+### curl.reset()
+Resets the state
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+<a name="Curl+rate"></a>
+
+### curl.rate(len) ⇒
+Get the state of the sponge.
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+**Returns**: The state.  
+
+| Param | Description |
+| --- | --- |
+| len | The length of the state to get. |
+
+<a name="Curl+absorb"></a>
+
+### curl.absorb(trits, offset, length)
+Absorbs trits given an offset and length
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+
+| Param | Description |
+| --- | --- |
+| trits | The trits to absorb. |
+| offset | The offset to start abororbing from the array. |
+| length | The length of trits to absorb. |
+
+<a name="Curl+squeeze"></a>
+
+### curl.squeeze(trits, offset, length)
+Squeezes trits given an offset and length
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
+
+| Param | Description |
+| --- | --- |
+| trits | The trits to squeeze. |
+| offset | The offset to start squeezing from the array. |
+| length | The length of trits to squeeze. |
+
+<a name="Curl+transform"></a>
+
+### curl.transform()
+Sponge transform function
+
+**Kind**: instance method of [<code>Curl</code>](#Curl)  
 <a name="createChannel"></a>
 
 ## createChannel(seed, security, mode, sideKey) ⇒
