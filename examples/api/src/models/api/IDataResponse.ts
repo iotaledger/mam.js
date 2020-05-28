@@ -1,8 +1,16 @@
 export interface IDataResponse {
     /**
+     * Success
+     */
+    success: boolean;
+    /**
      * The content type of the data response.
      */
-    contentType: string;
+    contentType?: string;
+    /**
+     * Show the content inline.
+     */
+    inline?: boolean;
     /**
      * The buffer of data to return.
      */

@@ -1,23 +1,45 @@
-import { LoadBalancerSettings, RandomWalkStrategy } from "@iota/client-load-balancer";
-import { ServiceFactory } from "./factories/serviceFactory";
-import { IRoute } from "./models/app/IRoute";
-import { AppHelper } from "./utils/appHelper";
+import bodyParser from "body-parser";
+import express, { Application } from "express";
+import { IConfiguration } from "./models/configuration/IConfiguration";
+import { routes } from "./routes";
+import { cors, executeRoute } from "./utils/apiHelper";
 
-const routes: IRoute[] = [
-    { path: "/v0/publish", method: "post", folder: "v0", func: "publish" },
-    { path: "/v0/fetch", method: "get", folder: "v0", func: "fetch" }
-];
+// tslint:disable:no-var-requires no-require-imports non-literal-require
+const configId = process.env.CONFIG_ID || "local";
+const config: IConfiguration = require(`./data/config.${configId}.json`);
 
-AppHelper.build(routes, async (app, config, port) => {
-    const mainNetLoadBalancerSettings: LoadBalancerSettings = {
-        nodeWalkStrategy: new RandomWalkStrategy(config.mainNetNodes)
-    };
+const app: Application = express();
 
-    ServiceFactory.register("mainnet-load-balancer-settings", () => mainNetLoadBalancerSettings);
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 
-    const devNetLoadBalancerSettings: LoadBalancerSettings = {
-        nodeWalkStrategy: new RandomWalkStrategy(config.devNetNodes)
-    };
+app.use((req, res, next) => {
+    cors(
+        req,
+        res,
+        config.allowedDomains ? config.allowedDomains.join(",") : undefined,
+        "GET, POST, OPTIONS, PUT, PATCH, DELETE",
+        "Content-Type, Authorization");
+    next();
+});
 
-    ServiceFactory.register("devnet-load-balancer-settings", () => devNetLoadBalancerSettings);
+for (const route of routes) {
+    app[route.method](route.path, async (req, res) => {
+        await executeRoute(
+            req,
+            res,
+            config,
+            route,
+            req.params);
+    });
+}
+
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
+app.listen(port, err => {
+    if (err) {
+        throw err;
+    }
+
+    console.log(`Started API Server on port ${port}`);
+    console.log(`Running Config '${configId}'`);
 });

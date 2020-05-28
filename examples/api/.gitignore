@@ -1,4 +1,5 @@
 .history
+.vercel
 node_modules
 
 /src/data/config.staging.json
