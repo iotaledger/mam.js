@@ -1,9 +1,9 @@
 {
     "mainNetNodes": [
-        MAIN_NET_NODES
+        MAIN-NET-NODES
     ],
     "devNetNodes": [
-        DEV_NET_NODES
+        DEV-NET-NODES
     ],
     "allowedDomains": [
         "ALLOWED-DOMAIN"
