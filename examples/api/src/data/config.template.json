@@ -1,5 +1,11 @@
 {
+    "mainNetNodes": [
+        MAIN_NET_NODES
+    ],
+    "devNetNodes": [
+        DEV_NET_NODES
+    ],
     "allowedDomains": [
-        "https://ALLOW-DOMAIN.COM"
+        "ALLOWED-DOMAIN"
     ]
 }
