@@ -23,6 +23,9 @@
 <dt><a href="#mamFetch">mamFetch(api, root, mode, sideKey)</a> ⇒</dt>
 <dd><p>Fetch a mam message from a channel.</p>
 </dd>
+<dt><a href="#decodeAddress">decodeAddress(root, mode)</a> ⇒</dt>
+<dd><p>Decodes the root to its associated address.</p>
+</dd>
 <dt><a href="#mamFetchAll">mamFetchAll(api, root, mode, sideKey, limit)</a> ⇒</dt>
 <dd><p>Fetch all the mam message from a channel.
 If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
@@ -31,6 +34,9 @@ same amount of messages as your limit you should probably read again.</p>
 </dd>
 <dt><a href="#mamFetchCombined">mamFetchCombined(api, channels)</a> ⇒</dt>
 <dd><p>Fetch the next message from a list of channels.</p>
+</dd>
+<dt><a href="#decodeTransactions">decodeTransactions(txObjects, address, root, sideKey)</a> ⇒</dt>
+<dd><p>Decode transactions from an address to try and find a MAM message.</p>
 </dd>
 <dt><a href="#parseMessage">parseMessage(payload, root, channelKey)</a> ⇒</dt>
 <dd><p>Parse the trytes back to the original message.</p>
@@ -181,6 +187,19 @@ Fetch a mam message from a channel.
 | mode | The mode to use for fetching. |
 | sideKey | The sideKey if mode is restricted. |
 
+<a name="decodeAddress"></a>
+
+## decodeAddress(root, mode) ⇒
+Decodes the root to its associated address.
+
+**Kind**: global function  
+**Returns**: The decoded address.  
+
+| Param | Description |
+| --- | --- |
+| root | The root to device. |
+| mode | The mode for the channel. |
+
 <a name="mamFetchAll"></a>
 
 ## mamFetchAll(api, root, mode, sideKey, limit) ⇒
@@ -209,6 +228,21 @@ Fetch the next message from a list of channels.
 | --- | --- |
 | api | The api to use for fetching. |
 | channels | The list of channel details to check for new messages. |
+
+<a name="decodeTransactions"></a>
+
+## decodeTransactions(txObjects, address, root, sideKey) ⇒
+Decode transactions from an address to try and find a MAM message.
+
+**Kind**: global function  
+**Returns**: The decoded message and the nextRoot if successful, undefined if no messages found,throws exception if transactions found on address are invalid.  
+
+| Param | Description |
+| --- | --- |
+| txObjects | The objects returned from the fetch. |
+| address | The address that the data was fetched from. |
+| root | The root within the mam channel to fetch the message. |
+| sideKey | The sideKey if mode is restricted. |
 
 <a name="parseMessage"></a>
 
