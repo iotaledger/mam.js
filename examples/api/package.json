@@ -1,7 +1,7 @@
 {
     "name": "mam-api",
     "description": "API for MAM v0",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "authors": [
         "Martyn Janes <martyn.janes@iota.org>"
     ],
