@@ -51,14 +51,23 @@ export async function mamFetch(
     sideKey?: string): Promise<IMamFetchedMessage | undefined> {
     validateModeKey(mode, sideKey);
 
-    const messageAddress =
-        mode === "public"
-            ? root
-            : trytes(maskHash(trits(root)));
+    const messageAddress = decodeAddress(root, mode);
 
     const txObjects = await api.findTransactionObjects({ addresses: [messageAddress] });
 
     return decodeTransactions(txObjects, messageAddress, root, sideKey);
+}
+
+/**
+ * Decodes the root to its associated address.
+ * @param root The root to device.
+ * @param mode The mode for the channel.
+ * @returns The decoded address.
+ */
+export function decodeAddress(root: string, mode: MamMode): string {
+    return mode === "public"
+        ? root
+        : trytes(maskHash(trits(root)));
 }
 
 /**
@@ -152,15 +161,14 @@ export async function mamFetchCombined(
  * @param sideKey The sideKey if mode is restricted.
  * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
- * @private
  */
-async function decodeTransactions(
+export async function decodeTransactions(
     txObjects: Readonly<Transaction[]>,
     address: string,
     root: string,
     sideKey?: string):
     Promise<IMamFetchedMessage | undefined> {
-    if (txObjects.length === 0) {
+    if (!txObjects || txObjects.length === 0) {
         return;
     }
 

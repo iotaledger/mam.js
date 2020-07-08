@@ -24572,9 +24572,7 @@
 	            switch (_a.label) {
 	                case 0:
 	                    validateModeKey(mode, sideKey);
-	                    messageAddress = mode === "public"
-	                        ? root
-	                        : src_3(maskHash(src_2(root)));
+	                    messageAddress = decodeAddress(root, mode);
 	                    return [4 /*yield*/, api.findTransactionObjects({ addresses: [messageAddress] })];
 	                case 1:
 	                    txObjects = _a.sent();
@@ -24582,6 +24580,17 @@
 	            }
 	        });
 	    });
+	}
+	/**
+	 * Decodes the root to its associated address.
+	 * @param root The root to device.
+	 * @param mode The mode for the channel.
+	 * @returns The decoded address.
+	 */
+	function decodeAddress(root, mode) {
+	    return mode === "public"
+	        ? root
+	        : src_3(maskHash(src_2(root)));
 	}
 	/**
 	 * Fetch all the mam message from a channel.
@@ -24684,13 +24693,12 @@
 	 * @param sideKey The sideKey if mode is restricted.
 	 * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
 	 * throws exception if transactions found on address are invalid.
-	 * @private
 	 */
 	function decodeTransactions(txObjects, address, root, sideKey) {
 	    return __awaiter(this, void 0, Promise, function () {
 	        var tails, notTails, _loop_2, i, state_1;
 	        return __generator(this, function (_a) {
-	            if (txObjects.length === 0) {
+	            if (!txObjects || txObjects.length === 0) {
 	                return [2 /*return*/];
 	            }
 	            tails = txObjects.filter(function (tx) { return tx.currentIndex === 0; });
@@ -24735,6 +24743,8 @@
 	exports.composeAPI = src_39$1;
 	exports.createChannel = createChannel;
 	exports.createMessage = createMessage;
+	exports.decodeAddress = decodeAddress;
+	exports.decodeTransactions = decodeTransactions;
 	exports.mamAttach = mamAttach;
 	exports.mamFetch = mamFetch;
 	exports.mamFetchAll = mamFetchAll;
