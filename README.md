@@ -74,7 +74,15 @@ const fetched = await mamFetch(api, mamMessage.root, mode, sideKey)
 const channelState = createChannel(seed, 2, mode, sideKey);
 const initialRoot = channelRoot(channelState);
 const chunkSize = 4;
-const chunk = await mamFetchAll(api, channelState.initialRoot, mode, sideKey, chunkSize);
+const chunk = await mamFetchAll(api, initialRoot, mode, sideKey, chunkSize);
+
+// If you want to fetch the next message from a list of channels
+const channels = [
+  { root: initialRoot1, mode: "restricted", sideKey: "MYKEY" },
+  { root: initialRoot2, mode: "public" },
+];
+// One message for each channel will be retrieved
+const fetched = await mamFetchCombined(api, channels);
 ```
 
 ## API Reference
