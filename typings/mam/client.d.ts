@@ -44,8 +44,11 @@ export declare function decodeAddress(root: string, mode: MamMode): string;
 export declare function mamFetchAll(api: API, root: string, mode: MamMode, sideKey?: string, limit?: number): Promise<IMamFetchedMessage[]>;
 /**
  * Fetch the next message from a list of channels.
- * @param api The api to use for fetching.
- * @param channels The list of channel details to check for new messages.
+ * @param {API} api - The api to use for fetching.
+ * @param {Object[]} channels - The list of channel details to check for new messages.
+ * @param {string} channels[].root - The root within the mam channel to fetch the message.
+ * @param {MamMode} channels[].mode - The mode to use for fetching.
+ * @param {string=} channels[].sideKey - The sideKey if mode is restricted.
  * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
  */

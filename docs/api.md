@@ -144,10 +144,13 @@ Fetch the next message from a list of channels.
 **Kind**: global function  
 **Returns**: The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,throws exception if transactions found on address are invalid.  
 
-| Param | Description |
-| --- | --- |
-| api | The api to use for fetching. |
-| channels | The list of channel details to check for new messages. |
+| Param | Type | Description |
+| --- | --- | --- |
+| api | <code>API</code> | The api to use for fetching. |
+| channels | <code>Array.&lt;Object&gt;</code> | The list of channel details to check for new messages. |
+| channels[].root | <code>string</code> | The root within the mam channel to fetch the message. |
+| channels[].mode | <code>MamMode</code> | The mode to use for fetching. |
+| [channels[].sideKey] | <code>string</code> | The sideKey if mode is restricted. |
 
 <a name="decodeTransactions"></a>
 
