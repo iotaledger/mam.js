@@ -3,6 +3,10 @@
  */
 export interface IMamFetchedMessage {
     /**
+     * The root the message was fetched from.
+     */
+    root: string;
+    /**
      * The message content fetched.
      */
     message: string;

@@ -60,7 +60,9 @@ async function run(asciiMessage) {
     console.log('Fetching from tangle, please wait...');
     const fetched = await mamFetch(api, mamMessage.root, mode, sideKey)
     if (fetched) {
+        console.log('Fetched Root', fetched.root);
         console.log('Fetched', trytesToAscii(fetched.message));
+        console.log('Fetched Next Root', fetched.nextRoot);
     } else {
         console.log('Nothing was fetched from the MAM channel');
     }

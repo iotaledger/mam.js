@@ -1374,7 +1374,7 @@
                         if (j === tails[i].lastIndex - 1) {
                             try {
                                 var parsed = parseMessage(msg, root, sideKey);
-                                return { value: __assign(__assign({}, parsed), { tag: tails[i].tag }) };
+                                return { value: __assign(__assign({ root: root }, parsed), { tag: tails[i].tag }) };
                             }
                             catch (err) {
                                 throw new Error("Failed while trying to read MAM channel from address " + address + ".\n" + err.message);

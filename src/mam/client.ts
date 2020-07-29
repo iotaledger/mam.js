@@ -199,6 +199,7 @@ export async function decodeTransactions(
                 try {
                     const parsed = parseMessage(msg, root, sideKey);
                     return {
+                        root,
                         ...parsed,
                         tag: tails[i].tag
                     };
