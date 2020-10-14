@@ -132,7 +132,7 @@ export function signature(hashTrits: Int8Array, key: Int8Array): Int8Array {
         let buffer = key.subarray(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
 
         for (let k = 0;
-            k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + hashTrits[i * 3 + 1] * 3 + hashTrits[i * 3 + 2] * 9);
+            k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + (hashTrits[(i * 3) + 1] * 3) + (hashTrits[(i * 3) + 2] * 9));
             k++) {
             sponge.reset();
             sponge.absorb(buffer, 0, buffer.length);
@@ -177,7 +177,7 @@ export function digestFromSignature(hash: Int8Array, sig: Int8Array): Int8Array 
     for (let i = 0; i < (sig.length / Curl.HASH_LENGTH); i++) {
         let innerBuffer = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
 
-        for (let j = 0; j < (hash[i * 3] + hash[i * 3 + 1] * 3 + hash[i * 3 + 2] * 9) - MIN_TRYTE_VALUE; j++) {
+        for (let j = 0; j < (hash[i * 3] + (hash[(i * 3) + 1] * 3) + (hash[(i * 3) + 2] * 9)) - MIN_TRYTE_VALUE; j++) {
             sponge.reset();
             sponge.absorb(innerBuffer, 0, innerBuffer.length);
             innerBuffer = sponge.rate();

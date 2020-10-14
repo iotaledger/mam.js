@@ -13,16 +13,16 @@ export function validateModeKey(mode: MamMode, sideKey?: string): void {
     }
     if (mode === "restricted") {
         if (!sideKey) {
-            throw new Error(`You must provide a sideKey for restricted mode`);
+            throw new Error("You must provide a sideKey for restricted mode");
         }
         if (!isTrytes(sideKey)) {
-            throw new Error(`The sideKey must be in trytes`);
+            throw new Error("The sideKey must be in trytes");
         }
         if (sideKey.length > 81) {
-            throw new Error(`The sideKey must be maximum length 81 trytes`);
+            throw new Error("The sideKey must be maximum length 81 trytes");
         }
     }
     if (mode !== "restricted" && sideKey) {
-        throw new Error(`sideKey is only used in restricted mode`);
+        throw new Error("sideKey is only used in restricted mode");
     }
 }

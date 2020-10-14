@@ -24,7 +24,7 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
 } {
     const payloadTrits = trits(payload);
     const rootTrits = trits(root);
-    const channelKeyTrits = trits(channelKey || "9".repeat(81));
+    const channelKeyTrits = trits(channelKey ?? "9".repeat(81));
 
     // Get data positions in payload
     const indexData = pascalDecode(payloadTrits);
@@ -44,7 +44,7 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
     // Decrypt the metadata
     const nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + Curl.HASH_LENGTH), sponge);
     const message = unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
-    const nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + Curl.HASH_LENGTH / 3), sponge);
+    const nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + (Curl.HASH_LENGTH / 3)), sponge);
     const hmac = sponge.rate();
 
     // Check the security level is valid

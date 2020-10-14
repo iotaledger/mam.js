@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 import { value as tritsValue } from "@iota/converter";
 
 const ZERO = new Int8Array([1, 0, 0, -1]);
@@ -87,7 +88,7 @@ export function pascalDecode(value: Int8Array): {
             ? -tritsValue(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE))
             : tritsValue(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE));
 
-        result = result + (Math.pow(27, i) * tritsIntValue);
+        result += (Math.pow(27, i) * tritsIntValue);
     }
 
     return { value: result, end: inputEnd };
@@ -182,7 +183,9 @@ function writeTrits(input: number, trits: Int8Array, index: number): number {
         case 0:
             return 0;
         default:
+            // eslint-disable-next-line no-case-declarations
             let abs = Math.floor(input / RADIX);
+            // eslint-disable-next-line no-case-declarations
             let r = input % RADIX;
             if (r > 1) {
                 abs += 1;

@@ -112,9 +112,9 @@ export async function mamFetchAll(
  * Fetch the next message from a list of channels.
  * @param {API} api - The api to use for fetching.
  * @param {Object[]} channels - The list of channel details to check for new messages.
- * @param {string} channels[].root - The root within the mam channel to fetch the message.
- * @param {MamMode} channels[].mode - The mode to use for fetching.
- * @param {string=} channels[].sideKey - The sideKey if mode is restricted.
+ * @param {string} channels.root - The root within the mam channel to fetch the message.
+ * @param {MamMode} channels.mode - The mode to use for fetching.
+ * @param {string} channels.sideKey - The sideKey if mode is restricted.
  * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
  */
@@ -124,21 +124,20 @@ export async function mamFetchCombined(
         /**
          * The root within the mam channel to fetch the message.
          */
-        root: string,
+        root: string;
         /**
          * The mode to use for fetching.
          */
-        mode: MamMode,
+        mode: MamMode;
         /**
          * The sideKey if mode is restricted.
          */
-        sideKey?: string
+        sideKey?: string;
     }[]): Promise<(IMamFetchedMessage | undefined)[]> {
-
     const addresses: string[] = channels.map(c =>
-        c.mode === "public"
+        (c.mode === "public"
             ? c.root
-            : trytes(maskHash(trits(c.root))));
+            : trytes(maskHash(trits(c.root)))));
 
     const txObjects = await api.findTransactionObjects({ addresses });
     const messages: (IMamFetchedMessage | undefined)[] = [];

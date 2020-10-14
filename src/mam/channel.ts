@@ -22,7 +22,7 @@ import { pascalEncode } from "../utils/pascal";
  */
 export function createChannel(seed: string, security: number, mode: MamMode, sideKey?: string): IMamChannelState {
     if (!isTrytesOfExactLength(seed, 81)) {
-        throw new Error(`The seed must be 81 trytes long`);
+        throw new Error("The seed must be 81 trytes long");
     }
     if (security < 1 || security > 3) {
         throw new Error(`Security must be between 1 and 3, it is ${security}`);
@@ -32,7 +32,7 @@ export function createChannel(seed: string, security: number, mode: MamMode, sid
     return {
         seed,
         mode,
-        sideKey: mode === "restricted" ? (sideKey || "").padEnd(81, "9") : undefined,
+        sideKey: mode === "restricted" ? (sideKey ?? "").padEnd(81, "9") : undefined,
         security,
         start: 0,
         count: 1,
@@ -77,7 +77,7 @@ export function channelRoot(channelState: IMamChannelState): string {
  */
 export function createMessage(channelState: IMamChannelState, message: string): IMamMessage {
     if (!isTrytes(message)) {
-        throw new Error(`The message must be in trytes`);
+        throw new Error("The message must be in trytes");
     }
     const tree = new MerkleTree(
         channelState.seed,
@@ -100,7 +100,7 @@ export function createMessage(channelState: IMamChannelState, message: string): 
 
     const sponge = new Curl(27);
 
-    const sideKeyTrits = trits(channelState.sideKey || "9".repeat(81));
+    const sideKeyTrits = trits(channelState.sideKey ?? "9".repeat(81));
     sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
     sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
 
@@ -136,8 +136,8 @@ export function createMessage(channelState: IMamChannelState, message: string): 
         payload = concatenate([payload, new Int8Array(3 - nextThird).fill(0)]);
     }
 
-    const messageAddress = channelState.mode === "public" ?
-        tree.root.addressTrits : maskHash(tree.root.addressTrits);
+    const messageAddress = channelState.mode === "public"
+        ? tree.root.addressTrits : maskHash(tree.root.addressTrits);
 
     const maskedAuthenticatedMessage: IMamMessage = {
         payload: trytes(payload),

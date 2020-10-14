@@ -110,6 +110,7 @@ export class Curl {
 
             for (let i = 0; i < Curl.STATE_LENGTH; i++) {
                 this._state[i] =
+                    // eslint-disable-next-line no-bitwise
                     Curl.TRUTH_TABLE[stateCopy[index] + (stateCopy[(index += index < 365 ? 364 : -365)] << 2) + 5];
             }
         }

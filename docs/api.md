@@ -148,9 +148,9 @@ Fetch the next message from a list of channels.
 | --- | --- | --- |
 | api | <code>API</code> | The api to use for fetching. |
 | channels | <code>Array.&lt;Object&gt;</code> | The list of channel details to check for new messages. |
-| channels[].root | <code>string</code> | The root within the mam channel to fetch the message. |
-| channels[].mode | <code>MamMode</code> | The mode to use for fetching. |
-| [channels[].sideKey] | <code>string</code> | The sideKey if mode is restricted. |
+| channels.root | <code>string</code> | The root within the mam channel to fetch the message. |
+| channels.mode | <code>MamMode</code> | The mode to use for fetching. |
+| channels.sideKey | <code>string</code> | The sideKey if mode is restricted. |
 
 <a name="decodeTransactions"></a>
 

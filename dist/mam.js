@@ -1,10 +1,12 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@iota/converter'), require('@iota/validators'), require('big-integer')) :
     typeof define === 'function' && define.amd ? define(['exports', '@iota/converter', '@iota/validators', 'big-integer'], factory) :
-    (global = global || self, factory(global.mam = {}, global.converter, global.validators, global.bigInt));
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.mam = {}, global.converter, global.validators, global.bigInt));
 }(this, (function (exports, converter, validators, bigInt) { 'use strict';
 
-    bigInt = bigInt && Object.prototype.hasOwnProperty.call(bigInt, 'default') ? bigInt['default'] : bigInt;
+    function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+    var bigInt__default = /*#__PURE__*/_interopDefaultLegacy(bigInt);
 
     /**
      * Class to implement Curl sponge.
@@ -78,6 +80,7 @@
                 stateCopy = this._state.slice();
                 for (var i = 0; i < Curl.STATE_LENGTH; i++) {
                     this._state[i] =
+                        // eslint-disable-next-line no-bitwise
                         Curl.TRUTH_TABLE[stateCopy[index] + (stateCopy[(index += index < 365 ? 364 : -365)] << 2) + 5];
                 }
             }
@@ -206,7 +209,7 @@
         var sponge = new Curl(27);
         for (var i = 0; i < key.length / Curl.HASH_LENGTH; i++) {
             var buffer = key.subarray(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
-            for (var k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + hashTrits[i * 3 + 1] * 3 + hashTrits[i * 3 + 2] * 9); k++) {
+            for (var k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + (hashTrits[(i * 3) + 1] * 3) + (hashTrits[(i * 3) + 2] * 9)); k++) {
                 sponge.reset();
                 sponge.absorb(buffer, 0, buffer.length);
                 buffer = sponge.rate();
@@ -242,7 +245,7 @@
         var buffer = new Int8Array(sig.length);
         for (var i = 0; i < (sig.length / Curl.HASH_LENGTH); i++) {
             var innerBuffer = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
-            for (var j = 0; j < (hash[i * 3] + hash[i * 3 + 1] * 3 + hash[i * 3 + 2] * 9) - MIN_TRYTE_VALUE; j++) {
+            for (var j = 0; j < (hash[i * 3] + (hash[(i * 3) + 1] * 3) + (hash[(i * 3) + 2] * 9)) - MIN_TRYTE_VALUE; j++) {
                 sponge.reset();
                 sponge.absorb(innerBuffer, 0, innerBuffer.length);
                 innerBuffer = sponge.rate();
@@ -329,6 +332,7 @@
             for (var c = 0; c < numChunks; c++) {
                 var chunk = siblings.slice(c * Curl.HASH_LENGTH, (c + 1) * Curl.HASH_LENGTH);
                 sponge.reset();
+                // eslint-disable-next-line no-bitwise
                 if ((i & index) === 0) {
                     sponge.absorb(rate, 0, rate.length);
                     sponge.absorb(chunk, 0, chunk.length);
@@ -337,6 +341,7 @@
                     sponge.absorb(chunk, 0, chunk.length);
                     sponge.absorb(rate, 0, rate.length);
                 }
+                // eslint-disable-next-line no-bitwise
                 i <<= 1;
                 rate = sponge.rate();
             }
@@ -348,10 +353,11 @@
          * @returns The key and leaves for the sub tree.
          */
         MerkleTree.prototype.getSubtree = function (index) {
+            var _a;
             if (this.root.size === 1) {
                 return {
-                    key: this.root.left && this.root.left.privateKeyTrits
-                        ? this.root.left.privateKeyTrits : new Int8Array(), leaves: []
+                    key: ((_a = this.root.left) === null || _a === void 0 ? void 0 : _a.privateKeyTrits) ? this.root.left.privateKeyTrits : new Int8Array(),
+                    leaves: []
                 };
             }
             var leaves = [];
@@ -378,7 +384,7 @@
             }
             leaves.reverse();
             return {
-                key: privateKey || new Int8Array(),
+                key: privateKey !== null && privateKey !== void 0 ? privateKey : new Int8Array(),
                 leaves: leaves
             };
         };
@@ -413,6 +419,7 @@
         return MerkleTree;
     }());
 
+    /* eslint-disable no-bitwise */
     var ZERO = new Int8Array([1, 0, 0, -1]);
     var RADIX = 3;
     var TRITS_PER_TRYTE = 3;
@@ -478,7 +485,7 @@
             var tritsIntValue = ((encoder >> i) & 1) !== 0
                 ? -converter.value(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE))
                 : converter.value(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE));
-            result = result + (Math.pow(27, i) * tritsIntValue);
+            result += (Math.pow(27, i) * tritsIntValue);
         }
         return { value: result, end: inputEnd };
     }
@@ -560,7 +567,9 @@
             case 0:
                 return 0;
             default:
+                // eslint-disable-next-line no-case-declarations
                 var abs = Math.floor(input / RADIX);
+                // eslint-disable-next-line no-case-declarations
                 var r = input % RADIX;
                 if (r > 1) {
                     abs += 1;
@@ -592,8 +601,8 @@
             var size = Math.min(length, Curl.HASH_LENGTH) - offset;
             var index = 0;
             while (index === 0) {
-                var incrementResult = this.increment(state, offset + size * 2 / 3, offset + size);
-                size = Math.min(roundThird(offset + size * 2 / 3 + incrementResult), Curl.HASH_LENGTH) - offset;
+                var incrementResult = this.increment(state, offset + (size * 2 / 3), offset + size);
+                size = Math.min(roundThird(offset + (size * 2 / 3) + incrementResult), Curl.HASH_LENGTH) - offset;
                 var curlCopy = {
                     low: state.low.slice(),
                     high: state.high.slice()
@@ -713,7 +722,9 @@
          * @returns The bitwise not of the value.
          */
         HammingDiver.prototype.bitWiseNot = function (value) {
-            return bigInt(1).shiftLeft(64).subtract(bigInt(1)).subtract(value);
+            return bigInt__default['default'](1).shiftLeft(64)
+                .subtract(bigInt__default['default'](1))
+                .subtract(value);
         };
         /**
          * Check if we have found the nonce.
@@ -727,7 +738,7 @@
                 var sum = 0;
                 for (var j = 0; j < securityLevel; j++) {
                     for (var k = j * 243 / 3; k < (j + 1) * 243 / 3; k++) {
-                        var bIndex = bigInt(1).shiftLeft(i);
+                        var bIndex = bigInt__default['default'](1).shiftLeft(i);
                         if (low[k].and(bIndex).equals(0)) {
                             sum--;
                         }
@@ -757,7 +768,7 @@
         HammingDiver.prototype.trinaryGet = function (low, high, arrLength, index) {
             var result = new Int8Array(arrLength);
             for (var i = 0; i < arrLength; i++) {
-                var bIndex = bigInt(index);
+                var bIndex = bigInt__default['default'](index);
                 var l = low[i].shiftRight(bIndex).and(1);
                 var h = high[i].shiftRight(bIndex).and(1);
                 if (l.equals(1) && h.equals(0)) {
@@ -775,43 +786,43 @@
         /**
          * Max 64 bit value.
          */
-        HammingDiver.MAX_VALUE = bigInt("FFFFFFFFFFFFFFFF", 16);
+        HammingDiver.MAX_VALUE = bigInt__default['default']("FFFFFFFFFFFFFFFF", 16);
         /**
          * Min 64 bit value.
          */
-        HammingDiver.MIN_VALUE = bigInt("0000000000000000", 16);
+        HammingDiver.MIN_VALUE = bigInt__default['default']("0000000000000000", 16);
         /**
          * High 0
          */
-        HammingDiver.HIGH_0 = bigInt("B6DB6DB6DB6DB6DB", 16);
+        HammingDiver.HIGH_0 = bigInt__default['default']("B6DB6DB6DB6DB6DB", 16);
         /**
          * High 1
          */
-        HammingDiver.HIGH_1 = bigInt("8FC7E3F1F8FC7E3F", 16);
+        HammingDiver.HIGH_1 = bigInt__default['default']("8FC7E3F1F8FC7E3F", 16);
         /**
          * High 2
          */
-        HammingDiver.HIGH_2 = bigInt("FFC01FFFF803FFFF", 16);
+        HammingDiver.HIGH_2 = bigInt__default['default']("FFC01FFFF803FFFF", 16);
         /**
          * High 3
          */
-        HammingDiver.HIGH_3 = bigInt("003FFFFFFFFFFFFF", 16);
+        HammingDiver.HIGH_3 = bigInt__default['default']("003FFFFFFFFFFFFF", 16);
         /**
          * Low 0
          */
-        HammingDiver.LOW_0 = bigInt("DB6DB6DB6DB6DB6D", 16);
+        HammingDiver.LOW_0 = bigInt__default['default']("DB6DB6DB6DB6DB6D", 16);
         /**
          * Low 1
          */
-        HammingDiver.LOW_1 = bigInt("F1F8FC7E3F1F8FC7", 16);
+        HammingDiver.LOW_1 = bigInt__default['default']("F1F8FC7E3F1F8FC7", 16);
         /**
          * Low 2
          */
-        HammingDiver.LOW_2 = bigInt("7FFFE00FFFFC01FF", 16);
+        HammingDiver.LOW_2 = bigInt__default['default']("7FFFE00FFFFC01FF", 16);
         /**
          * Low 3
          */
-        HammingDiver.LOW_3 = bigInt("FFC0000007FFFFFF", 16);
+        HammingDiver.LOW_3 = bigInt__default['default']("FFC0000007FFFFFF", 16);
         /**
          * Number of rounds
          */
@@ -964,7 +975,7 @@
         return {
             seed: seed,
             mode: mode,
-            sideKey: mode === "restricted" ? (sideKey || "").padEnd(81, "9") : undefined,
+            sideKey: mode === "restricted" ? (sideKey !== null && sideKey !== void 0 ? sideKey : "").padEnd(81, "9") : undefined,
             security: security,
             start: 0,
             count: 1,
@@ -1000,6 +1011,7 @@
      * @returns The prepared message, the channel state will also be updated.
      */
     function createMessage(channelState, message) {
+        var _a;
         if (!validators.isTrytes(message)) {
             throw new Error("The message must be in trytes");
         }
@@ -1011,7 +1023,7 @@
         var messageLengthTrits = pascalEncode(messageTrits.length);
         var subtree = tree.getSubtree(channelState.index);
         var sponge = new Curl(27);
-        var sideKeyTrits = converter.trits(channelState.sideKey || "9".repeat(81));
+        var sideKeyTrits = converter.trits((_a = channelState.sideKey) !== null && _a !== void 0 ? _a : "9".repeat(81));
         sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
         sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
         var payload = concatenate([indexTrits, messageLengthTrits]);
@@ -1035,8 +1047,8 @@
         if (nextThird !== 0) {
             payload = concatenate([payload, new Int8Array(3 - nextThird).fill(0)]);
         }
-        var messageAddress = channelState.mode === "public" ?
-            tree.root.addressTrits : maskHash(tree.root.addressTrits);
+        var messageAddress = channelState.mode === "public"
+            ? tree.root.addressTrits : maskHash(tree.root.addressTrits);
         var maskedAuthenticatedMessage = {
             payload: converter.trytes(payload),
             root: converter.trytes(tree.root.addressTrits),
@@ -1054,18 +1066,18 @@
     }
 
     /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation. All rights reserved.
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-    this file except in compliance with the License. You may obtain a copy of the
-    License at http://www.apache.org/licenses/LICENSE-2.0
+    Copyright (c) Microsoft Corporation.
 
-    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-    MERCHANTABLITY OR NON-INFRINGEMENT.
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
 
-    See the Apache Version 2.0 License for specific language governing permissions
-    and limitations under the License.
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
     ***************************************************************************** */
 
     var __assign = function() {
@@ -1080,10 +1092,11 @@
     };
 
     function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
             function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
             step((generator = generator.apply(thisArg, _arguments || [])).next());
         });
     }
@@ -1126,7 +1139,7 @@
     function parseMessage(payload, root, channelKey) {
         var payloadTrits = converter.trits(payload);
         var rootTrits = converter.trits(root);
-        var channelKeyTrits = converter.trits(channelKey || "9".repeat(81));
+        var channelKeyTrits = converter.trits(channelKey !== null && channelKey !== void 0 ? channelKey : "9".repeat(81));
         // Get data positions in payload
         var indexData = pascalDecode(payloadTrits);
         var index = indexData.value;
@@ -1143,7 +1156,7 @@
         // Decrypt the metadata
         var nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + Curl.HASH_LENGTH), sponge);
         var message = unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
-        var nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + Curl.HASH_LENGTH / 3), sponge);
+        var nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + (Curl.HASH_LENGTH / 3)), sponge);
         var hmac = sponge.rate();
         // Check the security level is valid
         var securityLevel = checksumSecurity(hmac);
@@ -1289,9 +1302,9 @@
      * Fetch the next message from a list of channels.
      * @param {API} api - The api to use for fetching.
      * @param {Object[]} channels - The list of channel details to check for new messages.
-     * @param {string} channels[].root - The root within the mam channel to fetch the message.
-     * @param {MamMode} channels[].mode - The mode to use for fetching.
-     * @param {string=} channels[].sideKey - The sideKey if mode is restricted.
+     * @param {string} channels.root - The root within the mam channel to fetch the message.
+     * @param {MamMode} channels.mode - The mode to use for fetching.
+     * @param {string} channels.sideKey - The sideKey if mode is restricted.
      * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
      * throws exception if transactions found on address are invalid.
      */
@@ -1302,9 +1315,9 @@
                 switch (_a.label) {
                     case 0:
                         addresses = channels.map(function (c) {
-                            return c.mode === "public"
+                            return (c.mode === "public"
                                 ? c.root
-                                : converter.trytes(maskHash(converter.trits(c.root)));
+                                : converter.trytes(maskHash(converter.trits(c.root))));
                         });
                         return [4 /*yield*/, api.findTransactionObjects({ addresses: addresses })];
                     case 1:

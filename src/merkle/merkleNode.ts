@@ -7,18 +7,22 @@ export class MerkleNode {
      * The left element for the node.
      */
     public left?: MerkleNode;
+
     /**
      * The right element for the node.
      */
     public right?: MerkleNode;
+
     /**
      * The size of the node.
      */
     public size: number;
+
     /**
      * The address hash of the node.
      */
     public addressTrits: Int8Array;
+
     /**
      * The private key hash of the node.
      */

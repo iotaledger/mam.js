@@ -48,6 +48,7 @@ export class MerkleTree {
             const chunk = siblings.slice(c * Curl.HASH_LENGTH, (c + 1) * Curl.HASH_LENGTH);
             sponge.reset();
 
+            // eslint-disable-next-line no-bitwise
             if ((i & index) === 0) {
                 sponge.absorb(rate, 0, rate.length);
                 sponge.absorb(chunk, 0, chunk.length);
@@ -56,6 +57,7 @@ export class MerkleTree {
                 sponge.absorb(rate, 0, rate.length);
             }
 
+            // eslint-disable-next-line no-bitwise
             i <<= 1;
 
             rate = sponge.rate();
@@ -63,6 +65,7 @@ export class MerkleTree {
 
         return sponge.rate();
     }
+
     /**
      * Get a sub tree.
      * @param index The index of the subtree.
@@ -72,15 +75,15 @@ export class MerkleTree {
         /**
          * The combined key for the subtree.
          */
-        key: Int8Array,
+        key: Int8Array;
         /**
          * The leaves of the subtree.
          */
-        leaves: MerkleNode[]
+        leaves: MerkleNode[];
     } {
         if (this.root.size === 1) {
             return {
-                key: this.root.left && this.root.left.privateKeyTrits
+                key: this.root.left?.privateKeyTrits
                     ? this.root.left.privateKeyTrits : new Int8Array(), leaves: []
             };
         }
@@ -112,7 +115,7 @@ export class MerkleTree {
         leaves.reverse();
 
         return {
-            key: privateKey || new Int8Array(),
+            key: privateKey ?? new Int8Array(),
             leaves
         };
     }

@@ -1,12 +1,19 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('big-integer')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'big-integer'], factory) :
-	(global = global || self, factory(global.mam = {}, global.bigInt));
-}(this, (function (exports, bigInt) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('crypto'), require('big-integer')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'crypto', 'big-integer'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.mam = {}, global.crypto, global.bigInt));
+}(this, (function (exports, crypto, bigInt) { 'use strict';
 
-	bigInt = bigInt && Object.prototype.hasOwnProperty.call(bigInt, 'default') ? bigInt['default'] : bigInt;
+	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+	var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
+	var bigInt__default = /*#__PURE__*/_interopDefaultLegacy(bigInt);
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+	function commonjsRequire () {
+		throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
+	}
 
 	function unwrapExports (x) {
 		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -36,46 +43,28 @@
 
 
 	/**
-	 * Converts an ascii encoded string to trytes.
+	 * This method converts ASCII characters to [trytes](https://docs.iota.org/docs/getting-started/0.1/introduction/ternary).
 	 *
-	 * ### How conversion works:
+	 * ## Related methods
 	 *
-	 * An ascii value of `1 Byte` can be represented in `2 Trytes`:
-	 *
-	 * 1. We get the decimal unicode value of an individual ASCII character.
-	 *
-	 * 2. From the decimal value, we then derive the two tryte values by calculating the tryte equivalent
-	 * (e.g.: `100` is expressed as `19 + 3 * 27`), given that tryte alphabet contains `27` trytes values:
-	 *   a. The first tryte value is the decimal value modulo `27` (which is the length of the alphabet).
-	 *   b. The second value is the remainder of `decimal value - first value` devided by `27`.
-	 *
-	 * 3. The two values returned from Step 2. are then input as indices into the available
-	 * trytes alphabet (`9ABCDEFGHIJKLMNOPQRSTUVWXYZ`), to get the correct tryte value.
-	 *
-	 * ### Example:
-	 *
-	 * Lets say we want to convert ascii character `Z`.
-	 *
-	 * 1. `Z` has a decimal unicode value of `90`.
-	 *
-	 * 2. `90` can be represented as `9 + 3 * 27`. To make it simpler:
-	 *   a. First value is `90 % 27 = 9`.
-	 *   b. Second value is `(90 - 9) / 27 = 3`.
-	 *
-	 * 3. Our two values are `9` and `3`. To get the tryte value now we simply insert it as indices
-	 * into the tryte alphabet:
-	 *   a. The first tryte value is `'9ABCDEFGHIJKLMNOPQRSTUVWXYZ'[9] = I`
-	 *   b. The second tryte value is `'9ABCDEFGHIJKLMNOPQRSTUVWXYZ'[3] = C`
-	 *
-	 * Therefore ascii character `Z` is represented as `IC` in trytes.
+	 * To convert trytes to ASCII characters, use the [`trytesToAscii()`]{@link #module_converter.trytesToAscii} method.
 	 *
 	 * @method asciiToTrytes
 	 *
+	 * @summary Converts ASCII characters to trytes.
+	 *
 	 * @memberof module:converter
 	 *
-	 * @param {string} input - ascii input
+	 * @param {string} input - ASCII input
 	 *
-	 * @return {string} string of trytes
+	 * @example
+	 * ```js
+	 * let trytes = Converter.asciiToTrytes('Hello, where is my coffee?');
+	 * ```
+	 *
+	 * @return {string} Trytes
+	 *
+	 * @throws {errors.INVALID_ASCII_CHARS}: Make sure that the `input` argument contains only valid ASCII characters.
 	 */
 	exports.asciiToTrytes = function (input) {
 	    // If input is not an ascii string, throw error
@@ -91,15 +80,31 @@
 	    return trytes;
 	};
 	/**
-	 * Converts trytes of _even_ length to an ascii string
+	 * This method converts trytes to ASCII characters.
+	 *
+	 * Because each ASCII character is represented as 2 trytes, the given trytes must be of an even length.
+	 *
+	 * ## Related methods
+	 *
+	 * To convert ASCII characters to trytes, use the [`asciiToTrytes()`]{@link #module_converter.asciiToTrytes} method.
 	 *
 	 * @method trytesToAscii
 	 *
+	 * @summary Converts trytes to ASCII characters.
+	 *
 	 * @memberof module:converter
 	 *
-	 * @param {string} trytes - trytes
+	 * @param {string} trytes - An even number of trytes
 	 *
-	 * @return {string} string in ascii
+	 * @example
+	 * ```js
+	 * let message = Converter.trytesToAscii('IOTA');
+	 * ```
+	 *
+	 * @return {string} ASCII characters
+	 *
+	 * @throws {errors.INVALID_TRYTES}: Make sure that the `trytes` argument contains only valid trytes (A-Z or 9).
+	 * @throws {errors.INVALID_ODD_LENGTH}: Make sure that the `trytes` argument contains an even number of trytes.
 	 */
 	exports.trytesToAscii = function (trytes) {
 	    if (typeof trytes !== 'string' || !new RegExp("^[9A-Z]{1,}$").test(trytes)) {
@@ -110,7 +115,10 @@
 	    }
 	    var ascii = '';
 	    for (var i = 0; i < trytes.length; i += 2) {
-	        ascii += String.fromCharCode(src.TRYTE_ALPHABET.indexOf(trytes[i]) + src.TRYTE_ALPHABET.indexOf(trytes[i + 1]) * 27);
+	        var charCode = src.TRYTE_ALPHABET.indexOf(trytes[i]) + src.TRYTE_ALPHABET.indexOf(trytes[i + 1]) * 27;
+	        if (charCode) {
+	            ascii += String.fromCharCode(charCode);
+	        }
 	    }
 	    return ascii;
 	};
@@ -239,6 +247,8 @@
 	 *
 	 * @method trits
 	 *
+	 * @ignore
+	 *
 	 * @memberof module:converter
 	 *
 	 * @param {String|Number} input - Tryte string or value to be converted.
@@ -268,13 +278,28 @@
 	}
 	exports.trits = trits;
 	/**
+	 * This method converts [trytes](https://docs.iota.org/docs/getting-started/0.1/introduction/ternary) to trits.
+	 *
+	 * ## Related methods
+	 *
+	 * To convert ASCII characters to trytes, use the [`asciiToTrytes()`]{@link #module_converter.asciiToTrytes} method.
+	 *
 	 * @method trytesToTrits
+	 *
+	 * @summary Converts trytes to trits.
 	 *
 	 * @memberof module:converter
 	 *
-	 * @ignore
+	 * @param {String|number} input - Trytes
 	 *
-	 * @alias trits
+	 * @example
+	 * ```js
+	 * let trits = Converter.trytesToTrits('IOTA');
+	 * ```
+	 *
+	 * @return {Int8Array} trits
+	 *
+	 * @throws {errors.INVALID_TRYTES}: Make sure that the `input` argument contains only valid trytes (A-Z or 9).
 	 */
 	exports.trytesToTrits = trits;
 	/**
@@ -283,6 +308,8 @@
 	 * @method trytes
 	 *
 	 * @memberof module:converter
+	 *
+	 * @ignore
 	 *
 	 * @param {Int8Array} trits
 	 *
@@ -308,19 +335,36 @@
 	}
 	exports.trytes = trytes;
 	/**
+	 * This method converts [trits](https://docs.iota.org/docs/getting-started/0.1/introduction/ternary) to trytes.
+	 *
+	 * ## Related methods
+	 *
+	 * To convert trytes to ASCII characters, use the [`trytesToAscii()`]{@link #module_converter.trytesToAscii} method.
+	 *
 	 * @method tritsToTrytes
+	 *
+	 * @summary Converts trits to trytes.
 	 *
 	 * @memberof module:converter
 	 *
-	 * @ignore
+	 * @param {String|number} input - Trits
 	 *
-	 * @alias trytes
+	 * @example
+	 * ```js
+	 * let trytes = Converter.tritsToTrytes(trits);
+	 * ```
+	 *
+	 * @return {Int8Array} trytes
+	 *
+	 * @throws {errors.INVALID_TRITS}: Make sure that the `input` argument contains an array of trits.
 	 */
 	exports.tritsToTrytes = trytes;
 	/**
 	 * Converts trits into an integer value
 	 *
 	 * @method value
+	 *
+	 * @ignore
 	 *
 	 * @memberof module:converter
 	 *
@@ -338,19 +382,35 @@
 	}
 	exports.value = value;
 	/**
+	 * This method converts [trits](https://docs.iota.org/docs/getting-started/0.1/introduction/ternary) to a number.
+	 *
+	 * ## Related methods
+	 *
+	 * To convert trytes to trits, use the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
+	 * To convert trits to trytes, use the [`tritsToTrytes()`]{@link #module_converter.tritsToTrytes} method.
+	 *
 	 * @method tritsToValue
+	 *
+	 * @summary Converts trits to a number.
 	 *
 	 * @memberof module:converter
 	 *
-	 * @ignore
+	 * @param {String|number} input - Trits
 	 *
-	 * @alias value
+	 * @example
+	 * ```js
+	 * let number = Converter.tritsToValue(trits);
+	 * ```
+	 *
+	 * @return {Int8Array} number
 	 */
 	exports.tritsToValue = value;
 	/**
 	 * Converts an integer value to trits
 	 *
 	 * @method fromValue
+	 *
+	 * @ignore
 	 *
 	 * @memberof module:converter
 	 *
@@ -382,13 +442,26 @@
 	}
 	exports.fromValue = fromValue;
 	/**
+	 * This method converts a number to [trits](https://docs.iota.org/docs/getting-started/0.1/introduction/ternary).
+	 *
+	 * ## Related methods
+	 *
+	 * To convert trits to trytes, use the [`tritsToTrytes()`]{@link #module_converter.tritsToTrytes} method.
+	 *
 	 * @method valueToTrits
+	 *
+	 * @summary Converts trits to a number.
 	 *
 	 * @memberof module:converter
 	 *
-	 * @ignore
+	 * @param {String|number} input - Number
 	 *
-	 * @alias fromValue
+	 * @example
+	 * ```js
+	 * let trits = Converter.valueToTrits(9);
+	 * ```
+	 *
+	 * @return {Int8Array} trits
 	 */
 	exports.valueToTrits = fromValue;
 
@@ -444,7 +517,6 @@
 	    IRICommand["GET_NEIGHBORS"] = "getNeighbors";
 	    IRICommand["ADD_NEIGHBORS"] = "addNeighbors";
 	    IRICommand["REMOVE_NEIGHBORS"] = "removeNeighbors";
-	    IRICommand["GET_TIPS"] = "getTips";
 	    IRICommand["FIND_TRANSACTIONS"] = "findTransactions";
 	    IRICommand["GET_TRYTES"] = "getTrytes";
 	    IRICommand["GET_INCLUSION_STATES"] = "getInclusionStates";
@@ -503,7 +575,7 @@
 	 * 
 	 */
 	/**
-	 * bluebird build version 3.7.1
+	 * bluebird build version 3.7.2
 	 * Features enabled: core, race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, using, timers, filter, any, each
 	*/
 	!function(e){module.exports=e();}(function(){return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r);}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -1077,37 +1149,10 @@
 	        promises.length = 0;
 	    }
 
-	    if (typeof document === "object" && document.createElement) {
-	        deferUnhandledRejectionCheck = (function() {
-	            var iframeSetTimeout;
-
-	            function checkIframe() {
-	                if (document.body) {
-	                    var iframe = document.createElement("iframe");
-	                    document.body.appendChild(iframe);
-	                    if (iframe.contentWindow &&
-	                        iframe.contentWindow.setTimeout) {
-	                        iframeSetTimeout = iframe.contentWindow.setTimeout;
-	                    }
-	                    document.body.removeChild(iframe);
-	                }
-	            }
-	            checkIframe();
-	            return function(promise) {
-	                promises.push(promise);
-	                if (iframeSetTimeout) {
-	                    iframeSetTimeout(unhandledRejectionCheck, 1);
-	                } else {
-	                    checkIframe();
-	                }
-	            };
-	        })();
-	    } else {
-	        deferUnhandledRejectionCheck = function(promise) {
-	            promises.push(promise);
-	            setTimeout(unhandledRejectionCheck, 1);
-	        };
-	    }
+	    deferUnhandledRejectionCheck = function(promise) {
+	        promises.push(promise);
+	        setTimeout(unhandledRejectionCheck, 1);
+	    };
 
 	    es5.defineProperty(Promise, "_unhandledRejectionCheck", {
 	        value: unhandledRejectionCheck
@@ -2736,11 +2781,7 @@
 	    var fn;
 	    if (last > 0 && typeof arguments[last] === "function") {
 	        fn = arguments[last];
-	        if (false) {
-	            {
-	                var ret;
-	            }
-	        }
+	        var ret; 
 	    }
 	    var args = [].slice.call(arguments);    if (fn) args.pop();
 	    var ret = new PromiseArray(args).promise();
@@ -3869,7 +3910,7 @@
 	_dereq_("./join")(
 	    Promise, PromiseArray, tryConvertToPromise, INTERNAL, async);
 	Promise.Promise = Promise;
-	Promise.version = "3.7.1";
+	Promise.version = "3.7.2";
 	_dereq_('./call_get.js')(Promise);
 	_dereq_('./generators.js')(Promise, apiRejection, INTERNAL, tryConvertToPromise, Proxyable, debug);
 	_dereq_('./map.js')(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
@@ -6395,11 +6436,6 @@
 	    function (s) { return Number.isInteger(s) && s >= 0; },
 	    errors$1.INVALID_THRESHOLD,
 	]; };
-	exports.getBalancesThresholdValidator = function (threshold) { return [
-	    threshold,
-	    function (t) { return Number.isInteger(t) && t <= 100; },
-	    errors$1.INVALID_THRESHOLD,
-	]; };
 	exports.stringify = function (value) {
 	    return JSON.stringify(value, null, 1);
 	};
@@ -6440,8 +6476,7 @@
 	var guards_31 = guards.startOptionValidator;
 	var guards_32 = guards.startEndOptionsValidator;
 	var guards_33 = guards.getInputsThresholdValidator;
-	var guards_34 = guards.getBalancesThresholdValidator;
-	var guards_35 = guards.stringify;
+	var guards_34 = guards.stringify;
 
 	var createAddNeighbors = createCommonjsModule(function (module, exports) {
 	exports.__esModule = true;
@@ -6451,44 +6486,56 @@
 	/**
 	 * @method createAddNeighbors
 	 *
+	 * @summary Creates a new `addNeighbors()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {Function} {@link #module_core.addNeighbors `addNeighbors`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`addNeighbors`]{@link #module_core.addNeighbors}  - A new `addNeighbors()` function that uses your chosen Provider instance.
 	 */
 	exports.createAddNeighbors = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Adds a list of neighbors to the connected IRI node by calling
-	     * [`addNeighbors`](https://docs.iota.works/iri/api#endpoints/addNeighbors) command.
-	     * Assumes `addNeighbors` command is available on the node.
 	     *
-	     * `addNeighbors` has temporary effect until your node relaunches.
+	     * This method adds temporary neighbors to the connected IRI node by calling the its
+	     * [`addNeighbors`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#addNeighbors) endpoint.
 	     *
-	     * @example
+	     * These neighbors are removed when the node is restarted.
 	     *
-	     * ```js
-	     * addNeighbors(['udp://148.148.148.148:14265'])
-	     *   .then(numAdded => {
-	     *     // ...
-	     *   }).catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
+	     * ## Related methods
+	     *
+	     * To see statistics about the connected IRI node's neighbors, use the [`getNeighbors()`]{@link #module_core.getNeighbors} method.
 	     *
 	     * @method addNeighbors
 	     *
+	     * @summary Adds temporary neighbors to the connected IRI node.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Array} uris - List of URI's
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Array.<string>} URIs - Comma-separated URIs of neighbor nodes that you want to add
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * addNeighbors(['tcp://148.148.148.148:15600'])
+	     *   .then(numberOfNeighbors => {
+	     *     console.log(`Successfully added ${numberOfNeighbors} neighbors`)
+	     *   }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     *   })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {number} Number of neighbors that were added
-	     * @reject {Error}
-	     * - `INVALID_URI`: Invalid uri
-	     * - Fetch error
+	     *
+	     * @fulfil {number} numberOfNeighbors - Number of neighbors that were added
+	     *
+	     * @reject {Error} error - One of the following errors:
+	     * - `INVALID_URI`: Make sure that the URI is a string and starts with `tcp://`
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
+	     *
 	     */
 	    return function addedNeighbors(uris, callback) {
 	        return bluebird.resolve(guards.validate(guards.arrayValidator(guards.uriValidator)(uris)))
@@ -6717,15 +6764,69 @@
 		}
 	}(commonjsGlobal, function () {
 
+		/*globals window, global, require*/
+
 		/**
 		 * CryptoJS core components.
 		 */
 		var CryptoJS = CryptoJS || (function (Math, undefined$1) {
+
+		    var crypto;
+
+		    // Native crypto from window (Browser)
+		    if (typeof window !== 'undefined' && window.crypto) {
+		        crypto = window.crypto;
+		    }
+
+		    // Native (experimental IE 11) crypto from window (Browser)
+		    if (!crypto && typeof window !== 'undefined' && window.msCrypto) {
+		        crypto = window.msCrypto;
+		    }
+
+		    // Native crypto from global (NodeJS)
+		    if (!crypto && typeof commonjsGlobal !== 'undefined' && commonjsGlobal.crypto) {
+		        crypto = commonjsGlobal.crypto;
+		    }
+
+		    // Native crypto import via require (NodeJS)
+		    if (!crypto && typeof commonjsRequire === 'function') {
+		        try {
+		            crypto = crypto__default['default'];
+		        } catch (err) {}
+		    }
+
 		    /*
-		     * Local polyfil of Object.create
+		     * Cryptographically secure pseudorandom number generator
+		     *
+		     * As Math.random() is cryptographically not safe to use
+		     */
+		    var cryptoSecureRandomInt = function () {
+		        if (crypto) {
+		            // Use getRandomValues method (Browser)
+		            if (typeof crypto.getRandomValues === 'function') {
+		                try {
+		                    return crypto.getRandomValues(new Uint32Array(1))[0];
+		                } catch (err) {}
+		            }
+
+		            // Use randomBytes method (NodeJS)
+		            if (typeof crypto.randomBytes === 'function') {
+		                try {
+		                    return crypto.randomBytes(4).readInt32LE();
+		                } catch (err) {}
+		            }
+		        }
+
+		        throw new Error('Native crypto module could not be used to get secure random number.');
+		    };
+
+		    /*
+		     * Local polyfill of Object.create
+
 		     */
 		    var create = Object.create || (function () {
 		        function F() {}
+
 		        return function (obj) {
 		            var subtype;
 
@@ -7007,26 +7108,8 @@
 		        random: function (nBytes) {
 		            var words = [];
 
-		            var r = (function (m_w) {
-		                var m_w = m_w;
-		                var m_z = 0x3ade68b1;
-		                var mask = 0xffffffff;
-
-		                return function () {
-		                    m_z = (0x9069 * (m_z & 0xFFFF) + (m_z >> 0x10)) & mask;
-		                    m_w = (0x4650 * (m_w & 0xFFFF) + (m_w >> 0x10)) & mask;
-		                    var result = ((m_z << 0x10) + m_w) & mask;
-		                    result /= 0x100000000;
-		                    result += 0.5;
-		                    return result * (Math.random() > .5 ? 1 : -1);
-		                }
-		            });
-
-		            for (var i = 0, rcache; i < nBytes; i += 4) {
-		                var _r = r((rcache || Math.random()) * 0x100000000);
-
-		                rcache = _r() * 0x3ade67b7;
-		                words.push((_r() * 0x100000000) | 0);
+		            for (var i = 0; i < nBytes; i += 4) {
+		                words.push(cryptoSecureRandomInt());
 		            }
 
 		            return new WordArray.init(words, nBytes);
@@ -7257,6 +7340,8 @@
 		         *     var processedData = bufferedBlockAlgorithm._process(!!'flush');
 		         */
 		        _process: function (doFlush) {
+		            var processedWords;
+
 		            // Shortcuts
 		            var data = this._data;
 		            var dataWords = data.words;
@@ -7289,7 +7374,7 @@
 		                }
 
 		                // Remove processed words
-		                var processedWords = dataWords.splice(0, nWordsReady);
+		                processedWords = dataWords.splice(0, nWordsReady);
 		                data.sigBytes -= nBytesReady;
 		            }
 
@@ -8093,7 +8178,8 @@
 		          if (i % 4) {
 		              var bits1 = reverseMap[base64Str.charCodeAt(i - 1)] << ((i % 4) * 2);
 		              var bits2 = reverseMap[base64Str.charCodeAt(i)] >>> (6 - (i % 4) * 2);
-		              words[nBytes >>> 2] |= (bits1 | bits2) << (24 - (nBytes % 4) * 8);
+		              var bitsCombined = bits1 | bits2;
+		              words[nBytes >>> 2] |= bitsCombined << (24 - (nBytes % 4) * 8);
 		              nBytes++;
 		          }
 		      }
@@ -8921,13 +9007,16 @@
 
 		            // Rounds
 		            for (var i = 0; i < 80; i++) {
+		                var Wil;
+		                var Wih;
+
 		                // Shortcut
 		                var Wi = W[i];
 
 		                // Extend message
 		                if (i < 16) {
-		                    var Wih = Wi.high = M[offset + i * 2]     | 0;
-		                    var Wil = Wi.low  = M[offset + i * 2 + 1] | 0;
+		                    Wih = Wi.high = M[offset + i * 2]     | 0;
+		                    Wil = Wi.low  = M[offset + i * 2 + 1] | 0;
 		                } else {
 		                    // Gamma0
 		                    var gamma0x  = W[i - 15];
@@ -8952,12 +9041,12 @@
 		                    var Wi16h = Wi16.high;
 		                    var Wi16l = Wi16.low;
 
-		                    var Wil = gamma0l + Wi7l;
-		                    var Wih = gamma0h + Wi7h + ((Wil >>> 0) < (gamma0l >>> 0) ? 1 : 0);
-		                    var Wil = Wil + gamma1l;
-		                    var Wih = Wih + gamma1h + ((Wil >>> 0) < (gamma1l >>> 0) ? 1 : 0);
-		                    var Wil = Wil + Wi16l;
-		                    var Wih = Wih + Wi16h + ((Wil >>> 0) < (Wi16l >>> 0) ? 1 : 0);
+		                    Wil = gamma0l + Wi7l;
+		                    Wih = gamma0h + Wi7h + ((Wil >>> 0) < (gamma0l >>> 0) ? 1 : 0);
+		                    Wil = Wil + gamma1l;
+		                    Wih = Wih + gamma1h + ((Wil >>> 0) < (gamma1l >>> 0) ? 1 : 0);
+		                    Wil = Wil + Wi16l;
+		                    Wih = Wih + Wi16h + ((Wil >>> 0) < (Wi16l >>> 0) ? 1 : 0);
 
 		                    Wi.high = Wih;
 		                    Wi.low  = Wil;
@@ -9348,6 +9437,9 @@
 
 		                // Rho Pi
 		                for (var laneIndex = 1; laneIndex < 25; laneIndex++) {
+		                    var tMsw;
+		                    var tLsw;
+
 		                    // Shortcuts
 		                    var lane = state[laneIndex];
 		                    var laneMsw = lane.high;
@@ -9356,11 +9448,11 @@
 
 		                    // Rotate lanes
 		                    if (rhoOffset < 32) {
-		                        var tMsw = (laneMsw << rhoOffset) | (laneLsw >>> (32 - rhoOffset));
-		                        var tLsw = (laneLsw << rhoOffset) | (laneMsw >>> (32 - rhoOffset));
+		                        tMsw = (laneMsw << rhoOffset) | (laneLsw >>> (32 - rhoOffset));
+		                        tLsw = (laneLsw << rhoOffset) | (laneMsw >>> (32 - rhoOffset));
 		                    } else /* if (rhoOffset >= 32) */ {
-		                        var tMsw = (laneLsw << (rhoOffset - 32)) | (laneMsw >>> (64 - rhoOffset));
-		                        var tLsw = (laneMsw << (rhoOffset - 32)) | (laneLsw >>> (64 - rhoOffset));
+		                        tMsw = (laneLsw << (rhoOffset - 32)) | (laneMsw >>> (64 - rhoOffset));
+		                        tLsw = (laneMsw << (rhoOffset - 32)) | (laneLsw >>> (64 - rhoOffset));
 		                    }
 
 		                    // Transpose lanes
@@ -9395,7 +9487,8 @@
 		                var lane = state[0];
 		                var roundConstant = ROUND_CONSTANTS[round];
 		                lane.high ^= roundConstant.high;
-		                lane.low  ^= roundConstant.low;	            }
+		                lane.low  ^= roundConstant.low;
+		            }
 		        },
 
 		        _doFinalize: function () {
@@ -10100,6 +10193,8 @@
 		         *     var key = kdf.compute(password, salt);
 		         */
 		        compute: function (password, salt) {
+		            var block;
+
 		            // Shortcut
 		            var cfg = this.cfg;
 
@@ -10119,7 +10214,7 @@
 		                if (block) {
 		                    hasher.update(block);
 		                }
-		                var block = hasher.update(password).finalize(salt);
+		                block = hasher.update(password).finalize(salt);
 		                hasher.reset();
 
 		                // Iterations
@@ -10510,17 +10605,19 @@
 		        });
 
 		        function xorBlock(words, offset, blockSize) {
+		            var block;
+
 		            // Shortcut
 		            var iv = this._iv;
 
 		            // Choose mixing block
 		            if (iv) {
-		                var block = iv;
+		                block = iv;
 
 		                // Remove IV for subsequent blocks
 		                this._iv = undefined$1;
 		            } else {
-		                var block = this._prevBlock;
+		                block = this._prevBlock;
 		            }
 
 		            // XOR blocks
@@ -10612,6 +10709,8 @@
 		        }),
 
 		        reset: function () {
+		            var modeCreator;
+
 		            // Reset cipher
 		            Cipher.reset.call(this);
 
@@ -10622,9 +10721,9 @@
 
 		            // Reset block mode
 		            if (this._xformMode == this._ENC_XFORM_MODE) {
-		                var modeCreator = mode.createEncryptor;
+		                modeCreator = mode.createEncryptor;
 		            } else /* if (this._xformMode == this._DEC_XFORM_MODE) */ {
-		                var modeCreator = mode.createDecryptor;
+		                modeCreator = mode.createDecryptor;
 		                // Keep at least one block in the buffer for unpadding
 		                this._minBufferSize = 1;
 		            }
@@ -10642,6 +10741,8 @@
 		        },
 
 		        _doFinalize: function () {
+		            var finalProcessedBlocks;
+
 		            // Shortcut
 		            var padding = this.cfg.padding;
 
@@ -10651,10 +10752,10 @@
 		                padding.pad(this._data, this.blockSize);
 
 		                // Process final blocks
-		                var finalProcessedBlocks = this._process(!!'flush');
+		                finalProcessedBlocks = this._process(!!'flush');
 		            } else /* if (this._xformMode == this._DEC_XFORM_MODE) */ {
 		                // Process final blocks
-		                var finalProcessedBlocks = this._process(!!'flush');
+		                finalProcessedBlocks = this._process(!!'flush');
 
 		                // Unpad data
 		                padding.unpad(finalProcessedBlocks);
@@ -10746,15 +10847,17 @@
 		         *     var openSSLString = CryptoJS.format.OpenSSL.stringify(cipherParams);
 		         */
 		        stringify: function (cipherParams) {
+		            var wordArray;
+
 		            // Shortcuts
 		            var ciphertext = cipherParams.ciphertext;
 		            var salt = cipherParams.salt;
 
 		            // Format
 		            if (salt) {
-		                var wordArray = WordArray.create([0x53616c74, 0x65645f5f]).concat(salt).concat(ciphertext);
+		                wordArray = WordArray.create([0x53616c74, 0x65645f5f]).concat(salt).concat(ciphertext);
 		            } else {
-		                var wordArray = ciphertext;
+		                wordArray = ciphertext;
 		            }
 
 		            return wordArray.toString(Base64);
@@ -10774,6 +10877,8 @@
 		         *     var cipherParams = CryptoJS.format.OpenSSL.parse(openSSLString);
 		         */
 		        parse: function (openSSLStr) {
+		            var salt;
+
 		            // Parse base64
 		            var ciphertext = Base64.parse(openSSLStr);
 
@@ -10783,7 +10888,7 @@
 		            // Test for salt
 		            if (ciphertextWords[0] == 0x53616c74 && ciphertextWords[1] == 0x65645f5f) {
 		                // Extract salt
-		                var salt = WordArray.create(ciphertextWords.slice(2, 4));
+		                salt = WordArray.create(ciphertextWords.slice(2, 4));
 
 		                // Remove salt from ciphertext
 		                ciphertextWords.splice(0, 4);
@@ -11083,17 +11188,19 @@
 		    });
 
 		    function generateKeystreamAndEncrypt(words, offset, blockSize, cipher) {
+		        var keystream;
+
 		        // Shortcut
 		        var iv = this._iv;
 
 		        // Generate keystream
 		        if (iv) {
-		            var keystream = iv.slice(0);
+		            keystream = iv.slice(0);
 
 		            // Remove IV for subsequent blocks
 		            this._iv = undefined;
 		        } else {
-		            var keystream = this._prevBlock;
+		            keystream = this._prevBlock;
 		        }
 		        cipher.encryptBlock(keystream, 0);
 
@@ -11505,10 +11612,12 @@
 
 		        // Unpad
 		        var i = data.sigBytes - 1;
-		        while (!((dataWords[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff)) {
-		            i--;
+		        for (var i = data.sigBytes - 1; i >= 0; i--) {
+		            if (((dataWords[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff)) {
+		                data.sigBytes = i + 1;
+		                break;
+		            }
 		        }
-		        data.sigBytes = i + 1;
 		    }
 		};
 
@@ -11690,6 +11799,8 @@
 		     */
 		    var AES = C_algo.AES = BlockCipher.extend({
 		        _doReset: function () {
+		            var t;
+
 		            // Skip reset of nRounds has been set before and key did not change
 		            if (this._nRounds && this._keyPriorReset === this._key) {
 		                return;
@@ -11712,7 +11823,7 @@
 		                if (ksRow < keySize) {
 		                    keySchedule[ksRow] = keyWords[ksRow];
 		                } else {
-		                    var t = keySchedule[ksRow - 1];
+		                    t = keySchedule[ksRow - 1];
 
 		                    if (!(ksRow % keySize)) {
 		                        // Rot word
@@ -12553,11 +12664,20 @@
 		            // Shortcuts
 		            var key = this._key;
 		            var keyWords = key.words;
+		            // Make sure the key length is valid (64, 128 or >= 192 bit)
+		            if (keyWords.length !== 2 && keyWords.length !== 4 && keyWords.length < 6) {
+		                throw new Error('Invalid key length - 3DES requires the key length to be 64, 128, 192 or >192.');
+		            }
+
+		            // Extend the key according to the keying options defined in 3DES standard
+		            var key1 = keyWords.slice(0, 2);
+		            var key2 = keyWords.length < 4 ? keyWords.slice(0, 2) : keyWords.slice(2, 4);
+		            var key3 = keyWords.length < 6 ? keyWords.slice(0, 2) : keyWords.slice(4, 6);
 
 		            // Create DES instances
-		            this._des1 = DES.createEncryptor(WordArray.create(keyWords.slice(0, 2)));
-		            this._des2 = DES.createEncryptor(WordArray.create(keyWords.slice(2, 4)));
-		            this._des3 = DES.createEncryptor(WordArray.create(keyWords.slice(4, 6)));
+		            this._des1 = DES.createEncryptor(WordArray.create(key1));
+		            this._des2 = DES.createEncryptor(WordArray.create(key2));
+		            this._des3 = DES.createEncryptor(WordArray.create(key3));
 		        },
 
 		        encryptBlock: function (M, offset) {
@@ -14199,12 +14319,36 @@
 	exports.NUMBER_OF_FRAGMENT_CHUNKS = exports.FRAGMENT_LENGTH / exports.HASH_LENGTH;
 	exports.NORMALIZED_FRAGMENT_LENGTH = exports.HASH_LENGTH / src.TRYTE_WIDTH / exports.NUMBER_OF_SECURITY_LEVELS;
 	/**
+	 * This method derives a subseed from a seed and a private key index.
+	 *
+	 * You can use the subseed to [derive private keys and their addresses](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/derive-addresses-from-private-keys).
+	 *
+	 * **Note:** If the given seed is less then 243 trits, 0 trits are appended to it until it is 243 trits long.
+	 *
+	 * ## Related methods
+	 *
+	 * To convert a seed from trytes to trits, use the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
+	 *
+	 * To derive a private key from the subseed, use the [`key()`]{@link #module_signing.key} method.
+	 *
 	 * @method subseed
 	 *
-	 * @param {Int8Array} seed - Seed trits
-	 * @param {number} index - Private key index
+	 * @summary Generates a subseed.
 	 *
-	 * @return {Int8Array} subseed trits
+	 * @memberof module:signing
+	 *
+	 * @param {Int8Array} seed - A 243-trit seed to use to derive the subseed
+	 * @param {number} index - The private key index to use to derive the subseed
+	 *
+	 * @example
+	 * ```js
+	 * const seed = 'MYSUPERSECRETSEED...';
+	 * const subseed = Sign.subseed(Converter.trytesToTrits(seed), 0);
+	 * ```
+	 *
+	 * @return {Int8Array} subseed - A subseed in trits
+	 *
+	 * @throws {errors.ILLEGAL_SUBSEED_INDEX}: Make sure that the `index` argument is a number greater than 0.
 	 */
 	function subseed(seed, index) {
 	    if (!Number.isInteger(index) || index < 0) {
@@ -14220,12 +14364,35 @@
 	}
 	exports.subseed = subseed;
 	/**
+	 * This method derives a private key from a subseed.
+	 *
+	 * You can use the private key to [derive an address](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/derive-addresses-from-private-keys) and to sign bundles that withdraw from that address.
+	 *
+	 * ## Related methods
+	 *
+	 * To generate a subseed, use the [`subseed()`]{@link #module_signing.subseed} method.
+	 *
 	 * @method key
 	 *
-	 * @param {Int8Array} subseedTrits - Subseed trits
-	 * @param {number} numberOfFragments - Number of private key fragments
+	 * @summary Generates a private key.
 	 *
-	 * @return {Int8Array} Private key trits
+	 * @memberof module:signing
+	 *
+	 * @param {Int8Array} subseedTrits - A subseed in trits
+	 * @param {number} numberOfFragments - The security level that you want the private key to have
+	 *
+	 * @example
+	 * ```js
+	 * const seed = 'MYSUPERSECRETSEED...';
+	 * const subseed = Signing.subseed(Converter.trytesToTrits(seed), 0);
+	 *
+	 * const privateKey = Signing.key(subseed, 2);
+	 * ```
+	 *
+	 * @return {Int8Array} privateKey - A private key in trits.
+	 *
+	 * @throws {errors.ILLEGAL_SUBSEED_LENGTH}: Make sure that the `subseedTrits` argument contains 243 trits.
+	 * @throws {errors.ILLEGAL_NUMBER_OF_FRAGMENTS}: Make sure that the `numberOfFragments` argument is a valid security level (between 1 and 3).
 	 */
 	function key(subseedTrits, numberOfFragments) {
 	    if (subseedTrits.length !== src$2["default"].HASH_LENGTH) {
@@ -14242,11 +14409,35 @@
 	}
 	exports.key = key;
 	/**
+	 * This method derives key digests from a private key.
+	 *
+	 * You can use the key digests to [generate an address](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/derive-addresses-from-private-keys).
+	 *
+	 * ## Related methods
+	 *
+	 * To generate a private key, use the [`key()`]{@link #module_signing.key} method.
+	 *
 	 * @method digests
 	 *
-	 * @param {Int8Array} key - Private key trits
+	 * @summary Generates key digests for a given private key.
 	 *
-	 * @return {Int8Array}
+	 * @memberof module:signing
+	 *
+	 * @param {Int8Array} key - Private key in trits
+	 *
+	 * @example
+	 * ```js
+	 * const seed = 'MYSUPERSECRETSEED...';
+	 * const subseed = Signing.subseed(Converter.trytesToTrits(seed), 0);
+	 *
+	 * const privateKey = Signing.key(subseed, 2);
+	 *
+	 * const digests = Signing.digests(privateKey);
+	 * ```
+	 *
+	 * @return {Int8Array} digests - Key digests in trits
+	 *
+	 * @throws {errors.ILLEGAL_KEY_LENGTH}: Make sure that the `key` argument contains 2,187, 4,374, or 6,561 trits.
 	 */
 	// tslint:disable-next-line no-shadowed-variable
 	function digests(key) {
@@ -14273,11 +14464,35 @@
 	}
 	exports.digests = digests;
 	/**
+	 * This method derives a 243-trit address from the given key digests.
+	 *
+	 * ## Related methods
+	 *
+	 * To generate a private key, use the [`key()`]{@link #module_signing.key} method.
+	 *
 	 * @method address
 	 *
-	 * @param {Int8Array} digests - Digests trits
+	 * @summary Derives an address from the given key digests.
 	 *
-	 * @return {Int8Array} Address trits
+	 * @memberof module:signing
+	 *
+	 * @param {Int8Array} digests - Key digests in trits
+	 *
+	 * @example
+	 * ```js
+	 * const seed = 'MYSUPERSECRETSEED...';
+	 * const subseed = Signing.subseed(Converter.trytesToTrits(seed), 0);
+	 *
+	 * const privateKey = Signing.key(subseed, 2);
+	 *
+	 * const digests = Signing.digests(privateKey);
+	 *
+	 * const address = Signing.address(digests);
+	 * ```
+	 *
+	 * @return {Int8Array} address - Address in trits
+	 *
+	 * @throws {errors.ILLEGAL_DIGESTS_LENGTH}: Make sure that the `digests` argument contains a multiple of 243 trits.
 	 */
 	// tslint:disable-next-line no-shadowed-variable
 	function address(digests) {
@@ -14294,7 +14509,9 @@
 	/**
 	 * @method digest
 	 *
-	 * @param {array} normalizedBundleFragment - Normalized bundle fragment
+	 * @ignore
+	 *
+	 * @param {array} normalizedBundleFragment - Normalized bundle fragments in trits
 	 * @param {Int8Array} signatureFragment - Signature fragment trits
 	 *
 	 * @return {Int8Array} Digest trits
@@ -14327,7 +14544,7 @@
 	exports.digest = digest;
 	/**
 	 * @method signatureFragment
-	 *
+	 * @ignore
 	 * @param {array} normalizeBundleFragment - normalized bundle fragment
 	 * @param {keyFragment} keyFragment - key fragment trits
 	 *
@@ -14368,13 +14585,39 @@
 	}
 	exports.signatureFragments = signatureFragments;
 	/**
+	 * This method validates a signature by doing the following:
+	 *
+	 * - Normalizing the bundle hash
+	 * - Deriving the key digests of the address, using the normalized bundle hash and the signature
+	 * -.Deriving an address from the key digests
+	 * - Comparing the derived address to the `expectedAddress` argument to find out if they match
+	 *
+	 * If the addresses match, the signature is valid.
+	 *
+	 * For more information about signatures see the [documentation portal](https://docs.iota.org/docs/getting-started/0.1/clients/signatures).
+	 *
+	 * ## Related methods
+	 *
+	 * To convert trytes such as bundle hashes and addresses to trits, use the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
+	 *
 	 * @method validateSignatures
 	 *
-	 * @param {Int8Array} expectedAddress - Expected address trytes
-	 * @param {Array<Int8Array>} signatureFragments - Array of signatureFragments
-	 * @param {Int8Array} bundle - Bundle hash
+	 * @summary Validates the given signature, using the given bundle and address.
 	 *
-	 * @return {boolean}
+	 * @memberof module:signing
+	 *
+	 * @param {Int8Array} expectedAddress - Input address in trits
+	 * @param {Array<Int8Array>} signatureFragments - Signature fragments in trits
+	 * @param {Int8Array} bundle - Bundle hash in trits
+	 *
+	 * @example
+	 * ```js
+	 * let valid = Signing.validateSignatures(expectedAddress, signatureFragments, bundle);
+	 * ```
+	 *
+	 * @return {boolean} valid - Whether the signatures are valid.
+	 *
+	 * @throws {errors.ILLEGAL_BUNDLE_HASH_LENGTH}: Make sure that the `bundle` argument contains a 243-trit bundle hash.
 	 */
 	function validateSignatures(expectedAddress, signatureFragments, // tslint:disable-line
 	bundle) {
@@ -14400,13 +14643,32 @@
 	}
 	exports.validateSignatures = validateSignatures;
 	/**
-	 * Normalizes the bundle hash, with resulting digits summing to zero.
+	 * This method normalizes the given bundle hash to make sure that only around half of the private key is revealed when the bundle hash is signed.
+	 *
+	 * For more information about signatures see the [documentation portal](https://docs.iota.org/docs/getting-started/0.1/clients/signatures).
+	 *
+	 * To find out more about why the bundle hash is normalized, see [this answer on StackExchange](https://iota.stackexchange.com/questions/1588/why-is-the-bundle-hash-normalized).
+	 *
+	 * ## Related methods
+	 *
+	 * To convert a bundle hash from trytes to trits, use the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
 	 *
 	 * @method normalizedBundle
 	 *
-	 * @param {Int8Array} bundle - Bundle hash to be normalized
+	 * @summary Normalizes the bundle hash.
 	 *
-	 * @return {Int8Array} Normalized bundle hash
+	 * @memberof module:signing
+	 *
+	 * @param {Int8Array} bundle - Bundle hash in trits
+	 *
+	 * @example
+	 * ```js
+	 * let normalizedBundleHash = Signing.normalizedBundle(bundle);
+	 * ```
+	 *
+	 * @return {Int8Array} Normalized bundle hash in trits
+	 *
+	 * @throws {errors.ILLEGAL_BUNDLE_HASH_LENGTH}: Make sure that the `bundle` argument contains a 243-trit bundle hash.
 	 */
 	exports.normalizedBundle = function (bundle) {
 	    if (bundle.length !== exports.HASH_LENGTH) {
@@ -14970,11 +15232,6 @@
 	    function (s) { return Number.isInteger(s) && s >= 0; },
 	    errors$5.INVALID_THRESHOLD,
 	]; };
-	exports.getBalancesThresholdValidator = function (threshold) { return [
-	    threshold,
-	    function (t) { return Number.isInteger(t) && t <= 100; },
-	    errors$5.INVALID_THRESHOLD,
-	]; };
 	exports.stringify = function (value) {
 	    return JSON.stringify(value, null, 1);
 	};
@@ -15015,8 +15272,7 @@
 	var guards_31$1 = guards$1.startOptionValidator;
 	var guards_32$1 = guards$1.startEndOptionsValidator;
 	var guards_33$1 = guards$1.getInputsThresholdValidator;
-	var guards_34$1 = guards$1.getBalancesThresholdValidator;
-	var guards_35$1 = guards$1.stringify;
+	var guards_34$1 = guards$1.stringify;
 
 	if (!Int8Array.prototype.slice) {
 	    Object.defineProperty(Int8Array.prototype, 'slice', {
@@ -15153,7 +15409,7 @@
 	 *
 	 * @param {Int8Array} lengthOrOffset
 	 *
-	 * @return {bolean}
+	 * @return {boolean}
 	 */
 	exports.isMultipleOfTransactionLength = function (lengthOrOffset) {
 	    if (!Number.isInteger(lengthOrOffset)) {
@@ -15201,12 +15457,11 @@
 	    };
 	};
 	/**
-	 * Returns a copy of `signatureOrMessage` field.
+	 * Gets the `signatureOrMessage` field of all transactions in a bundle.
 	 *
 	 * @method signatureOrMessage
 	 *
-	 * @param {Int8Array} buffer - Transaction buffer. Buffer length must be a multiple of transaction length.
-	 * @param {Number} [offset=0] - Transaction trit offset. It must be a multiple of transaction length.
+	 * @param {Int8Array} buffer - Transaction trytes
 	 *
 	 * @return {Int8Array}
 	 */
@@ -15401,14 +15656,32 @@
 	 */
 	exports.transactionEssence = exports.transactionBufferSlice(exports.TRANSACTION_ESSENCE_OFFSET, exports.TRANSACTION_ESSENCE_LENGTH);
 	/**
-	 * Calculates the transaction hash.
+	 * This method takes transaction trits, and returns the transaction hash.
+	 *
+	 * ## Related methods
+	 *
+	 * To validate the length of transaction trits, use the [`isMultipleOfTransactionLength()`]{@link #module_transaction.isMultipleOfTransactionLength} method.
+	 *
+	 * To get a transaction's trits from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method, then convert them to trits, using the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
 	 *
 	 * @method transactionHash
 	 *
-	 * @param {Int8Array} buffer - Transaction buffer. Buffer length must be multiple of transaction length.
-	 * @param {Number} [offset=0] - Transaction trit offset. It must be a multiple of transaction length.
+	 * @summary Generates the transaction hash for a given transaction.
+	 *
+	 * @memberof module:transaction
+	 *
+	 * @param {Int8Array} buffer - Transactions in trits
+	 * @param {Number} [offset=0] - Offset in trits to define a transaction to hash in the `buffer` argument
+	 *
+	 * @example
+	 * ```js
+	 * let hash = Transaction.transactionHash(transactions);
+	 * ```
 	 *
 	 * @return {Int8Array} Transaction hash
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `buffer` argument contains 8,019 trits (the length of a transaction without the transaction hash).
+	 * @throws {errors.ILLEGAL_TRANSACTION_OFFSET}: Make sure that the `offset` argument is a multiple of 8,019 (the length of a transaction without the transaction hash).
 	 */
 	exports.transactionHash = function (buffer, offset) {
 	    if (offset === void 0) { offset = 0; }
@@ -15426,14 +15699,33 @@
 	};
 	/* Guards */
 	/**
-	 * Checks if input trits represent a syntactically valid transaction.
+	 * This method takes an array of transaction trits and validates whether they form a valid transaction by checking the following:
+	 *
+	 * - Addresses in value transactions have a 0 trit at the end, which means they were generated using the Kerl hashing function
+	 * - The transaction would result in a valid hash, according to the given [`minWeightMagnitude`](https://docs.iota.org/docs/getting-started/0.1/network/minimum-weight-magnitude) argument
+	 *
+	 * ## Related methods
+	 *
+	 * To get a transaction's trits from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method, then convert them to trits, using the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
 	 *
 	 * @method isTransaction
 	 *
-	 * @param {Int8Array} transaction - Transaction trits.
-	 * @param {number} [minWeightMagnitude=0] - Min weight magnitude.
+	 * @summary Validates the structure and contents of a given transaction.
 	 *
-	 * @return {boolean}
+	 * @memberof module:transaction
+	 *
+	 * @param {Int8Array} transaction - Transaction trits
+	 * @param {number} [minWeightMagnitude=0] - Minimum weight magnitude
+	 *
+	 * @example
+	 * ```js
+	 * let valid = Transaction.isTransaction(transaction);
+	 * ```
+	 *
+	 * @return {boolean} valid - Whether the transaction is valid.
+	 *
+	 * @throws {errors.ILLEGAL_MIN_WEIGHT_MAGNITUDE}: Make sure that the `minWeightMagnitude` argument is a number between 1 and 81.
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `transaction` argument contains 8,019 trits (the length of a transaction without the transaction hash).
 	 */
 	exports.isTransaction = function (transaction, minWeightMagnitude) {
 	    if (minWeightMagnitude === void 0) { minWeightMagnitude = 0; }
@@ -15454,40 +15746,89 @@
 	                .every(function (trit) { return trit === 0; })));
 	};
 	/**
-	 * Checks if given transaction is tail.
-	 * A tail transaction is the one with `currentIndex=0`.
+	 * This method takes an array of transaction trits, and checks its `currentIndex` field to validate whether it is the tail transaction in a bundle.
+	 *
+	 * ## Related methods
+	 *
+	 * To get a transaction's trits from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method, then convert them to trits, using the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
 	 *
 	 * @method isTailTransaction
 	 *
-	 * @param {Int8Array} transaction
+	 * @summary Checks if the given transaction is a tail transaction in a bundle.
 	 *
-	 * @return {boolean}
+	 * @memberof module:transaction
+	 *
+	 * @param {Int8Array} transaction - Transaction trits
+	 *
+	 * @example
+	 * ```js
+	 * let tail = Transaction.isTailTransaction(transaction);
+	 * ```
+	 *
+	 * @return {boolean} tail - Whether the transaction is a tail transaction.
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `transaction` argument contains 8,019 trits (the length of a transaction without the transaction hash).
 	 */
 	exports.isTail = function (transaction) {
 	    return exports.isTransaction(transaction) && src.tritsToValue(exports.createCurrentIndex(false)(transaction)) === 0;
 	};
 	/**
-	 * Checks if given transaction is head.
-	 * The head transaction is the one with `currentIndex=lastIndex`.
+	 * This method takes an array of transaction trits, and checks its `currentIndex` field to validate whether it is the head transaction in a bundle.
+	 *
+	 * ## Related methods
+	 *
+	 * To get a transaction's trits from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method, then convert them to trits, using the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
 	 *
 	 * @method isHeadTransaction
 	 *
-	 * @param {Int8Array} transaction
+	 * @summary Checks if the given transaction is a head transaction in a bundle.
 	 *
-	 * @return {boolean}
+	 * @memberof module:transaction
+	 *
+	 * @param {Int8Array} transaction - Transaction trits
+	 *
+	 * @example
+	 * ```js
+	 * let head = Transaction.isHeadTransaction(transaction);
+	 * ```
+	 *
+	 * @return {boolean} head - Whether the transaction is a head transaction.
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `transaction` argument contains 8,019 trits (the length of a transaction without the transaction hash).
 	 */
 	exports.isHead = function (transaction) {
 	    return exports.isTransaction(transaction) &&
 	        src.tritsToValue(exports.createCurrentIndex(false)(transaction)) === src.tritsToValue(exports.createLastIndex(false)(transaction));
 	};
 	/**
-	 * Checks if given transaction has been attached.
+	 * This method checks if the given transaction trits include a proof of work by validating that the its `attachmentTimestamp` field has a non-zero value.
+	 *
+	 * The `attachmentTimestamp` field is set by the `attachToTangle` endpoint. Therefore, if this field is non-zero, this method assumes that proof of work was done.
+	 *
+	 * **Note:** This method does not validate proof of work.
+	 *
+	 * ## Related methods
+	 *
+	 * To get a transaction's trits from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method, then convert them to trits, using the [`trytesToTrits()`]{@link #module_converter.trytesToTrits} method.
 	 *
 	 * @method isAttachedTransaction
 	 *
-	 * @param {Int8Array} transaction
+	 * @ignore
 	 *
-	 * @return {boolean}
+	 * @summary Checks if the given transaction has a non-zero value in its `attachmentTimestamp` field.
+	 *
+	 * @memberof module:transaction
+	 *
+	 * @param {Int8Array} transaction - Transaction trits
+	 *
+	 * @example
+	 * ```js
+	 * let attached = Transaction.isAttachedTransaction(transaction);
+	 * ```
+	 *
+	 * @return {boolean} attached - Whether the transaction has a non-zero value in its `attachmentTimestamp` field.
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `transaction` argument contains 8,019 trits (the length of a transaction without the transaction hash).
 	 */
 	exports.isAttached = function (transaction) {
 	    return exports.isTransaction(transaction) &&
@@ -15692,34 +16033,49 @@
 	/**
 	 * @method createAttachToTangle
 	 *
+	 * @summary Creates a new `attachToTangle()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {Function} {@link #module_core.attachToTangle `attachToTangle`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`attachToTangle`]{@link #module_core.attachToTangle} - A new `attachToTangle()` function that uses your chosen Provider instance.
 	 */
 	exports.createAttachToTangle = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Performs the Proof-of-Work required to attach a transaction to the Tangle by
-	     * calling [`attachToTangle`](https://docs.iota.works/iri/api#endpoints/attachToTangle) command.
-	     * Returns list of transaction trytes and overwrites the following fields:
+	     * This method uses the connected IRI node's [`attachToTangle`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#attachToTangle) endpoint to chain the given transaction trytes into a bundle and do proof of work.
+	     *
+	     * By doing proof of work, this method overwrites the following transaction fields:
 	     *  - `hash`
 	     *  - `nonce`
 	     *  - `attachmentTimestamp`
 	     *  - `attachmentTimestampLowerBound`
 	     *  - `attachmentTimestampUpperBound`
 	     *
-	     * This method can be replaced with a local equivalent such as
-	     * [`ccurl.interface.js`](https://github.com/iotaledger/ccurl.interface.js) in node.js,
-	     * [`curl.lib.js`](https://github.com/iotaledger/curl.lib.js) which works on WebGL 2 enabled browsers
-	     * or remote [`PoWbox`](https://powbox.devnet.iota.org/).
+	     * **Note:** You can replace this method with your own custom one in the [`composeApi()`]{@link ##module_core.composeApi} method. For example, you may want to write a function that does local proof of work, using either the [`ccurl.interface.js`](https://github.com/iotaledger/ccurl.interface.js) NodeJS library,
+	     * or the [`curl.lib.js`](https://github.com/iotaledger/curl.lib.js) library for browsers that support WebGL2.
 	     *
-	     * `trunkTransaction` and `branchTransaction` hashes are given by
-	     * {@link #module_core.getTransactionsToApprove `getTransactionsToApprove`}.
+	     * ## Related methods
 	     *
-	     * **Note:** Persist the transaction trytes in local storage __before__ calling this command, to ensure
-	     * that reattachment is possible, until your bundle has been included.
+	     * To attach the returned transaction trytes to the Tangle, use the [`broadcastTransactions()`]{@link #module_core.broadcastTransactions} method to send them to a node.
+	     *
+	     * You can get a trunk and branch transaction hash by calling the
+	     * [`getTransactionsToApprove()`]{@link #module_core.getTransactionsToApprove} method
+	     *
+	     * @method attachToTangle
+	     *
+	     * @summary Connects the given transaction trytes into a bundle and sends them to the connected IOTA node to complete [remote proof of work](https://docs.iota.org/docs/getting-started/0.1/transactions/proof-of-work).
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Hash} trunkTransaction - Trunk transaction hash
+	     * @param {Hash} branchTransaction - Branch transaction hash
+	     * @param {number} minWeightMagnitude - The [minimum weight magnitude](https://docs.iota.org/docs/getting-started/0.1/network/minimum-weight-magnitude) to use for proof of work. **Note:** This value must be at least the same as the minimum weight magnitude of the branch and trunk transactions.
+	     * @param {TransactionTrytes[]} trytes - Array of transaction trytes in head first order, which are returned by the [`prepareTransfers()`]{@link #module_core.prepareTransfers} method
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
@@ -15729,34 +16085,22 @@
 	     *     attachToTangle(trunkTransaction, branchTransaction, minWeightMagnitude, trytes)
 	     *   )
 	     *   .then(attachedTrytes => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
+	     *     console.log(`Successfully did proof of work. Here are your bundle's transaction trytes: ${attachedTrytes}`)
+	     *   }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
 	     *   })
 	     * ```
 	     *
-	     * @method attachToTangle
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Hash} trunkTransaction - Trunk transaction as returned by
-	     * [`getTransactionsToApprove`]{@link #module_core.getTransactionsToApprove}
-	     * @param {Hash} branchTransaction - Branch transaction as returned by
-	     * [`getTransactionsToApprove`]{@link #module_core.getTransactionsToApprove}
-	     * @param {number} minWeightMagnitude - Number of minimum trailing zeros in tail transaction hash
-	     * @param {TransactionTrytes[]} trytes - List of transaction trytes
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {TransactionTrytes[]} Array of transaction trytes with nonce and attachment timestamps
-	     * @reject {Error}
-	     * - `INVALID_TRUNK_TRANSACTION`: Invalid `trunkTransaction`
-	     * - `INVALID_BRANCH_TRANSACTION`: Invalid `branchTransaction`
-	     * - `INVALID_MIN_WEIGHT_MAGNITUDE`: Invalid `minWeightMagnitude` argument
-	     * - `INVALID_TRANSACTION_TRYTES`: Invalid transaction trytes
-	     * - `INVALID_TRANSACTIONS_TO_APPROVE`: Invalid transactions to approve
-	     * - Fetch error
+	     *
+	     * @fulfil {TransactionTrytes[]} attachedTrytes - Array of transaction trytes in tail-first order. To attach these transactions to the Tangle, pass the trytes to the [`broadcastTransactions()`]{@link #module_core.broadcastTransactions} method.
+	     *
+	     * @reject {Error} error - One of the following errors:
+	     * - `INVALID_TRUNK_TRANSACTION`: Make sure that the hash contains 81 trytes
+	     * - `INVALID_BRANCH_TRANSACTION`: Make sure that the hash contains 81 trytes
+	     * - `INVALID_MIN_WEIGHT_MAGNITUDE`: Make sure that the minimum weight magnitude is at least the same as the one used for the branch and trunk transactions.
+	     * - `INVALID_TRANSACTION_TRYTES`: Make sure the trytes can be converted to a valid transaction object
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function attachToTangle(trunkTransaction, branchTransaction, minWeightMagnitude, trytes, callback) {
 	        return bluebird.resolve(guards.validate([
@@ -15811,51 +16155,65 @@
 	/**
 	 * @method createBroadcastTransactions
 	 *
+	 * @summary Creates a new `broadcastTransactions()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.broadcastTransactions `broadcastTransactions`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`broadcastTransactions`]{@link #module_core.broadcastTransactions}  - A new `broadcastTransactions()` function that uses your chosen Provider instance.
 	 */
 	exports.createBroadcastTransactions = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Broadcasts an list of _attached_ transaction trytes to the network by calling
-	     * [`boradcastTransactions`](https://docs.iota.org/iri/api#endpoints/broadcastTransactions) command.
-	     * Tip selection and Proof-of-Work must be done first, by calling
-	     * [`getTransactionsToApprove`]{@link #module_core.getTransactionsToApprove} and
-	     * [`attachToTangle`]{@link #module_core.attachToTangle} or an equivalent attach method or remote
-	     * [`PoWbox`](https://powbox.testnet.iota.org/), which is a development tool.
+	     * This method sends the given transaction trytes to the connected IRI node, using its
+	     * [`broadcastTransactions`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#broadcastTransactions) endpoint.
 	     *
-	     * You may use this method to increase odds of effective transaction propagation.
+	     * **Note:** Before calling this method, we recommend saving your transaction trytes in local storage.
+	     * By doing so, you make sure that you can always reattach your transactions to the Tangle in case they remain in a pending state.
 	     *
-	     * **Note:** Persist the transaction trytes in local storage __before__ calling this command, to ensure
-	     * that reattachment is possible, until your bundle has been included.
+	     * ## Related methods
+	     *
+	     * The given transaction trytes must be in a valid bundle and must include a proof of work.
+	     *
+	     * To create a valid bundle, use the `prepareTransfers()` method. For more information about what makes a bundles and transactions valid, see [this guide](https://docs.iota.org/docs/node-software/0.1/iri/concepts/transaction-validation).
+	     *
+	     * To do proof of work, use one of the following methods:
+	     *
+	     * - [`attachToTangle()`]{@link #module_core.attachToTangle}
+	     * - [`sendTrytes()`]{@link #module_core.sendTrytes}
+	     *
+	     * @method broadcastTransactions
+	     *
+	     * @summary Sends the given transaction trytes to the connected IRI node.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {TransactionTrytes[]} trytes - Transaction trytes that include proof of work
+	     * @param {Callback} [callback] - Optional callback
 	     *
 	     * @example
 	     *
 	     * ```js
 	     * broadcastTransactions(trytes)
-	     *   .then(trytes => {
-	     *      // ...
+	     *   .then(transactionTrytes => {
+	     *      console.log(`Successfully sent the following transaction trytes to the node:)
+	     *      console.log(JSON.stringify(transactionTrytes));
 	     *   })
-	     *   .catch(err => {
-	     *     // ...
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
 	     *   })
 	     * ```
 	     *
-	     * @method broadcastTransactions
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {TransactionTrytes[]} trytes - Attached Transaction trytes
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {Trytes[]} Attached transaction trytes
-	     * @reject {Error}
-	     * - `INVALID_ATTACHED_TRYTES`: Invalid array of attached trytes
-	     * - Fetch error
+	     *
+	     * @fulfil {TransactionTrytes[]} transactionTrytes - Array of transaction trytes that you just broadcast
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_ATTACHED_TRYTES`: Make sure that the trytes include a proof of work
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (trytes, callback) {
 	        return bluebird.resolve(guards.validate([
@@ -15895,81 +16253,68 @@
 	/**
 	 * @method createCheckConsistency
 	 *
+	 * @summary Creates a new `checkConsistency()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.checkConsistency `checkConsistency`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`checkConsistency`]{@link #module_core.checkConsistency}  - A new `checkConsistency()` function that uses your chosen Provider instance.
 	 */
 	exports.createCheckConsistency = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Checks if a transaction is _consistent_ or a set of transactions are _co-consistent_, by calling
-	     * [`checkConsistency`](https://docs.iota.org/iri/api#endpoints/checkConsistency) command.
-	     * _Co-consistent_ transactions and the transactions that they approve (directly or inderectly),
-	     * are not conflicting with each other and rest of the ledger.
+	     * This method finds out if a transaction has a chance of being confirmed, using the connected node's
+	     * [`checkConsistency`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#checkconsistency) endpoint.
 	     *
-	     * As long as a transaction is consistent it might be accepted by the network.
-	     * In case a transaction is inconsistent, it will not be accepted, and a reattachment
-	     * is required by calling [`replayBundle`]{@link #module_core.replayBundle}.
+	     * A consistent transaction is one where:
+	     * - The node has the transaction's branch and trunk transactions in its ledger
+	     * - The transaction's bundle is valid
+	     * - The transaction's branch and trunk transactions are valid
 	     *
-	     * @example
+	     * For more information about what makes a bundles and transactions valid, see [this article](https://docs.iota.org/docs/node-software/0.1/iri/concepts/transaction-validation).
 	     *
-	     * ```js
-	     * checkConsistency(tailHash)
-	     *   .then(isConsistent => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
+	     * As long as a transaction is consistent it has a chance of being confirmed.
 	     *
-	     * @example
-	     * ##### Example with `checkConsistency` & `isPromotable`
+	     * ## Related methods
 	     *
-	     * Consistent transactions might remain pending due to networking issues,
-	     * or if not referenced by recent milestones issued by
-	     * [Coordinator](https://docs.iota.org/introduction/tangle/consensus).
-	     * Therefore `checkConsistency` with a time heuristic can determine
-	     * if a transaction should be [_promoted_]{@link #module_core.promoteTransaction}
-	     * or [_reattached_]{@link #module_core.replayBundle}.
-	     * This functionality is abstracted in [`isPromotable`]{@link #module_core.isPromotable}.
+	     * If a consistent transaction is taking a long time to be confirmed, you can improve its chances, using the
+	     * [`promoteTransaction()`]{@link #module_core.promoteTransaction} method.
 	     *
-	     * ```js
-	     * const isAboveMaxDepth = attachmentTimestamp => (
-	     *    // Check against future timestamps
-	     *    attachmentTimestamp < Date.now() &&
-	     *    // Check if transaction wasn't issued before last 6 milestones
-	     *    // Milestones are being issued every ~2mins
-	     *    Date.now() - attachmentTimestamp < 11 * 60 * 1000
-	     * )
-	     *
-	     * const isPromotable = ({ hash, attachmentTimestamp }) => (
-	     *   checkConsistency(hash)
-	     *      .then(isConsistent => (
-	     *        isConsistent &&
-	     *        isAboveMaxDepth(attachmentTimestamp)
-	     *      ))
-	     * )
-	     * ```
+	     * If a transaction is inconsistent, it will never be confirmed. In this case, you can reattach the transaction, using the [`replayBundle()`]{@link #module_core.replayBundle} method.
 	     *
 	     * @method checkConsistency
 	     *
+	     * @summary Checks if one or more transactions are consistent.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Hash|Hash[]} transactions - Tail transaction hash (hash of transaction
-	     * with `currentIndex == 0`), or array of tail transaction hashes
-	     * @param {object} [options] - Options
-	     * @param {boolean} [options.rejectWithReason] - Enables rejection if state is `false`, with reason as error message
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Hash|Hash[]} transactions - One or more tail transaction hashes to check
+	     * @param {Object} [options] - Options object
+	     * @param {boolean} [options.rejectWithReason] - Return the reason for inconsistent transactions
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * checkConsistency(transactions)
+	     *   .then(isConsistent => {
+	     *     isConsistent? console.log(All these transactions are consistent): console.log(One or more of these transactions are inconsistent);
+	     *   })
+	     *   .catch(err => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     *   })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {boolean} Consistency state of given transaction or co-consistency of given transactions.
-	     * @reject {Error}
-	     * - `INVALID_TRANSACTION_HASH`: Invalid transaction hash
-	     * - Fetch error
-	     * - Reason for returning `false`, if called with `options.rejectWithReason`
+	     *
+	     * @fulfil {boolean} isConsistent - Whether the given transactions are consistent
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure the tail transaction hashes are 81 trytes long and their `currentIndex` field is 0
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
+	     * - Reason for inconsistency if the method was called with the `options.rejectWithReason` argument
 	     */
 	    return function checkConsistency(transactions, options, callback) {
 	        var rejectWithReason = types.getOptionsWithDefaults(defaults)(options || {}).rejectWithReason;
@@ -16488,11 +16833,6 @@
 	    function (s) { return Number.isInteger(s) && s >= 0; },
 	    errors$6.INVALID_THRESHOLD,
 	]; };
-	exports.getBalancesThresholdValidator = function (threshold) { return [
-	    threshold,
-	    function (t) { return Number.isInteger(t) && t <= 100; },
-	    errors$6.INVALID_THRESHOLD,
-	]; };
 	exports.stringify = function (value) {
 	    return JSON.stringify(value, null, 1);
 	};
@@ -16533,8 +16873,7 @@
 	var guards_31$2 = guards$2.startOptionValidator;
 	var guards_32$2 = guards$2.startEndOptionsValidator;
 	var guards_33$2 = guards$2.getInputsThresholdValidator;
-	var guards_34$2 = guards$2.getBalancesThresholdValidator;
-	var guards_35$2 = guards$2.stringify;
+	var guards_34$2 = guards$2.stringify;
 
 	var src$6 = createCommonjsModule(function (module, exports) {
 	/** @module checksum */
@@ -16554,17 +16893,36 @@
 	var ADDRESS_WITH_CHECKSUM_TRYTES_LENGTH = HASH_TRYTES_LENGTH + ADDRESS_CHECKSUM_TRYTES_LENGTH;
 	var MIN_CHECKSUM_TRYTES_LENGTH = 3;
 	/**
-	 * Generates and appends the 9-tryte checksum of the given trytes, usually an address.
+	 * This method takes 81 trytes, which could be an address or a seed, generates the [checksum](https://docs.iota.org/docs/getting-started/0.1/clients/checksums) and appends it to the trytes.
+	 *
+	 * To generate a checksum that is less than 9 trytes long, make sure to set the `isAddress` argument to false.
+	 *
+	 * ## Related methods
+	 *
+	 * To generate an address, use the [`getNewAddress()`]{@link #module_core.getNewAddress} method.
 	 *
 	 * @method addChecksum
 	 *
-	 * @param {string} input - Input trytes
+	 * @summary Generates a checksum and appends it to the given trytes.
 	 *
-	 * @param {number} [checksumLength=9] - Checksum trytes length
+	 * @memberof module:checksum
 	 *
-	 * @param {boolean} [isAddress=true] - Flag to denote if given input is address. Defaults to `true`.
+	 * @param {string} input - 81 trytes to which to append the checksum
 	 *
-	 * @returns {string} Address (with checksum)
+	 * @param {number} [checksumLength=9] - Length of the checksum to generate
+	 *
+	 * @param {boolean} [isAddress=true] - Whether the input is an address
+	 *
+	 * @example
+	 * ```js
+	 * let addressWithChecksum = Checksum.addChecksum('ADDRESS...');
+	 * ```
+	 *
+	 * @returns {string} The original trytes with an appended checksum.
+	 *
+	 * @throws {errors.INVALID_ADDRESS}: Make sure that the given address is 90 trytes long.
+	 * @throws {errors.INVALID_TRYTES}: Make sure that the `input` argument contains only [trytes](https://docs.iota.org/docs/getting-started/0.1/introduction/ternary)
+	 * @throws {errors.INVALID_CHECKSUM_LENGTH}: Make sure that the `checksumLength` argument is a number greater than or equal to 3. If the `isAddress` argument is set to true, make sure that the `checksumLength` argument is 9.
 	 */
 	function addChecksum(input, checksumLength, isAddress) {
 	    if (checksumLength === void 0) { checksumLength = ADDRESS_CHECKSUM_TRYTES_LENGTH; }
@@ -16597,13 +16955,29 @@
 	}
 	exports.addChecksum = addChecksum;
 	/**
-	 * Removes the 9-trytes checksum of the given input.
+	 * This method takes an address of 90 trytes, and removes the last 9 trytes to return the address without a checksum.
+	 *
+	 * ## Related methods
+	 *
+	 * To generate an address, use the [`getNewAddress()`]{@link #module_core.getNewAddress} method.
+	 * To add a checksum to an address, use the [`addChecksum()`]{@link #module_checksum.addChecksum} method.
 	 *
 	 * @method removeChecksum
 	 *
-	 * @param {string} input - Input trytes
+	 * @summary Removes the checksum from the given address.
 	 *
-	 * @return {string} Trytes without checksum
+	 * @memberof module:checksum
+	 *
+	 * @param {string} input - Address from which to remove the checksum
+	 *
+	 * @example
+	 * ```js
+	 * let addressWithoutChecksum = Checksum.removeChecksum('ADDRESS...');
+	 * ```
+	 *
+	 * @returns {string} The original address without the appended checksum.
+	 *
+	 * @throws {errors.INVALID_ADDRESS}: Make sure that the given address is 90 trytes long.
 	 */
 	function removeChecksum(input) {
 	    if (!guards$2.isTrytes(input, HASH_TRYTES_LENGTH) && !guards$2.isTrytes(input, ADDRESS_WITH_CHECKSUM_TRYTES_LENGTH)) {
@@ -16613,13 +16987,29 @@
 	}
 	exports.removeChecksum = removeChecksum;
 	/**
-	 * Validates the checksum of the given address trytes.
+	 * This method takes an address of 90 trytes, and checks if the checksum is valid.
+	 *
+	 * ## Related methods
+	 *
+	 * To generate an address, use the [`getNewAddress()`]{@link #module_core.getNewAddress} method.
+	 * To add a checksum to an address, use the [`addChecksum()`]{@link #module_checksum.addChecksum} method.
 	 *
 	 * @method isValidChecksum
 	 *
-	 * @param {string} addressWithChecksum
+	 * @summary Validates the checksum of an address.
 	 *
-	 * @return {boolean}
+	 * @memberof module:checksum
+	 *
+	 * @param {string} addressWithChecksum - Address with a checksum
+	 *
+	 * @example
+	 * ```js
+	 * let valid = Checksum.isValidChecksum('ADDRESS...');
+	 * ```
+	 *
+	 * @returns {boolean} Whether the checksum is valid.
+	 *
+	 * @throws {errors.INVALID_ADDRESS}: Make sure that the given address is 90 trytes long.
 	 */
 	exports.isValidChecksum = function (addressWithChecksum) {
 	    return addressWithChecksum === addChecksum(removeChecksum(addressWithChecksum));
@@ -16688,52 +17078,64 @@
 	/**
 	 * @method createFindTransactions
 	 *
+	 * @summary Creates a new `findTransactions()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.findTransactions `findTransactionObjects`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`findTransactions`]{@link #module_core.findTransactions}  - A new `findTransactions()` function that uses your chosen Provider instance.
 	 */
 	exports.createFindTransactions = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Searches for transaction `hashes`  by calling
-	     * [`findTransactions`](https://docs.iota.org/iri/api#endpoints/findTransactions) command.
-	     * It allows to search for transactions by passing a `query` object with `addresses`, `tags` and `approvees` fields.
-	     * Multiple query fields are supported and `findTransactions` returns intersection of results.
+	     * This method searches for transaction hashes by calling the connected IRI node's [`findTransactions`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#findTransactions) endpoint.
+	     *
+	     * If you pass more than one query parameter, this method returns only transactions that contain all the given fields in those queries.
+	     *
+	     * ## Related methods
+	     *
+	     * To find transaction objects, use the [`findTransactionObjects()`]{@link #module_core.findTransactionObjects} method.
+	     *
+	     * @method findTransactions
+	     *
+	     * @summary * Searches the Tangle for the hashes of transactions that contain all the given values in their transaction fields.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Object} query - Query object
+	     * @param {Hash[]} [query.addresses] - Array of addresses to search for in transactions
+	     * @param {Hash[]} [query.bundles] - Array of bundle hashes to search for in transactions
+	     * @param {Tag[]} [query.tags] - Array of tags to search for in transactions
+	     * @param {Hash[]} [query.approvees] - Array of transaction hashes that you want to search for in transactions' branch and trunk transaction fields
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
-	     * findTransactions({ addresses: ['ADRR...'] })
-	     *    .then(hashes => {
-	     *        // ...
-	     *    })
-	     *    .catch(err => {
-	     *        // handle errors here
-	     *    })
+	     * findTransactions({ addresses: ['ADDRESS999...'] })
+	     *    .then(transactionHashes => {
+	     *      console.log(`Successfully found the following transactions:)
+	     *      console.log(JSON.stringify(transactionHashes));
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     *   })
 	     * ```
 	     *
-	     * @method findTransactions
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {object} query
-	     * @param {Hash[]} [query.addresses] - List of addresses
-	     * @param {Hash[]} [query.bundles] - List of bundle hashes
-	     * @param {Tag[]} [query.tags] - List of tags
-	     * @param {Hash[]} [query.addresses] - List of approvees
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @returns {Promise}
-	     * @fulfil {Hash[]} Array of transaction hashes
-	     * @reject {Error}
-	     * - `INVALID_SEARCH_KEY`
-	     * - `INVALID_HASH`: Invalid bundle hash
-	     * - `INVALID_TRANSACTION_HASH`: Invalid approvee transaction hash
-	     * - `INVALID_ADDRESS`: Invalid address
-	     * - `INVALID_TAG`: Invalid tag
-	     * - Fetch error
+	     *
+	     * @fulfil {Hash[]} transactionHashes - Array of transaction hashes for transactions, which contain fields that match the query object
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_SEARCH_KEY`: Make sure that you entered valid query parameters
+	     * - `INVALID_HASH`: Make sure that the bundle hashes are 81 trytes long
+	     * - `INVALID_TRANSACTION_HASH`: Make sure that the approvee transaction hashes are 81 trytes long
+	     * - `INVALID_ADDRESS`: Make sure that the addresses contain only trytes
+	     * - `INVALID_TAG`: Make sure that the tags contain only trytes
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function findTransactions(query, callback) {
 	        return bluebird.resolve(exports.validateFindTransactions(query))
@@ -16781,59 +17183,75 @@
 	/**
 	 * @method createGetBalances
 	 *
+	 * @summary Creates a new `getBalances()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getBalances `getBalances`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getBalances`]{@link #module_core.getBalances}  - A new `getBalances()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetBalances = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Fetches _confirmed_ balances of given addresses at the latest solid milestone,
-	     * by calling [`getBalances`](https://docs.iota.works/iri/api#endpoints/getBalances) command.
+	     * This method uses the connected IRI node's [`getBalances`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#getbalances) endpoint.
 	     *
-	     * @example
-	     * ```js
-	     * getBalances([address], 100)
-	     *   .then(({ balances }) => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
+	     * Any pending output transactions are not included in the balance.
+	     * For example, if a pending output transaction deposits 10 Mi into an address that contains 50 Mi, this method will return a balance of 50 Mi not 60 Mi.
+	     *
+	     * ## Related methods
+	     *
+	     * To find the balance of all addresses that belong to your seed, use the [`getAccountData()`]{@link #module_core.getAccountData} method.
 	     *
 	     * @method getBalances
 	     *
+	     * @summary Gets the confirmed balances of the given addresses.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Hash[]} addresses - List of addresses
-	     * @param {number} threshold - Confirmation threshold, currently `100` should be used
-	     * @param {Hash[]} [tips] - List of tips to calculate the balance from the PoV of these transactions
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Hash[]} addresses - Array of addresses
+	     * @param {Hash[]} [tips] - Array of past transaction hashes from which to calculate the balances of the addresses. The balance will be calculated from the latest milestone that references these transactions.
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * getBalances([address])
+	     *   .then( balances => {
+	     *     console.log(`Balance of the first address: `$balances.balances[0])
+	     *     console.log(JSON.stringify(transactions));
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     * }
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {Balances} Object with list of `balances` and corresponding `milestone`
-	     * @reject {Error}
-	     * - `INVALID_HASH`: Invalid address
-	     * - `INVALID_THRESHOLD`: Invalid `threshold`
-	     * - Fetch error
+	     *
+	     * @fulfil {Balances} balances - Object that contains the following:
+	     * - balances.addresses: Array of balances in the same order as the `addresses` argument
+	     * - balances.references: Either the transaction hash of the latest milestone, or the transaction hashes that were passed to the `tips` argument
+	     * - balances.milestoneIndex: The latest milestone index that confirmed the balance
+	     * - balances.duration: The number of milliseconds that it took for the node to return a response
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_HASH`: Make sure that the addresses contain only trytes
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
-	    return function (addresses, threshold, tips, callback) {
+	    return function (addresses, tips, callback) {
 	        // If no tips are provided, switch arguments
 	        if (tips && typeof tips === 'function') {
 	            callback = tips;
 	            tips = [];
 	        }
-	        return bluebird.resolve(guards.validate([addresses, function (arr) { return arr.every(guards.isHash); }, errors$1.INVALID_ADDRESS], guards.getBalancesThresholdValidator(threshold), !!tips && [
+	        return bluebird.resolve(guards.validate([addresses, function (arr) { return arr.every(guards.isHash); }, errors$1.INVALID_ADDRESS], !!tips && [
 	            tips,
 	            function (arr) { return arr.every(function (h) { return guards.isTrytesOfExactLength(h, src$5.TRANSACTION_HASH_LENGTH / src.TRYTE_WIDTH); }); },
 	            errors$1.INVALID_TRANSACTION_HASH,
 	        ]))
 	            .then(function () {
-	            return send(__assign({ command: types.IRICommand.GET_BALANCES, addresses: addresses.map(src$6.removeChecksum), // Addresses passed to IRI should not have the checksum
-	                threshold: threshold }, (Array.isArray(tips) && tips.length && { tips: tips })));
+	            return send(__assign({ command: types.IRICommand.GET_BALANCES, addresses: addresses.map(src$6.removeChecksum) }, (Array.isArray(tips) && tips.length && { tips: tips })));
 	        })
 	            .then(function (res) { return (__assign({}, res, { balances: res.balances.map(function (balance) { return parseInt(balance, 10); }) })); })
 	            .asCallback(callback);
@@ -16854,50 +17272,62 @@
 	/**
 	 * @method createGetInclusionStates
 	 *
+	 * @summary Creates a new `getInclusionStates()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getInclusionStates `getInclusionStates`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getInclusionStates`]{@link #module_core.getInclusionStates}  - A new `getInclusionStates()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetInclusionStates = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Fetches inclusion states of given list of transactions, by calling
-	     * [`getInclusionStates`](https://docs.iota.works/iri/api#endpoints/getInclusionsStates) command.
+	     * This method uses the connected IRI node's [`getInclusionStates`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#getinclusionstates) endpoint.
+	     *
+	     * If the given tip transactions reference a given transaction, the returned state is `true`.
+	     *
+	     * If the given tip transactions do not reference a given transaction, the returned state is `false`.
+	     *
+	     * @method getInclusionStates
+	     *
+	     * @summary Finds out if one or more given transactions are referenced by one or more other given transactions.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Hash[]} transactions - Array of transaction hashes to check
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     * ```js
 	     * getInclusionStates(transactions)
 	     *   .then(states => {
-	     *     // ...
+	     *      for(let i = 0; i < states.length; i++){
+	     *          states? console.log(`Transaction ${i} is referenced by the given transactions`) :
+	     *          console.log(`Transaction ${i} is not referenced by the given transactions`);
+	     *      }
 	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     *   });
 	     * ```
 	     *
-	     * @method getInclusionStates
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Hash[]} transactions - List of transaction hashes
-	     * @param {Hash[]} tips - List of tips to check if transactions are referenced by
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {boolean[]} Array of inclusion state
-	     * @reject {Error}
-	     * - `INVALID_TRANSACTION_HASH`: Invalid `hashes` or `tips`
-	     * - Fetch error
+	     *
+	     * @fulfil {boolean[]} states - Array of inclusion states, where `true` means that the transaction is referenced by the given transacions and `false` means that it's not.
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure that the transaction hashes are 81 trytes long
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
-	    return function (transactions, tips, callback) {
-	        return bluebird.resolve(guards.validate(guards.arrayValidator(guards.hashValidator)(transactions, errors$1.INVALID_TRANSACTION_HASH), guards.arrayValidator(guards.hashValidator)(tips, errors$1.INVALID_TRANSACTION_HASH)))
+	    return function (transactions, callback) {
+	        return bluebird.resolve(guards.validate(guards.arrayValidator(guards.hashValidator)(transactions, errors$1.INVALID_TRANSACTION_HASH)))
 	            .then(function () {
 	            return send({
 	                command: types.IRICommand.GET_INCLUSION_STATES,
-	                transactions: transactions,
-	                tips: tips
+	                transactions: transactions
 	            });
 	        })
 	            .then(function (_a) {
@@ -16919,27 +17349,64 @@
 	/**
 	 * @method createGetNeighbors
 	 *
+	 * @summary Creates a new `getNeighbors()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getNeighbors `getNeighbors`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getNeighbors`]{@link #module_core.getNeighbors}  - A new `getNeighbors()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetNeighbors = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Returns list of connected neighbors.
+	     * This method uses the connected IRI node's [`getNeighbors`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#getneighbors) endpoint to find information about the neighbors' activity.
+	     *
+	     * All statistics are aggregated until the node restarts.
+	     *
+	     * ## Related methods
+	     *
+	     * To add neighbors to the node, use the [`addNeighbors()`]{@link #module_core.addNeighbors} method.
 	     *
 	     * @method getNeighbors
 	     *
+	     * @summary Gets information and statistics about the connected IRI node's neighbors.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     *
+	     * ```js
+	     * getNeighbors()
+	     * .then(neighbors => {
+	     *     console.log(`Node is connected to the following neighbors: \n`)
+	     *     console.log(JSON.stringify(neighbors));
+	     * })
+	     * .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     * });
+	     *```
 	     *
 	     * @return {Promise}
-	     * @fulfil {Neighbors}
-	     * @reject {Error}
-	     * - Fetch error
+	     *
+	     * @fulfil {Neighbors} neighbors - Array that contains the following:
+	     * - neighbors.address: IP address of the neighbor
+	     * - neighbors.domain: Domain name of the neighbor
+	     * - neighbors.numberOfAllTransactions: Number of transactions in the neighbors ledger (including invalid ones)
+	     * - neighbors.numberOfRandomTransactionRequests: Number of random tip transactions that the neighbor has requested from the connected node
+	     * - neighbors.numberOfNewTransactions: Number of new transactions that the neighbor has sent to the connected node
+	     * - neighbors.numberOfInvalidTransactions: Number of invalid transactions that the neighbor sent to the connected node
+	     * - neighbors.numberOfStaleTransactions: Number of transactions that the neighbor sent to the connected node, which contain a timestamp that's older than the connected node's latest snapshot
+	     * - neighbors.numberOfSentTransactions: Number of transactions that the connected node has sent to the neighbor
+	     * - neighbors.numberOfDroppedSentPackets: Number of network packets that the neighbor dropped because its queue was full
+	     * - neighbors.connectionType: The transport protocol that the neighbor uses to sent packets to the connected node
+	     * - neighbors.connected: Whether the neighbor is connected to the node
+	     *
+	     * @reject {Error} error - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getNeighbors(callback) {
 	        return send({
@@ -16964,38 +17431,69 @@
 	/**
 	 * @method createGetNodeInfo
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @summary Creates a new `getNodeInfo()` method, using a custom Provider instance.
 	 *
 	 * @memberof module:core
 	 *
-	 * @return {function} {@link #module_core.getNodeInfo `getNodeInfo`}
+	 * @ignore
+	 *
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getNodeInfo`]{@link #module_core.getNodeInfo}  - A new `getNodeInfo()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetNodeInfo = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Returns information about connected node by calling
-	     * [`getNodeInfo`](https://docs.iota.works/iri/api#endpoints/getNodeInfo) command.
+	     * This method uses the connected IRI node's
+	     * [`getNodeInfo`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#getnodeinfo) endpoint.
 	     *
-	     * @example
+	     * ## Related methods
 	     *
-	     * ```js
-	     * getNodeInfo()
-	     *   .then(info => console.log(info))
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
+	     * To get statistics about the connected node's neighbors, use the [`getNeighbors()`]{@link #module_core.getNeighbors} method.
 	     *
 	     * @method getNodeInfo
 	     *
+	     * @summary Gets information about the connected IRI node.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * getNodeInfo()
+	     *   .then(info => console.log(JSON.stringify(info)))
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     *   })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {NodeInfo} Object with information about connected node.
-	     * @reject {Error}
-	     * - Fetch error
+	     *
+	     * @fulfil {NodeInfo} info - Object that contains the following information:
+	     * info.appName: Name of the IRI network
+	     * info.appVersion: Version of the [IRI node software](https://docs.iota.org/docs/node-software/0.1/iri/introduction/overview)
+	     * info.jreAvailableProcessors: Available CPU cores on the node
+	     * info.jreFreeMemory: Amount of free memory in the Java virtual machine
+	     * info.jreMaxMemory: Maximum amount of memory that the Java virtual machine can use
+	     * info.jreTotalMemory: Total amount of memory in the Java virtual machine
+	     * info.jreVersion: The version of the Java runtime environment
+	     * info.latestMilestone: Transaction hash of the latest [milestone](https://docs.iota.org/docs/getting-started/0.1/network/the-coordinator)
+	     * info.latestMilestoneIndex: Index of the latest milestone
+	     * info.latestSolidSubtangleMilestone: Transaction hash of the node's latest solid milestone
+	     * info.latestSolidSubtangleMilestoneIndex: Index of the node's latest solid milestone
+	     * info.milestoneStartIndex: Start milestone for the current version of the IRI node software
+	     * info.lastSnapshottedMilestoneIndex: Index of the last milestone that triggered a [local snapshot](https://docs.iota.org/docs/getting-started/0.1/network/nodes#local-snapshots) on the node
+	     * info.neighbors: Total number of connected neighbors
+	     * info.packetsQueueSize: Size of the node's packet queue
+	     * info.time: Unix timestamp
+	     * info.tips: Number of tips transactions
+	     * info.transactionsToRequest: Total number of transactions that the node is missing in its ledger
+	     * info.features: Enabled configuration options on the node
+	     * info.coordinatorAddress: Address (Merkle root) of the [Coordinator](https://docs.iota.org/docs/getting-started/0.1/network/the-coordinator)
+	     * info.duration: Number of milliseconds it took to complete the request
+	     *
+	     * @reject {Error} error - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getNodeInfo(callback) {
 	        return send({
@@ -17009,62 +17507,6 @@
 	unwrapExports(createGetNodeInfo);
 	var createGetNodeInfo_1 = createGetNodeInfo.createGetNodeInfo;
 
-	var createGetTips = createCommonjsModule(function (module, exports) {
-	exports.__esModule = true;
-
-	/**
-	 * @method createGetTips
-	 *
-	 * @memberof module:core
-	 *
-	 * @param {Provider} provider - Network provider
-	 *
-	 * @return {function} {@link #module_core.getTips `getTips`}
-	 */
-	exports.createGetTips = function (_a) {
-	    var send = _a.send;
-	    /**
-	     * Returns a list of tips (transactions not referenced by other transactions),
-	     * as seen by the connected node.
-	     *
-	     * @example
-	     *
-	     * ```js
-	     * getTips()
-	     *   .then(tips => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
-	     *
-	     * @method getTips
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Callback} [callback] - Optional callback
-	     *
-	     * @return {Promise}
-	     * @fulfil {Hash[]} List of tip hashes
-	     * @reject {Error}
-	     * - Fetch error
-	     */
-	    return function (callback) {
-	        return send({ command: types.IRICommand.GET_TIPS })
-	            .then(function (_a) {
-	            var hashes = _a.hashes;
-	            return hashes;
-	        })
-	            .asCallback(callback);
-	    };
-	};
-
-	});
-
-	unwrapExports(createGetTips);
-	var createGetTips_1 = createGetTips.createGetTips;
-
 	var createGetTransactionsToApprove = createCommonjsModule(function (module, exports) {
 	exports.__esModule = true;
 
@@ -17076,59 +17518,61 @@
 	/**
 	 * @method createGetTransactionsToApprove
 	 *
+	 * @summary Creates a new `getTransactionsToApprove()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getTransactionsToApprove `getTransactionsToApprove`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getTransactionsToApprove`]{@link #module_core.getTransactionsToApprove}  - A new `getTransactionsToApprove()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetTransactionsToApprove = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Does the _tip selection_ by calling
-	     * [`getTransactionsToApprove`](https://docs.iota.works/iri/api#endpoints/getTransactionsToApprove) command.
-	     * Returns a pair of approved transactions, which are chosen randomly after validating the transaction trytes,
-	     * the signatures and cross-checking for conflicting transactions.
+	     * This method gets two [consistent]{@link #module_core.checkConsistency} tip transaction hashes that can be used as branch and trunk transactions by calling the connected IRI node's [`getTransactionsToApprove`](https://docs.iota.works/iri/api#endpoints/getTransactionsToApprove) endpoint.
 	     *
-	     * Tip selection is executed by a Random Walk (RW) starting at random point in given `depth`
-	     * ending up to the pair of selected tips. For more information about tip selection please refer to the
-	     * [whitepaper](https://iota.org/IOTA_Whitepaper.pdf).
+	     * To make sure that the tip transactions also directly or indirectly reference another transaction, add that transaction's hash to the `reference` argument.
 	     *
-	     * The `reference` option allows to select tips in a way that the reference transaction is being approved too.
-	     * This is useful for promoting transactions, for example with
-	     * [`promoteTransaction`]{@link #module_core.promoteTransaction}.
+	     * ## Related methods
+	     *
+	     * You can use the returned transaction hashes to do proof of work on transaction trytes, using the [`attachToTangle()`]{@link #module_core.attachToTangle} method.
+	     *
+	     * @method getTransactionsToApprove
+	     *
+	     * @summary Gets two tip transaction hashes that can be used as branch and trunk transactions.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {number} depth - The [depth](https://docs.iota.org/docs/getting-started/0.1/transactions/depth) at which to start the weighted random walk. The [Trinity wallet](https://trinity.iota.org/) uses a value of `3`,
+	     * meaning that the weighted random walk starts 3 milestones in the past.
+	     * @param {Hash} [reference] - Optional transaction hash that you want the tip transactions to reference
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
-	     * const depth = 3
-	     * const minWeightMagnitude = 14
-	     *
-	     * getTransactionsToApprove(depth)
-	     *   .then(transactionsToApprove =>
-	     *      attachToTangle(minWeightMagnitude, trytes, { transactionsToApprove })
-	     *   )
-	     *   .then(storeAndBroadcast)
-	     *   .catch(err => {
-	     *     // handle errors here
+	     * getTransactionsToApprove(3)
+	     *   .then(transactionsToApprove) => {
+	     *      console.log(Found the following transaction hashes that you can reference in a new bundle:);
+	     *      console.log(JSON.stringify(transactionsToApprove));
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
 	     *   })
 	     * ```
 	     *
-	     * @method getTransactionsToApprove
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {number} depth - The depth at which Random Walk starts. A value of `3` is typically used by wallets,
-	     * meaning that RW starts 3 milestones back.
-	     * @param {Hash} [reference] - Optional reference transaction hash
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {trunkTransaction, branchTransaction} A pair of approved transactions
-	     * @reject {Error}
-	     * - `INVALID_DEPTH`
-	     * - `INVALID_REFERENCE_HASH`: Invalid reference hash
-	     * - Fetch error
+	     *
+	     * @fulfil {Object} transactionsToApprove - An object that contains the following:
+	     * - trunkTransaction: Transaction hash
+	     * - branchTransaction: Transaction hash
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_DEPTH`: Make sure that the `depth` argument is greater than zero
+	     * - `INVALID_REFERENCE_HASH`: Make sure that the reference transaction hash is 81 trytes long
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getTransactionsToApprove(depth, reference, callback) {
 	        return bluebird.resolve(guards.validate([depth, function (n) { return Number.isInteger(n) && n > 0; }, errors$1.INVALID_DEPTH], !!reference && [
@@ -17170,43 +17614,59 @@
 	/**
 	 * @method createGetTrytes
 	 *
+	 * @summary Creates a new `getTrytes()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getTrytes `getTrytes`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getTrytes`]{@link #module_core.getTrytes}  - A new `getTrytes()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetTrytes = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Fetches the transaction trytes given a list of transaction hashes, by calling
-	     * [`getTrytes`](https://docs.iota.works/iri/api#endpoints/getTrytes) command.
+	     * This method uses the connected IRI node's
+	     * [`getTrytes`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#gettrytes) endpoint.
+	     *
+	     * The transaction trytes include all transaction fields except the transaction hash.
+	     *
+	     * **Note:** If the connected IRI node doesn't have the given transaction in its ledger, the value at the index of that transaction hash is either `null` or a string of `9`s.
+	     *
+	     * ## Related methods
+	     *
+	     * To get transaction objects instead of trytes, use the [`getTransactionObjects()`]{@link #module_core.getTransactionObjects} method.
+	     *
+	     * @method getTrytes
+	     *
+	     * @summary Gets the transaction trytes for the given transaction hashes.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Array<Hash>} hashes - Array of transaction hashes
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     * ```js
 	     * getTrytes(hashes)
-	     *   // Parsing as transaction objects
-	     *   .then(trytes => asTransactionObjects(hashes)(trytes))
-	     *   .then(transactions => {
-	     *     // ...
+	     *   .then(trytes => {
+	     *   .then(transactionTrytes => {
+	     *     console.log(Found the following transaction trytes:);
+	     *     console.log(JSON.stringify(transactionTrytes));
 	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     *   });
 	     * ```
 	     *
-	     * @method getTrytes
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Array<Hash>} hashes - List of transaction hashes
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {Trytes[]} - Transaction trytes
-	     * @reject Error{}
-	     * - `INVALID_TRANSACTION_HASH`: Invalid hash
-	     * - Fetch error
+	     *
+	     * @fulfil {Trytes[]} transactionTrytes - Array of transaction trytes
+	     *
+	     * @reject Error{} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure that the transaction hashes are 81 trytes long
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getTrytes(hashes, callback) {
 	        return bluebird.resolve(guards.validate([
@@ -17260,6 +17720,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider - Network provider
 	 *
 	 * @return {function} {@link #module_core.removeNeighbors `removeNeighbors`}
@@ -17267,24 +17729,42 @@
 	exports.createRemoveNeighbors = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * Removes a list of neighbors from the connected IRI node by calling
-	     * [`removeNeighbors`]{@link https://docs.iota.works/iri/api#endpoints/removeNeighbors} command.
-	     * Assumes `removeNeighbors` command is available on the node.
+	     * This method removes a list of neighbors from the connected IRI node by calling its
+	     * [`removeNeighbors`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#removeneighbors) endpoint.
 	     *
-	     * This method has temporary effect until your IRI node relaunches.
+	     * These neighbors are re-added when the node is restarted.
+	     *
+	     * ## Related methods
+	     *
+	     * To see statistics about the connected IRI node's neighbors, use the [`getNeighbors()`]{@link #module_core.getNeighbors} method.
 	     *
 	     * @method removeNeighbors
 	     *
+	     * @summary Removes a list of neighbors from the connected IRI node.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Array} uris - List of URI's
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Array} uris - Array of neighbor URIs that you want to add to the node
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     *
+	     * ```js
+	     * iota.addNeighbors(['tcp://148.148.148.148:15600'])
+	     *   .then(numberOfNeighbors => {
+	     *     console.log(`Successfully removed ${numberOfNeighbors} neighbors`)
+	     *   }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     *   })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {number} Number of neighbors that were removed
-	     * @reject {Error}
-	     * - `INVALID_URI`: Invalid uri
-	     * - Fetch error
+	     *
+	     * @fulfil {number} numberOfNeighbors - Number of neighbors that were removed
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_URI`: Make sure that the URI is valid (for example URIs must start with `udp://` or `tcp://`)
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (uris, callback) {
 	        return bluebird.resolve(guards.validate(guards.arrayValidator(guards.uriValidator)(uris)))
@@ -17317,6 +17797,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider - Network provider
 	 *
 	 * @return {function} {@link #module_core.storeTransactions `storeTransactions`}
@@ -17324,30 +17806,50 @@
 	exports.createStoreTransactions = function (_a) {
 	    var send = _a.send;
 	    /**
-	     * @description Persists a list of _attached_ transaction trytes in the store of connected node by calling
-	     * [`storeTransactions`](https://docs.iota.org/iri/api#endpoints/storeTransactions) command.
-	     * Tip selection and Proof-of-Work must be done first, by calling
-	     * [`getTransactionsToApprove`]{@link #module_core.getTransactionsToApprove} and
-	     * [`attachToTangle`]{@link #module_core.attachToTangle} or an equivalent attach method or remote
-	     * [`PoWbox`](https://powbox.devnet.iota.org/).
+	     * This method uses the connected IRI node's
+	     * [`storeTransactions`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#storeTransactions) endpoint to store the given transaction trytes.
 	     *
-	     * **Note:** Persist the transaction trytes in local storage __before__ calling this command, to ensure
-	     * that reattachment is possible, until your bundle has been included.
+	     * **Note:** Before calling this method, we recommend saving your transaction trytes in local storage.
+	     * By doing so, you make sure that you can always reattach your transactions to the Tangle in case they remain in a pending state.
 	     *
-	     * Any transactions stored with this command will eventaully be erased, as a result of a snapshot.
+	     * ## Related methods
 	     *
-	     * @method storeTransactions
+	     * The given transaction trytes must be in a valid bundle and must include a proof of work.
+	     *
+	     * To create a valid bundle, use the `prepareTransfers()` method. For more information about what makes a bundles and transactions valid, see [this guide](https://docs.iota.org/docs/node-software/0.1/iri/concepts/transaction-validation).
+	     *
+	     * To do proof of work, use one of the following methods:
+	     *
+	     * - [`attachToTangle()`]{@link #module_core.attachToTangle}
+	     * - [`sendTrytes()`]{@link #module_core.sendTrytes}
+	     *
+	     * @method storeAndBroadcast
+	     *
+	     * @summary Stores the given transaction trytes on the connected IRI node.
 	     *
 	     * @memberof module:core
 	     *
-	     * @param {Trytes[]} trytes - Attached transaction trytes
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Trytes[]} trytes - Array of transaction trytes
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * storeTransactions(trytes)
+	     * .then(transactionTrytes => {
+	     *     console.log(`Successfully stored transactions on the node`);
+	     *     console.log(JSON.stringify(transactionTrytes));
+	     * }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     * })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fullfil {Trytes[]} Attached transaction trytes
-	     * @reject {Error}
-	     * - `INVALID_ATTACHED_TRYTES`: Invalid attached trytes
-	     * - Fetch error
+	     *
+	     * @fullfil {Trytes[]} transactionTrytes - Attached transaction trytes
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_TRYTES`: Make sure the trytes can be converted to a valid transaction object
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (trytes, callback) {
 	        return bluebird.resolve(guards.validate([
@@ -17387,9 +17889,8 @@
 	    return function (addresses, callback) {
 	        if (caller !== 'lib') {
 	            /* tslint:disable-next-line:no-console */
-	            console.warn('Avoid using `wereAddressesSpentFrom()` instead of proper input management with a local database.\n' +
-	                '`wereAddressesSpentFrom()` does not scale in IoT environment, hence it will be removed from the ' +
-	                'library in a future version.');
+	            console.warn('Avoid using `wereAddressesSpentFrom()`. Instead, use the account module to keep track of spent addresses.\n' +
+	                '`wereAddressesSpentFrom()` will be removed from the library in a future version.');
 	        }
 	        return bluebird.resolve(guards.validate(guards.arrayValidator(guards.hashValidator)(addresses, errors$1.INVALID_ADDRESS)))
 	            .then(function () {
@@ -17899,11 +18400,6 @@
 	    function (s) { return Number.isInteger(s) && s >= 0; },
 	    errors$7.INVALID_THRESHOLD,
 	]; };
-	exports.getBalancesThresholdValidator = function (threshold) { return [
-	    threshold,
-	    function (t) { return Number.isInteger(t) && t <= 100; },
-	    errors$7.INVALID_THRESHOLD,
-	]; };
 	exports.stringify = function (value) {
 	    return JSON.stringify(value, null, 1);
 	};
@@ -17944,8 +18440,7 @@
 	var guards_31$3 = guards$3.startOptionValidator;
 	var guards_32$3 = guards$3.startEndOptionsValidator;
 	var guards_33$3 = guards$3.getInputsThresholdValidator;
-	var guards_34$3 = guards$3.getBalancesThresholdValidator;
-	var guards_35$3 = guards$3.stringify;
+	var guards_34$3 = guards$3.stringify;
 
 	if (!Int8Array.prototype.slice) {
 	    Object.defineProperty(Int8Array.prototype, 'slice', {
@@ -18035,7 +18530,6 @@
 	    IRICommand["GET_NEIGHBORS"] = "getNeighbors";
 	    IRICommand["ADD_NEIGHBORS"] = "addNeighbors";
 	    IRICommand["REMOVE_NEIGHBORS"] = "removeNeighbors";
-	    IRICommand["GET_TIPS"] = "getTips";
 	    IRICommand["FIND_TRANSACTIONS"] = "findTransactions";
 	    IRICommand["GET_TRYTES"] = "getTrytes";
 	    IRICommand["GET_INCLUSION_STATES"] = "getInclusionStates";
@@ -18079,13 +18573,28 @@
 
 
 	/**
-	 * Converts a transaction object or a list of those into transaction trytes.
+	 * This method takes one or more transaction objects and converts them into trytes.
+	 *
+	 * ## Related methods
+	 *
+	 * To get JSON data from the `signatureMessageFragment` field of the transaction trytes, use the [`extractJSON()`]{@link #module_extract-json.extractJSON} method.
 	 *
 	 * @method asTransactionTrytes
 	 *
-	 * @param {Transaction | Transaction[]} transactions - Transaction object(s)
+	 * @summary Converts one or more transaction objects into transaction trytes.
+	 *
+	 * @memberof module:transaction-converter
+	 *
+	 * @param {Transaction | Transaction[]} transactions - Transaction objects
+	 *
+	 * @example
+	 * ```js
+	 * let trytes = TransactionConverter.asTransactionTrytes(transactionObject);
+	 * ```
 	 *
 	 * @return {Trytes | Trytes[]} Transaction trytes
+	 *
+	 * @throws {errors.INVALID_TRYTES}: Make sure that the object fields in the `transactions` argument contains valid trytes (A-Z or 9).
 	 */
 	function asTransactionTrytes(transactions) {
 	    var txTrytes = types$1.asArray(transactions).map(function (transaction) {
@@ -18111,13 +18620,30 @@
 	}
 	exports.asTransactionTrytes = asTransactionTrytes;
 	/**
-	 * Converts transaction trytes of 2673 trytes into a transaction object.
+	 * This method takes 2,673 transaction trytes and converts them into a transaction object.
+	 *
+	 * ## Related methods
+	 *
+	 * To convert more than one transaction into an object at once, use the [`asTransactionObjects()`]{@link #module_transaction-converter.asTransactionObjects} method.
+	 *
+	 * To get a transaction's trytes from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method.
 	 *
 	 * @method asTransactionObject
 	 *
-	 * @param {Trytes} trytes - Transaction trytes
+	 * @summary Converts transaction trytes into a transaction object.
 	 *
-	 * @return {Transaction} Transaction object
+	 * @memberof module:transaction-converter
+	 *
+	 * @param {Trytes} transaction - Transaction trytes
+	 *
+	 * @example
+	 * ```js
+	 * let transactionObject = TransactionConverter.asTransactionObject(transactionTrytes);
+	 * ```
+	 *
+	 * @return {Transaction} transactionObject - A transaction object
+	 *
+	 * @throws {errors.INVALID_TRYTES}: Make sure that the object fields in the `transaction` argument contains valid trytes (A-Z or 9).
 	 */
 	exports.asTransactionObject = function (trytes, hash) {
 	    if (!guards$3.isTrytesOfExactLength(trytes, src$5.TRANSACTION_LENGTH / src.TRYTE_WIDTH)) {
@@ -18149,17 +18675,30 @@
 	    };
 	};
 	/**
-	 * Converts a list of transaction trytes into list of transaction objects.
-	 * Accepts a list of hashes and returns a mapper. In cases hashes are given,
-	 * the mapper function map them to converted objects.
+	 * This method takes an array of transaction hashes and returns a mapper.
+	 *
+	 * If any hashes are given, the mapper function maps them to their converted objects. Otherwise, all hashes are recalculated.
+	 *
+	 * ## Related methods
+	 *
+	 * To get a transaction's trytes from the Tangle, use the [`getTrytes()`]{@link #module_core.getTrytes} method.
 	 *
 	 * @method asTransactionObjects
 	 *
-	 * @param {Hash[]} [hashes] - Optional list of known hashes.
-	 * Known hashes are directly mapped to transaction objects,
-	 * otherwise all hashes are being recalculated.
+	 * @summary Converts one or more transaction trytes into transaction objects.
 	 *
-	 * @return {Function} {@link #module_transaction.transactionObjectsMapper `transactionObjectsMapper`}
+	 * @memberof module:transaction-converter
+	 *
+	 * @param {Hash[]} [hashes] - Transaction hashes
+	 *
+	 * @example
+	 * ```js
+	 * let transactionObjectsMapper = TransactionConverter.asTransactionObjects([hashes]);
+	 * ```
+	 *
+	 * @return {Function} [`transactionObjectsMapper()`]{@link #module_transaction.transactionObjectsMapper}
+	 *
+	 * @throws {errors.INVALID_TRYTES}: Make sure that transcactions contains valid trytes (A-Z or 9).
 	 */
 	exports.asTransactionObjects = function (hashes) {
 	    /**
@@ -18206,45 +18745,66 @@
 	/**
 	 * @method createBroadcastBundle
 	 *
+	 * @summary Creates a new `broadcastBundle()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.broadcastBundle `broadcastBundle`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`broadcastBundle`]{@link #module_core.broadcastBundle}  - A new `broadcastBundle()` function that uses your chosen Provider instance.
 	 */
 	exports.createBroadcastBundle = function (provider) {
 	    var broadcastTransactions = src$b.createBroadcastTransactions(provider);
 	    var getBundle = src$b.createGetBundle(provider);
 	    /**
-	     * Re-broadcasts all transactions in a bundle given the tail transaction hash.
-	     * It might be useful when transactions did not properly propagate,
-	     * particularly in the case of large bundles.
+	     * This method uses the `getBundle()` method to get all transactions in the given tail transaction's bundle from the connected IRI node.
+	     *
+	     * Then, those transactions are sent to the node again so that the node sends them to all of its neighbors.
+	     *
+	     * You may want to use this method to improve the likelihood of your transactions reaching the rest of the network.
+	     *
+	     * **Note:** To use this method, the node must already have your bundle's transaction trytes in its ledger.
+	     *
+	     * ## Related methods
+	     *
+	     * To create and sign a bundle of new transactions, use the [`prepareTransfers()`]{@link #module_core.prepareTransfers} method.
+	     *
+	     * @method broadcastBundle
+	     *
+	     * @summary Resends all transactions in the bundle of a given tail transaction hash to the connected IRI node.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Hash} tailTransactionHash - Tail transaction hash
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
 	     * broadcastBundle(tailHash)
-	     *   .then(transactions => {
-	     *      // ...
+	     *   .then(transactionObjects => {
+	     *      console.log(`Successfully sent the following bundle to the node:)
+	     *      console.log(JSON.stringify(transactionObjects));
 	     *   })
-	     *   .catch(err => {
-	     *     // ...
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
 	     *   })
 	     * ```
 	     *
-	     * @method broadcastBundle
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Hash} tailTransactionHash - Tail transaction hash
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {Transaction[]} List of transaction objects
-	     * @reject {Error}
-	     * - `INVALID_HASH`: Invalid tail transaction hash
-	     * - `INVALID_BUNDLE`: Invalid bundle
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} transactionObjects - Array of transaction objects
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure the tail transaction hash is 81 trytes long and its `currentIndex` field is 0
+	     * - `INVALID_BUNDLE`: Check the tail transaction's bundle for the following:
+	     *   - Addresses in value transactions have a 0 trit at the end, which means they were generated using the Kerl hashing function
+	     *   - Transactions in the bundle array are in the same order as their currentIndex field
+	     *   - The total value of all transactions in the bundle sums to 0
+	     *   - The bundle hash is valid
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function broadcastBundle(tailTransactionHash, callback) {
 	        return getBundle(tailTransactionHash)
@@ -18265,55 +18825,65 @@
 	/**
 	 * @method createFindTransactionObjects
 	 *
+	 * @summary Creates a new `findTransactionObjects()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.findTransactionObjects `findTransactionObjects`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`findTransactionObjects`]{@link #module_core.findTransactionObjects}  - A new `findTransactionObjects()` function that uses your chosen Provider instance.
 	 */
 	exports.createFindTransactionObjects = function (provider) {
 	    var findTransactions = src$b.createFindTransactions(provider);
 	    var getTransactionObjects = src$b.createGetTransactionObjects(provider);
 	    /**
-	     * Wrapper function for [`findTransactions`]{@link #module_core.findTransactions} and
-	     * [`getTrytes`]{@link #module_core.getTrytes}.
-	     * Searches for transactions given a `query` object with `addresses`, `tags` and `approvees` fields.
-	     * Multiple query fields are supported and `findTransactionObjects` returns intersection of results.
+	     * This method uses the [`findTransactions()`]{@link #module_core.findTransactions} to find transactions with the given fields, then it uses
+	     * the [`getTransactionObjects()`]{@link #module_core.getTransactionObjects} method to return the transaction objects.
 	     *
-	     * @example
+	     * If you pass more than one query, this method returns only transactions that contain all the given fields in those queries.
 	     *
-	     * Searching for transactions by address:
+	     * ## Related methods
 	     *
-	     * ```js
-	     * findTransactionObjects({ addresses: ['ADR...'] })
-	     *    .then(transactions => {
-	     *        // ...
-	     *    })
-	     *    .catch(err => {
-	     *        // ...
-	     *    })
-	     * ```
+	     * To find only transaction hashes, use the [`findTransactions()`]{@link #module_core.findTransactions} method.
 	     *
 	     * @method findTransactionObjects
 	     *
+	     * @summary Searches the Tangle for transaction objects that contain all the given values in their [transaction fields](https://docs.iota.org/docs/getting-started/0.1/transactions/transactions#structure-of-a-transaction).
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {object} query
-	     * @param {Hash[]} [query.addresses] - List of addresses
-	     * @param {Hash[]} [query.bundles] - List of bundle hashes
-	     * @param {Tag[]} [query.tags] - List of tags
-	     * @param {Hash[]} [query.addresses] - List of approvees
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Object} query - Query object
+	     * @param {Hash[]} [query.addresses] - Array of addresses to search for in transactions
+	     * @param {Hash[]} [query.bundles] - Array of bundle hashes to search for in transactions
+	     * @param {Tag[]} [query.tags] - Array of tags to search for in transactions
+	     * @param {Hash[]} [query.approvees] - Array of transaction hashes that you want to search for in transactions' branch and trunk transaction fields
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * findTransactionObjects({ addresses: ['ADDRESS999...'] })
+	     *    .then(transactionObjects => {
+	     *      console.log(`Successfully found the following transactions:)
+	     *      console.log(JSON.stringify(transactionObjects));
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     *   })
+	     * ```
 	     *
 	     * @returns {Promise}
-	     * @fulfil {Transaction[]} Array of transaction objects
-	     * @reject {Error}
-	     * - `INVALID_SEARCH_KEY`
-	     * - `INVALID_HASH`: Invalid bundle hash
-	     * - `INVALID_TRANSACTION_HASH`: Invalid approvee transaction hash
-	     * - `INVALID_ADDRESS`: Invalid address
-	     * - `INVALID_TAG`: Invalid tag
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} transactionObjects - Array of transaction objects, which contain fields that match the query object
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_SEARCH_KEY`: Make sure that you entered valid query parameters
+	     * - `INVALID_HASH`: Make sure that the bundle hashes are 81 trytes long
+	     * - `INVALID_TRANSACTION_HASH`: Make sure that the approvee transaction hashes are 81 trytes long
+	     * - `INVALID_ADDRESS`: Make sure that the addresses contain only trytes
+	     * - `INVALID_TAG`: Make sure that the tags contain only trytes
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function findTransactionObjects(query, callback) {
 	        return findTransactions(query)
@@ -18343,13 +18913,13 @@
 
 	exports.createGetBundlesFromAddresses = function (provider, caller) {
 	    var findTransactionObjects = src$b.createFindTransactionObjects(provider);
-	    var getLatestInclusion = src$b.createGetLatestInclusion(provider);
+	    var getInclusionStates = src$b.createGetInclusionStates(provider);
 	    /* tslint:disable-next-line:only-arrow-functions */
 	    return function (addresses, inclusionStates, callback) {
 	        if (caller !== 'lib') {
 	            /* tslint:disable-next-line:no-console */
-	            console.warn('`getBundlesFromAddresses()` has been deprecated and will be removed in v2.0.0' +
-	                'Please use `findTransactionObjects()` and `getBundle()` as an alternative');
+	            console.warn('The `getBundlesFromAddresses()` method is deprecated and will be removed in v2.0.0' +
+	                'Please use the `findTransactionObjects()` and `getBundle()` methods as an alternative');
 	        }
 	        // 1. Get txs associated with addresses
 	        return (findTransactionObjects({ addresses: addresses })
@@ -18365,7 +18935,7 @@
 	            .then(exports.groupTransactionsIntoBundles)
 	            // 4. If requested, add persistence status to each bundle
 	            .then(function (bundles) {
-	            return inclusionStates ? exports.addPersistence(getLatestInclusion, bundles) : bundles;
+	            return inclusionStates ? exports.addPersistence(getInclusionStates, bundles) : bundles;
 	        })
 	            // 5. Sort bundles by timestamp
 	            .then(exports.sortByTimestamp)
@@ -18410,10 +18980,10 @@
 	        return bundle.map(function (tx) { return (__assign({}, tx, { persistence: state })); });
 	    });
 	}; };
-	exports.addPersistence = function (getLatestInclusion, bundles) {
+	exports.addPersistence = function (getInclusionStates, bundles) {
 	    // Get the first hash of each bundle
 	    var hashes = bundles.map(function (bundle) { return bundle[0].hash; });
-	    return getLatestInclusion(hashes).then(exports.zipPersistence(bundles));
+	    return getInclusionStates(hashes).then(exports.zipPersistence(bundles));
 	};
 	exports.sortByTimestamp = function (bundles) {
 	    return bundles.slice().sort(function (_a, _b) {
@@ -18450,11 +19020,15 @@
 	/**
 	 * @method createGetAccountData
 	 *
+	 * @summary Creates a new `getAccountData()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getAccountData `getAccountData`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getAccountData`]{@link #module_core.getAccountData}  - A new `getAccountData()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetAccountData = function (provider, caller) {
 	    var getNewAddress = src$b.createGetNewAddress(provider, /* Called by */ 'lib');
@@ -18462,51 +19036,74 @@
 	    var getBalances = src$b.createGetBalances(provider);
 	    var wereAddressesSpentFrom = createWereAddressesSpentFrom.createWereAddressesSpentFrom(provider, /* Called by */ 'lib');
 	    /**
-	     * Returns an `AccountData` object, containing account information about `addresses`, `transactions`,
-	     * `inputs` and total account balance.
+	     * This method generates [addresses](https://docs.iota.org/docs/getting-started/0.1/clients/addresses) for a given seed, and searches the Tangle for data about those addresses such as transactions, inputs, and total balance.
+	     *
+	     * **Note:** The given seed is used to [generate addresses](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/generate-an-address) on your local device. It is never sent anywhere.
+	     *
+	     * If you don't pass an `options.end` argument to this method, it will continue to generate addresses until it finds an unspent one.
+	     *
+	     * **Note:** The total balance does not include IOTA tokens on [spent addresses](https://docs.iota.org/docs/getting-started/0.1/clients/addresses#spent-addresses).
+	     *
+	     * ## Related methods
+	     *
+	     * To find the balance of specific addresses, which don't have to belong to your seed, use the [`getBalances()`]{@link #module_core.getBalances} method.
+	     *
+	     * To find only inputs (objects that contain information about addresses with a postive balance), use the [`getInputs()`]{@link #module_core.getInputs} method.
+	     *
+	     * @method getAccountData
+	     *
+	     * @summary Searches the Tangle for transctions, addresses, and balances that are associated with a given seed.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {string} seed - The seed to use to generate addresses
+	     * @param {Object} options - Options object
+	     * @param {number} [options.start=0] - The key index from which to start generating addresses
+	     * @param {number} [options.security=2] - The [security level](https://docs.iota.org/docs/getting-started/0.1/clients/security-levels) to use to generate the addresses
+	     * @param {number} [options.end] - The key index at which to stop generating addresses
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
-	     * getAccountData(seed, {
-	     *    start: 0,
-	     *    security: 2
-	     * })
+	     * getAccountData(seed)
 	     *   .then(accountData => {
 	     *     const { addresses, inputs, transactions, balance } = accountData
-	     *     // ...
+	     *     console.log(`Successfully found the following transactions:)
+	     *     console.log(JSON.stringify(transactions));
 	     *   })
-	     *   .catch(err => {
-	     *     // ...
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
 	     *   })
 	     * ```
 	     *
-	     * @method getAccountData
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {string} seed
-	     * @param {object} options
-	     * @param {number} [options.start=0] - Starting key index
-	     * @param {number} [options.security = 0] - Security level to be used for getting inputs and addresses
-	     * @param {number} [options.end] - Ending key index
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @returns {Promise}
-	     * @fulfil {AccountData}
-	     * @reject {Error}
-	     * - `INVALID_SEED`
-	     * - `INVALID_START_OPTION`
-	     * - `INVALID_START_END_OPTIONS`: Invalid combination of start & end options`
-	     * - Fetch error
+	     *
+	     * @fulfil {AccountData} accountData - Object that contains the following:
+	     * - accountData.transfers: (deprecated) Array of transaction objects that contain one of the seed's addresses
+	     * - accountData.transactions: Array of transaction hashes for transactions that contain one of the seed's addresses
+	     * - accountData.addresses: Array of spent addresses
+	     * - accountData.inputs: Array of input objects for any unspent addresses
+	     *   - accountData.inputs.address: The 81-tryte address (without checksum)
+	     *   - accountData.inputs.keyIndex: The key index of the address
+	     *   - accountData.inputs.security: Security level of the address
+	     *   - accountData.inputs.balance: Balance of the address
+	     * - accountData.balance: The total balance of unspent addresses
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_SEED`: Make sure that the seed contains only trytes
+	     * - `INVALID_SECURITY_LEVEL`: Make sure that the security level is a number between 1 and 3
+	     * - `INVALID_START_OPTION`: Make sure that the `options.start` argument is greater than zero
+	     * - `INVALID_START_END_OPTIONS`: Make sure that the `options.end` argument is not greater than the `options.start` argument by more than 1,000`
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (seed, options, callback) {
 	        if (options === void 0) { options = {}; }
 	        var _a = exports.getAccountDataOptions(options), start = _a.start, end = _a.end, security = _a.security;
 	        if (caller !== 'lib') {
 	            /* tslint:disable-next-line:no-console */
-	            console.warn('`AccountData.transfers` field is deprecated, and `AccountData.transactions` field should be used instead.\n' +
-	                'Fetching of full bundles should be done lazily.');
+	            console.warn('The returned `accountData.transfers` field is deprecated, therefore do not rely on this field in your applications.\n' +
+	                'Instead, you can get only the transactions that you need by using the transaction hashes returned in the `accountData.transactions` field.');
 	        }
 	        return (bluebird.resolve(guards.validate(guards.seedValidator(seed), guards.securityLevelValidator(security), !!start && guards.startOptionValidator(start), !!start && !!end && guards.startEndOptionsValidator({ start: start, end: end })))
 	            // 1. Generate addresses up to first unused address
@@ -18526,7 +19123,7 @@
 	            return bluebird.all([
 	                getBundlesFromAddresses(addresses, true),
 	                // findTransactions({ addresses }), // Find transactions instead of getBundlesFromAddress as of v2.0.0
-	                getBalances(addresses, 100),
+	                getBalances(addresses),
 	                wereAddressesSpentFrom(addresses),
 	                addresses,
 	            ]);
@@ -18773,19 +19370,34 @@
 	exports.INVALID_BUNDLE = errors$8.INVALID_BUNDLE;
 	var HASH_TRITS_SIZE = 243;
 	/**
-	 * Validates all signatures of a bundle.
 	 *
-	 * @method validateSignatures
+	 * This method takes an array of transaction trytes and checks if the signatures are valid.
 	 *
-	 * @param {Transaction[]} bundle
+	 * ## Related methods
 	 *
-	 * @return {boolean}
+	 * To get a bundle's transaction trytes from the Tangle, use the [`getBundle()`]{@link #module_core.getBundle} method.
+	 *
+	 * @method validateBundleSignatures
+	 *
+	 * @summary Validates the signatures in a given bundle
+	 *
+	 * @memberof module:bundle-validator
+	 *
+	 * @param {Transaction[]} bundle - Transaction trytes
+	 *
+	 * @example
+	 * ```js
+	 * let valid = Validator.validateBundleSignatures(bundle);
+	 * ```
+	 *
+	 * @return {boolean} Whether the signatures are valid
+	 *
 	 */
 	exports.validateBundleSignatures = function (bundle) {
 	    var signatures = bundle.slice().sort(function (a, b) { return a.currentIndex - b.currentIndex; })
 	        .reduce(function (acc, _a, i) {
-	        var address = _a.address, signatureMessageFragment = _a.signatureMessageFragment, value = _a.value;
 	        var _b, _c;
+	        var address = _a.address, signatureMessageFragment = _a.signatureMessageFragment, value = _a.value;
 	        return value < 0
 	            ? __assign({}, acc, (_b = {}, _b[address] = [src.trits(signatureMessageFragment)], _b)) : value === 0 && acc.hasOwnProperty(address) && address === bundle[i - 1].address
 	            ? __assign({}, acc, (_c = {}, _c[address] = acc[address].concat(src.trits(signatureMessageFragment)), _c)) : acc;
@@ -18795,14 +19407,32 @@
 	    });
 	};
 	/**
-	 * Checks if a bundle is _syntactically_ valid.
-	 * Validates signatures and overall structure.
+	 * This method takes an array of transaction trytes and validates whether they form a valid bundle by checking the following:
+	 *
+	 * - Addresses in value transactions have a 0 trit at the end, which means they were generated using the Kerl hashing function
+	 * - Transactions in the bundle array are in the same order as their `currentIndex` field
+	 * - The total value of all transactions in the bundle sums to 0
+	 * - The bundle hash is valid
+	 *
+	 * ## Related methods
+	 *
+	 * To get a bundle's transaction trytes from the Tangle, use the [`getBundle()`]{@link #module_core.getBundle} method.
 	 *
 	 * @method isBundle
 	 *
-	 * @param {Transaction[]} bundle
+	 * @summary Validates the structure and contents of a given bundle.
 	 *
-	 * @returns {boolean}
+	 * @memberof module:bundle-validator
+	 *
+	 * @param {Transaction[]} bundle - Transaction trytes
+	 *
+	 * @example
+	 * ```js
+	 * let bundle = Validator.isBundle(bundle);
+	 * ```
+	 *
+	 * @return {boolean} bundle - Whether the bundle is valid
+	 *
 	 */
 	function isBundle(bundle) {
 	    var totalSum = 0;
@@ -18875,44 +19505,62 @@
 	/**
 	 * @method createGetBundle
 	 *
+	 * @summary Creates a new `getBundle()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getBundle `getBundle`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getBundle`]{@link #module_core.getBundle}  - A new `getBundle()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetBundle = function (provider) {
 	    var traverseBundle = src$b.createTraverseBundle(provider);
 	    /**
-	     * Fetches and validates the bundle given a _tail_ transaction hash, by calling
-	     * [`traverseBundle`]{@link #module_core.traverseBundle} and traversing through `trunkTransaction`.
+	     * This method uses the [`traverseBundle()`]{@link #module_core.traverseBundle} method to find all transactions in a bundle, validate them, and return them as transaction objects.
+	     *
+	     * For more information about what makes a bundles and transactions valid, see [this guide](https://docs.iota.org/docs/node-software/0.1/iri/concepts/transaction-validation).
+	     *
+	     * ## Related methods
+	     *
+	     * To find transaction objects that aren't in the same bundle, use the [`getTransactionObjects()`]{@link #module_core.getTransactionObjects} method.
+	     *
+	     * @method getBundle
+	     *
+	     * @summary Searches the Tangle for a valid bundle that includes the given tail transaction hash.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Hash} tailTransactionHash - Tail transaction hash
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
 	     * getBundle(tail)
 	     *    .then(bundle => {
-	     *        // ...
-	     *    })
-	     *    .catch(err => {
-	     *        // handle errors
+	     *     console.log(`Bundle found:)
+	     *     console.log(JSON.stringify(bundle));
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
 	     *    })
 	     * ```
 	     *
-	     * @method getBundle
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Hash} tailTransactionHash - Tail transaction hash
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @returns {Promise}
-	     * @fulfil {Transaction[]} Bundle as array of transaction objects
-	     * @reject {Error}
-	     * - `INVALID_TRANSACTION_HASH`
-	     * - `INVALID_TAIL_HASH`: Provided transaction is not tail (`currentIndex !== 0`)
-	     * - `INVALID_BUNDLE`: Bundle is syntactically invalid
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} bundle - Array of transaction objects that are in the bundle
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure the tail transaction hash is 81 trytes long
+	     * - `INVALID_TAIL_HASH`: Make sure that the tail transaction hash is for a transaction whose `currentIndex` field is 0
+	     * - `INVALID_BUNDLE`: Check the tail transaction's bundle for the following:
+	     *   - Addresses in value transactions have a 0 trit at the end, which means they were generated using the Kerl hashing function
+	     *   - Transactions in the bundle array are in the same order as their currentIndex field
+	     *   - The total value of all transactions in the bundle sums to 0
+	     *   - The bundle hash is valid
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getBundle(tailTransactionHash, callback) {
 	        return traverseBundle(tailTransactionHash)
@@ -18964,7 +19612,9 @@
 	 * @param {number} [options.security=2] - Security level
 	 *
 	 * @return {Promise}
+	 *
 	 * @fulfil {Hash[]} List of addresses up to (and including) first unused address
+	 *
 	 * @reject {Error}
 	 * - `INVALID_SEED`
 	 * - `INVALID_START_OPTION`
@@ -19018,49 +19668,65 @@
 	/**
 	 * @method createGetNewAddress
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @summary Creates a new `getNewAddress()` method, using a custom Provider instance.
 	 *
 	 * @memberof module:core
 	 *
-	 * @return {function} {@link #module_core.getNewAddress `getNewAddress`}
+	 * @ignore
+	 *
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getNewAddress`]{@link #module_core.getNewAddress}  - A new `getNewAddress()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetNewAddress = function (provider, caller) {
 	    var isAddressUsed = exports.createIsAddressUsed(provider);
 	    /**
-	     * Generates and returns a new address by calling [`findTransactions`]{@link #module_core.findTransactions}
-	     * until the first unused address is detected. This stops working after a snapshot.
+	     * This method uses the connected IRI node's [`findTransactions`]{@link #module_core.findTransactions}
+	     * endpoint to search every transactions in the Tangle for each generated address. If an address is found in a transaction, a new address is generated until one is found that isn't in any transactions.
 	     *
-	     * @example
-	     * ```js
-	     * getNewAddress(seed, { index })
-	     *   .then(address => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
+	     * **Note:** The given seed is used to [generate addresses](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/generate-an-address) on your local device. It is never sent anywhere.
+	     *
+	     * **Note:** Because of local snapshots, this method is not a reliable way of generating unspent addresses. Instead, you should use the [account module](https://docs.iota.org/docs/client-libraries/0.1/account-module/introduction/overview) to keep track of your spent addresses.
+	     *
+	     * ## Related methods
+	     *
+	     * To find out which of your addresses are spent, use the [`getAccountData()`]{@link #module_core.getAccountData} method.
 	     *
 	     * @method getNewAddress
 	     *
+	     * @summary Generates a new address for a given seed.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {string} seed - At least 81 trytes long seed
-	     * @param {object} [options]
-	     * @param {number} [options.index=0] - Key index to start search at
-	     * @param {number} [options.security=2] - Security level
-	     * @param {boolean} [options.checksum=false] - `Deprecated` Flag to include 9-trytes checksum or not
-	     * @param {number} [options.total] - `Deprecated` Number of addresses to generate.
-	     * @param {boolean} [options.returnAll=false] - `Deprecated` Flag to return all addresses, from start up to new address.
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {string} seed - The seed to use to generate addresses
+	     * @param {Object} [options] - Options object
+	     * @param {number} [options.index=0] - The key index from which to start generating addresses
+	     * @param {number} [options.security=2] - The [security level](https://docs.iota.org/docs/getting-started/0.1/clients/security-levels) to use to generate the addresses
+	     * @param {boolean} [options.checksum=false] - `Deprecated`
+	     * @param {number} [options.total] - `Deprecated`
+	     * @param {boolean} [options.returnAll=false] - `Deprecated`
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * getNewAddress(seed)
+	     *   .then(address => {
+	     *     console.log(`Here's your new address: ${address})
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     *   })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {Hash|Hash[]} New (unused) address or list of addresses up to (and including) first unused address
-	     * @reject {Error}
-	     * - `INVALID_SEED`
-	     * - `INVALID_START_OPTION`
-	     * - `INVALID_SECURITY`
-	     * - Fetch error
+	     *
+	     * @fulfil {Hash|Hash[]} address - A single new address or an array of new addresses
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_SEED`: Make sure that the seed contains only trytes
+	     * - `INVALID_SECURITY_LEVEL`: Make sure that the security level is a number between 1 and 3
+	     * - `INVALID_START_OPTION`: Make sure that the `options.start` argument is greater than zero
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getNewAddress(seed, options, callback) {
 	        if (options === void 0) { options = {}; }
@@ -19119,56 +19785,80 @@
 	/**
 	 * @method createGetInputs
 	 *
+	 * @summary Creates a new `getInputs()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
+	 * @ignore
 	 *
-	 * @return {function} {@link #module_core.getInputs `getInputs`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getInputs`]{@link #module_core.getInputs}  - A new `getInputs()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetInputs = function (provider) {
 	    var getNewAddress = createGetNewAddress.createGetNewAddress(provider, 'lib');
 	    var getBalances = src$b.createGetBalances(provider);
 	    /**
-	     * Creates and returns an `Inputs` object by generating addresses and fetching their latest balance.
+	     * This method generates [addresses](https://docs.iota.org/docs/getting-started/0.1/clients/addresses) for a given seed and finds those that have a positive balance.
+	     *
+	     * **Note:** The given seed is used to [generate addresses](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/generate-an-address) on your local device. It is never sent anywhere.
+	     *
+	     * To find a certain amount of [IOTA tokens](https://docs.iota.org/docs/getting-started/0.1/clients/token) and return only the addresses that, when combined, contain that amount, pass it to the `options.threshold` argument.
+	     *
+	     * ## Related methods
+	     *
+	     * You may want to use this method to find inputs for the [`prepareTransfers()`]{@link #module_core.prepareTransfers} method.
+	     *
+	     * @method getInputs
+	     *
+	     * @summary Finds a seed's addresses that have a positive balance.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {string} seed - The seed to use to generate addresses
+	     * @param {Object} [options] - Options object
+	     * @param {number} [options.start=0] - The key index from which to start generating addresses
+	     * @param {number} [options.security=2] - The [security level](https://docs.iota.org/docs/getting-started/0.1/clients/security-levels) to use to generate the addresses
+	     * @param {number} [options.end] - The key index at which to stop generating addresses
+	     * @param {number} [options.threshold] - The amount of IOTA tokens that you want to find
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
-	     * getInputs(seed, { start: 0, threhold })
+	     * getInputs(seed)
 	     *   .then(({ inputs, totalBalance }) => {
-	     *     // ...
+	     *     console.log(`Your seed has a total of ${totalBalance} IOTA tokens \n` +
+	     *     `on the following addresses:`)
+	     *      for(let i = 0; i < inputs.length; i++) {
+	     *          console.log(`${inputs[i].address}: ${inputs[i].balance}`)
+	     *      }
 	     *   })
-	     *   .catch(err => {
-	     *     if (err.message === errors.INSUFFICIENT_BALANCE) {
-	     *        // ...
+	     *   .catch(error => {
+	     *     if (error.message === errors.INSUFFICIENT_BALANCE) {
+	     *        console.log('You have no IOTA tokens');
 	     *     }
-	     *     // ...
-	     *   })
+	     *   });
 	     * ```
-	     *
-	     * @method getInputs
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {string} seed
-	     * @param {object} [options]
-	     * @param {number} [options.start=0] - Index offset indicating from which address we start scanning for balance
-	     * @param {number} [options.end] - Last index up to which we stop scanning
-	     * @param {number} [options.security=2] - Security level of inputs
-	     * @param {threshold} [options.threshold] - Minimum amount of balance required
-	     * @param {Callback} [callback] - Optional callback
 	     *
 	     * @return {Promise}
 	     *
-	     * @fulfil {Inputs} Inputs object containg a list of `{@link Address}` objects and `totalBalance` field
-	     * @reject {Error}
-	     * - `INVALID_SEED`
-	     * - `INVALID_SECURITY_LEVEL`
-	     * - `INVALID_START_OPTION`
-	     * - `INVALID_START_END_OPTIONS`
-	     * - `INVALID_THRESHOLD`
-	     * - `INSUFFICIENT_BALANCE`
-	     * - Fetch error
+	     * @fulfil {Inputs} - Array that contains the following:
+	     * - input.addresses: An address
+	     * - input.keyIndex: The key index of the address
+	     * - input.security: The security level of the address
+	     * - input.balance: The amount of IOTA tokens in the address
+	     * - inputs.totalBalance: The combined balance of all addresses
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_SEED`: Make sure that the seed contains only trytes
+	     * - `INVALID_SECURITY_LEVEL`: Make sure that the security level is a number between 1 and 3
+	     * - `INVALID_START_OPTION`: Make sure that the `options.start` argument is greater than zero
+	     * - `INVALID_START_END_OPTIONS`: Make sure that the `options.end` argument is not greater than the `options.start` argument by more than 1,000`
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors) `
+	     * - `INVALID_THRESHOLD`: Make sure that the threshold is a number greater than zero
+	     * - `INSUFFICIENT_BALANCE`: Make sure that the seed has addresses that contain IOTA tokens
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (seed, options, callback) {
 	        if (options === void 0) { options = {}; }
@@ -19178,7 +19868,7 @@
 	            .then(function (newAddressOptions) { return getNewAddress(seed, newAddressOptions); })
 	            .then(function (allAddresses) { return types.asArray(allAddresses); })
 	            .then(function (allAddresses) {
-	            return getBalances(allAddresses, 100)
+	            return getBalances(allAddresses)
 	                .then(function (_a) {
 	                var balances = _a.balances;
 	                return exports.createInputsObject(allAddresses, balances, start, security);
@@ -19235,63 +19925,6 @@
 	var createGetInputs_6 = createGetInputs.filterByThreshold;
 	var createGetInputs_7 = createGetInputs.hasSufficientBalance;
 
-	var createGetLatestInclusion = createCommonjsModule(function (module, exports) {
-	exports.__esModule = true;
-
-	/**
-	 * @method createGetLatestInclusion
-	 *
-	 * @memberof module:core
-	 *
-	 * @param {Provider} provider - Network provider for accessing IRI
-	 *
-	 * @return {function} {@link #module_core.getLatestInclusion `getLatestInclusion`}
-	 */
-	exports.createGetLatestInclusion = function (provider) {
-	    var getInclusionStates = src$b.createGetInclusionStates(provider);
-	    var getNodeInfo = src$b.createGetNodeInfo(provider);
-	    /**
-	     * Fetches inclusion states of given transactions and a list of tips,
-	     * by calling [`getInclusionStates`]{@link #module_core.getInclusionStates} on `latestSolidSubtangleMilestone`.
-	     *
-	     * @example
-	     *
-	     * ```js
-	     * getLatestInclusion(hashes)
-	     *    .then(states => {
-	     *        // ...
-	     *    })
-	     *    .catch(err => {
-	     *        // handle error
-	     *    })
-	     * ```
-	     *
-	     * @method getLatestInclusion
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Array<Hash>} transactions - List of transactions hashes
-	     * @param {number} tips - List of tips to check if transactions are referenced by
-	     * @param {Callback} [callback] - Optional callback
-	     *
-	     * @return {Promise}
-	     * @fulfil {boolean[]} List of inclusion states
-	     * @reject {Error}
-	     * - `INVALID_HASH`: Invalid transaction hash
-	     * - Fetch error
-	     */
-	    return function getLatestInclusion(transactions, callback) {
-	        return getNodeInfo()
-	            .then(function (nodeInfo) { return getInclusionStates(transactions, [nodeInfo.latestSolidSubtangleMilestone]); })
-	            .asCallback(callback);
-	    };
-	};
-
-	});
-
-	unwrapExports(createGetLatestInclusion);
-	var createGetLatestInclusion_1 = createGetLatestInclusion.createGetLatestInclusion;
-
 	var createGetTransactionObjects = createCommonjsModule(function (module, exports) {
 	exports.__esModule = true;
 
@@ -19299,41 +19932,55 @@
 	/**
 	 * @method createGetTransactionObjects
 	 *
+	 * @summary Creates a new `getTransactionObjects()` method, using a custom Provider instance.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} provider - Network provider
+	 * @ignore
 	 *
-	 * @return {Function} {@link #module_core.getTransactionObjects `getTransactionObjects`}
+	 * @param {Provider} provider - The Provider object that the method should use to call the node's API endpoints.
+	 *
+	 * @return {Function} [`getTransactionObjects`]{@link #module_core.getTransactionObjects}  - A new `getTransactionObjects()` function that uses your chosen Provider instance.
 	 */
 	exports.createGetTransactionObjects = function (provider) {
 	    var getTrytes = src$b.createGetTrytes(provider);
 	    /**
-	     * Fetches the transaction objects, given an array of transaction hashes.
+	     * This method returns transaction objects in the same order as the given hashes.
+	     * For example, if the node doesn't have any transactions with a given hash, the value at that index in the returned array is empty.
 	     *
-	     * @example
+	     * ## Related methods
 	     *
-	     * ```js
-	     * getTransactionObjects(hashes)
-	     *   .then(transactions => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // handle errors
-	     *   })
-	     * ```
+	     * To find all transaction objects in a specific bundle, use the [`getBundle()`]{@link #module_core.getBundle} method.
 	     *
 	     * @method getTransactionObjects
+	     *
+	     * @summary Searches the Tangle for transactions with the given hashes and returns their contents as objects.
 	     *
 	     * @memberof module:core
 	     *
 	     * @param {Hash[]} hashes - Array of transaction hashes
-	     * @param {Function} [callback] - Optional callback
+	     * @param {Function} [callback] - Optional callback function
+	     *
+	     * @example
+	     *
+	     * ```js
+	     * getTransactionObjects(transactionHashes)
+	     *   .then(transactionObjects => {
+	     *     console.log('Found the following transactions:');
+	     *     console.log(JSON.stringify(transactionObjects));
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     *   });
+	     * ```
 	     *
 	     * @returns {Promise}
-	     * @fulfil {Transaction[]} - List of transaction objects
-	     * @reject {Error}
-	     * - `INVALID_TRANSACTION_HASH`
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} - Array of transaction objects
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure that the transaction hashes are 81 trytes long
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function getTransactionObjects(hashes, callback) {
 	        return getTrytes(hashes)
@@ -19366,69 +20013,54 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider - Network provider
 	 *
 	 * @param {number} [depth=6] - Depth up to which promotion is effective.
 	 *
-	 * @return {function} {@link #module_core.isPromotable `isPromotable`}
+	 * @return {function} {@link #module_core.isPromotable}
 	 */
 	exports.createIsPromotable = function (provider, depth) {
 	    if (depth === void 0) { depth = DEPTH; }
 	    var checkConsistency = src$b.createCheckConsistency(provider);
 	    var getTrytes = src$b.createGetTrytes(provider);
 	    /**
-	     * Checks if a transaction is _promotable_, by calling [`checkConsistency`]{@link #module_core.checkConsistency} and
-	     * verifying that `attachmentTimestamp` is above a lower bound.
-	     * Lower bound is calculated based on number of milestones issued
-	     * since transaction attachment.
+	     * To decide if a transaction can be promoted, this method makes sure that it's [consistent]{@link #module_core.checkConsistency}
+	     * and that the value of the transaction's `attachmentTimestamp` field is not older than the latest 6 milestones.
 	     *
-	     * @example
-	     * #### Example with promotion and reattachments
+	     * ## Related methods
 	     *
-	     * Using `isPromotable` to determine if transaction can be [_promoted_]{@link #module_core.promoteTransaction}
-	     * or should be [_reattached_]{@link #module_core.replayBundle}
-	     *
-	     * ```js
-	     * // We need to monitor inclusion states of all tail transactions (original tail & reattachments)
-	     * const tails = [tail]
-	     *
-	     * getLatestInclusion(tails)
-	     *   .then(states => {
-	     *     // Check if none of transactions confirmed
-	     *     if (states.indexOf(true) === -1) {
-	     *       const tail = tails[tails.length - 1] // Get latest tail hash
-	     *
-	     *       return isPromotable(tail)
-	     *         .then(isPromotable => isPromotable
-	     *           ? promoteTransaction(tail, 3, 14)
-	     *           : replayBundle(tail, 3, 14)
-	     *             .then(([reattachedTail]) => {
-	     *               const newTailHash = reattachedTail.hash
-	     *
-	     *               // Keeping track of all tail hashes to check confirmation
-	     *               tails.push(newTailHash)
-	     *
-	     *               // Promote the new tail...
-	     *             })
-	     *     }
-	     *   }).catch(err => {
-	     *     // ...
-	     *   })
-	     * ```
+	     * If a transaction is promotable, you can promote it by using the [`promoteTransaction()`]{@link #module_core.promoteTransaction} method.
 	     *
 	     * @method isPromotable
+	     *
+	     * @summary Checks if a given tail transaction hash can be [promoted](https://docs.iota.org/docs/getting-started/0.1/transactions/reattach-rebroadcast-promote#promote).
 	     *
 	     * @memberof module:core
 	     *
 	     * @param {Hash} tail - Tail transaction hash
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * isPromotable(tailTransactionHash)
+	     *   .then(isPromotable => {
+	     *     isPromotable? console.log(`${tailTransactionHash} can be promoted`):
+	     *     console.log(`${tailTransactionHash} cannot be promoted. You may want to reattach it.`);
+	     *   })
+	     *   .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     *   })
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {boolean} Consistency state of transaction or co-consistency of transactions
-	     * @reject {Error}
-	     * - `INVALID_HASH`: Invalid hash
-	     * - `INVALID_DEPTH`: Invalid depth
-	     * - Fetch error
+	     *
+	     * @fulfil {boolean} isPromotable - Returns `true` if the transaction is promotable or `false` if not.
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure the tail transaction hashes are 81 trytes long and their `currentIndex` field is 0
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (tail, callback) {
 	        return bluebird.resolve(guards.validate(guards.hashValidator(tail), guards.depthValidator(depth)))
@@ -19479,7 +20111,7 @@
 	var filterSpendingTransactions = function (transactions) { return transactions.filter(function (tx) { return tx.value < 0; }); };
 	// Appends the confirmation status to each transaction
 	var withInclusionState = function (provider, transactions) {
-	    return src$b.createGetLatestInclusion(provider)(transactions.map(function (tx) { return tx.hash; })).then(function (states) {
+	    return src$b.createGetInclusionStates(provider)(transactions.map(function (tx) { return tx.hash; })).then(function (states) {
 	        return transactions.map(function (tx, i) { return (__assign({}, tx, { confirmed: states[i] })); });
 	    });
 	};
@@ -19789,9 +20421,9 @@
 
 
 	/**
-	 * Creates a bundle with given transaction entries.
-	 *
 	 * @method createBundle
+	 *
+	 * @summary Creates a bundle array from the given transaction entries.
 	 *
 	 * @param {BundleEntry[]} [entries=[]] - Entries of single or multiple transactions with the same address
 	 *
@@ -19802,19 +20434,44 @@
 	    return entries.reduce(function (bundle, entry) { return exports.addEntry(bundle, entry); }, new Int8Array(0));
 	};
 	/**
-	 * Adds given transaction entry to a bundle.
+	 * Adds transaction trits in the given entry object to a given bundle array.
+	 *
+	 * ## Related methods
+	 *
+	 * See the [converter](https://github.com/iotaledger/iota.js/tree/next/packages/converter) package for methods that convert values to trits.
 	 *
 	 * @method addEntry
 	 *
-	 * @param {object} entry - Entry of a single or multiple transactions with the same address.
-	 * @param {Int8Array} entry.address - Address.
-	 * @param {Int8Array} entry.value - Value to transfer in iotas.
-	 * @param {Int8Array} [entry.signatureOrMessage] - Signature or message fragment(s).
-	 * @param {Int8Array} [entry.timestamp] - Issuance timestamp (in seconds).
-	 * @param {Int8Array} [entry.tag] - Optional Tag, **Deprecated**.
-	 * @param {Int8Array} bundle - Bundle buffer.
+	 * @summary Adds the given transaction entry to a bundle array.
 	 *
-	 * @return {Int8Array} Bundle copy with new entries.
+	 * @memberof module:bundle
+	 *
+	 * @param {object} entry - Transaction entry object
+	 * @param {Int8Array} entry.address - An address in trits
+	 * @param {Int8Array} entry.value - An amount of IOTA tokens in trits
+	 * @param {Int8Array} [entry.signatureOrMessage] - Signature fragments or a message in trits
+	 * @param {Int8Array} [entry.issuanceTimestamp] - Unix epoch in trits
+	 * @param {Int8Array} [entry.tag] - (deprecated)
+	 * @param {Int8Array} bundle - Bundle array to which to add the entry object
+	 *
+	 * @example
+	 * ```js
+	 * let bundle = new Int8Array();
+	 *
+	 * bundle = Bundle.addEntry(bundle, {
+	 *  address: Converter.trytesToTrits(outputAddress),
+	 *  value: Converter.valueToTrits(value),
+	 *  issuanceTimestamp: Converter.valueToTrits(Math.floor(Date.now() / 1000));
+	 * });
+	 * ```
+	 *
+	 * @return {Int8Array} A copy of the original bundle that also includes the added entries.
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `bundle` argument contains valid transaction trits
+	 * @throws {errors.ILLEGAL_SIGNATURE_OR_MESSAGE_LENGTH}: Make sure that the `entry.signatureOrMessage` argument contains 6,561 trits
+	 * @throws {errors.ILLEGAL_ADDRESS_LENGTH}: Make sure that the `entry.address` argument contains 243 trits
+	 * @throws {errors.ILLEGAL_VALUE_LENGTH}: Make sure that the `entry.value` argument contains 6,561 trits
+	 * @throws {errors.ILLEGAL_ISSUANCE_TIMESTAMP_LENGTH}: Make sure that the `entry.timestamp` argument contains 81 trits
 	 */
 	exports.addEntry = function (bundle, entry) {
 	    var signatureOrMessage = entry.signatureOrMessage, 
@@ -19901,15 +20558,28 @@
 	    return bundleCopy;
 	};
 	/**
-	 * Finalizes a bundle by calculating the bundle hash.
+	 * This method takes an array of transaction trits, generates the bundle hash, and adds it to each transaction.
+	 *
+	 * ## Related methods
+	 *
+	 * See the [`addEntry()`]{@link #module_bundle.addEntry} method for creating new bundles.
 	 *
 	 * @method finalizeBundle
 	 *
-	 * @param {Int8Array} bundle - Bundle transaction trits
+	 * @summary Generates a bundle hash.
 	 *
-	 * @param {number} [numberOfFragments=3]
+	 * @memberof module:bundle
 	 *
-	 * @return {Int8Array} List of transactions in the finalized bundle
+	 * @param {Int8Array} bundle - Transaction trits
+	 *
+	 * @example
+	 * ```js
+	 * const result = Bundle.finalizeBundle(bundle);
+	 * ```
+	 *
+	 * @return {Int8Array} Transaction trits that include a bundle hash
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `bundle` argument contains valid transaction trits
 	 */
 	exports.finalizeBundle = function (bundle, numberOfFragments) {
 	    if (numberOfFragments === void 0) { numberOfFragments = 3; }
@@ -19944,15 +20614,36 @@
 	    return bundleCopy;
 	};
 	/**
-	 * Adds signature message fragments to transactions in a bundle starting at offset.
+	 * This method takes an array of transaction trits, and add the given message or signature to the transactions, starting from the given index.
+	 *
+	 * If the signature or message is too long to fit in a single transaction, it is split across the next transaction in the bundle, starting from the given index.
+	 *
+	 * ## Related methods
+	 *
+	 * See the [`addEntry()`]{@link #module_bundle.addEntry} method for creating new bundles.
 	 *
 	 * @method addSignatureOrMessage
 	 *
-	 * @param {Int8Array} bundle - Bundle buffer.
-	 * @param {Int8Array} signatureOrMessage - Signature or message to add.
-	 * @param {number} index - Transaction index as entry point for signature or message fragments.
+	 * @summary Adds signature message fragments to transactions in a bundle.
 	 *
-	 * @return {Int8Array} List of transactions in the updated bundle
+	 * @memberof module:bundle
+	 *
+	 * @param {Int8Array} bundle - Transaction trits
+	 * @param {Int8Array} signatureOrMessage - Signature or message to add to the bundle
+	 * @param {number} index - Transaction index at which to start adding the signature or message
+	 *
+	 * @example
+	 * ```js
+	 * const signature = Converter.trytesToTrits('SIGNATURE...')
+	 * bundle.set(Bundle.addSignatureOrMessage(bundle, signature, 1));
+	 * ```
+	 *
+	 * @return {Int8Array} Transaction trits that include a bundle hash.
+	 *
+	 * @throws {errors.ILLEGAL_TRANSACTION_BUFFER_LENGTH}: Make sure that the `bundle` argument contains valid transaction trits
+	 * @throws {errors.ILLEGAL_TRANSACTION_INDEX}: Make sure that the `index` argument is a number and that the bundle contains enough transactions
+	 * @throws {errors.ILLEGAL_SIGNATURE_OR_MESSAGE_LENGTH}: Make sure that the `signatureOrMessage` argument contains at least 6,561 trits
+	 *
 	 */
 	exports.addSignatureOrMessage = function (bundle, signatureOrMessage, index) {
 	    if (!src$5.isMultipleOfTransactionLength(bundle.length)) {
@@ -19974,17 +20665,6 @@
 	    }
 	    return bundleCopy;
 	};
-	/**
-	 * Sums up transaction values in a bundle starting at offset.
-	 *
-	 * @method valueSum
-	 *
-	 * @param {Int8Array} bundle - Bundle buffer.
-	 * @param {number} offset - Offset from the start of the bundle buffer.
-	 * @param {number} length - Length of transactions in which values should be summed.
-	 *
-	 * @return {number} Total value of 'length' transactions in the bundle starting at offset.
-	 */
 	exports.valueSum = function (buffer, offset, length) {
 	    if (!src$5.isMultipleOfTransactionLength(buffer.length)) {
 	        throw new RangeError(errors$9.ILLEGAL_TRANSACTION_BUFFER_LENGTH);
@@ -20102,63 +20782,127 @@
 	};
 	exports.getPrepareTransfersOptions = function (options) { return (__assign({}, types.getOptionsWithDefaults(defaults)(options), { remainderAddress: options.address || options.remainderAddress || undefined })); };
 	/**
-	 * Create a [`prepareTransfers`]{@link #module_core.prepareTransfers} function by passing an optional network `provider`.
-	 * It is possible to prepare and sign transactions offline, by omitting the provider option.
 	 *
 	 * @method createPrepareTransfers
 	 *
+	 * @summary Creates a new `prepareTransfers()` method.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {Provider} [provider] - Optional network provider to fetch inputs and remainder address.
-	 * In case this is omitted, proper input objects and remainder should be passed
-	 * to [`prepareTransfers`]{@link #module_core.prepareTransfers}, if required.
+	 * @param {Provider} [provider] - Optional provider object that the method should use to call the node's API endpoints.
+	 * To create transactions offline, omit this parameter so that the returned function does not get your addresses and balances from the node. To create value transactions offline, make sure to pass input objects and a remainder address to the returned function.
 	 *
-	 * @return {Function} {@link #module_core.prepareTransfers `prepareTransfers`}
+	 * @example
+	 * ```js
+	 * const prepareTransfers = Iota.createPrepareTransfers();
+	 *
+	 * const transfers = [
+	 *  {
+	 *    value: 1,
+	 *    address: 'RECEIVINGADDRESS...'
+	 *  }
+	 * ];
+	 *
+	 * prepareTransfers(seed, transfers, {
+	 *  inputs:[{address: 'ADDRESS...',
+	 *  keyIndex: 5,
+	 *  security: 2,
+	 *  balance: 50}],
+	 *  // Remainder will be 50 -1 = 49 IOTA tokens
+	 *  address: 'REMAINDERADDRESS...'
+	 * })
+	 * .then(bundleTrytes => {
+	 *  console.log('Bundle trytes are ready to be attached to the Tangle:');
+	 *  console.log(JSON.stringify(bundleTrytes));
+	 * })
+	 * .catch(error => {
+	 *  console.log(`Something went wrong: ${error}`);
+	 * });
+	 * ```
+	 *
+	 * @return {Function} [`prepareTransfers`]{@link #module_core.prepareTransfers}  - A new `prepareTransfers()` function that uses your chosen Provider instance.
 	 */
 	exports.createPrepareTransfers = function (provider, now, caller) {
 	    if (now === void 0) { now = function () { return Date.now(); }; }
 	    var addInputs = exports.createAddInputs(provider);
 	    var addRemainder = exports.createAddRemainder(provider);
 	    /**
-	     * Prepares the transaction trytes by generating a bundle, filling in transfers and inputs,
-	     * adding remainder and signing. It can be used to generate and sign bundles either online or offline.
-	     * For offline usage, please see [`createPrepareTransfers`]{@link #module_core.createPrepareTransfers}
-	     * which can create a `prepareTransfers` function without a network provider.
+	     * This method creates a bundle, using the given arguments and uses the given seed to sign any transactions that withdraw IOTA tokens.
 	     *
-	     * **Note:** After calling this method, persist the returned transaction trytes in local storage. Only then you should broadcast to network.
-	     * This will allow for reattachments and prevent key reuse if trytes can't be recovered by querying the network after broadcasting.
+	     * **Note:** The given seed is used to [generate addresses](https://docs.iota.org/docs/client-libraries/0.1/how-to-guides/js/generate-an-address) and sign transactions on your local device. It is never sent anywhere.
+	     *
+	     * **Note:** To create transactions offline, use the [`createPrepareTransfers`]{@link #module_core.createPrepareTransfers} without a `provider` argument.
+	     *
+	     * After calling this method, we recommend saving the returned transaction trytes in local storage before sending them to a node.
+	     * By doing so, you make sure that you can always reattach your transactions to the Tangle in case they remain in a pending state.
+	     * Reattaching transactions is safer than creating and signing new transactions, which could lead to [spent addresses](https://docs.iota.org/docs/getting-started/0.1/clients/addresses#spent-addresses).
+	     *
+	     * ## Related methods
+	     *
+	     * To attach the returned transaction trytes to the Tangle, you can use one of the following:
+	     *
+	     * - [`sendTrytes()`]{@link #module_core.sendTrytes} (easiest)
+	     * - [`getTransactionsToApprove()`]{@link #module_core.getTransactionsToApprove} followed by [`attachToTangle()`]{@link #module_core.attachToTangle} followed by [`broadcastTransactions()`]{@link #module_core.broadcastTransactions} (for more control)
 	     *
 	     * @method prepareTransfers
 	     *
+	     * @summary Creates and signs a bundle of valid transaction trytes, using the given arguments.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {string} seed
+	     * @param {string} seed - The seed to use to generate addresses and sign transactions
 	     *
-	     * @param {object} transfers
+	     * @param {Transfers.<Transfer>} transfers - Array of transfer objects
+	     * @param {Hash} transfer.address - Address to which to send a transaction
+	     * @param {number} transfer.value - Amount of IOTA tokens to send to the address
+	     * @param {string} transfer.message - Message to include in the transaction. The message must include only ASCII characters.
+	     * @param {string} transfer.tag - Up to 27 trytes to include in the transaction's `obsoleteTag` field
+	     * @param {Object} [options] - Options object
+	     * @param {Input[]} [options.inputs] Array of input objects, which contain information about the addresses from which to withdraw IOTA tokens
+	     * @param {Hash} [options.inputs[].address] One of the seed's addresses from which to withdraw IOTA tokens
+	     * @param {number} [options.inputs[].keyIndex] Key index of the address
+	     * @param {number} [options.inputs[].security] Security level of the address
+	     * @param {number} [options.inputs[].balance] Total balance of the address. The total balance is withdrawn and any remaining IOTA tokens are sent to the address in the `options.remainderAddress` field.
+	     * @param {Hash} [options.remainderAddress] Remainder address to send any remaining IOTA tokens (total value in the `transfers` array minus the total balance of the input addresses)
+	     * @param {number} [options.security=2] Security level to use for calling the [`getInputs`]{@link #module_core.getInputs} method to automatically select input objects
+	     * @property {Hash} [options.hmacKey] HMAC key used for adding an HMAC signature to the transaction
 	     *
-	     * @param {object} [options]
-	     * @param {Input[]} [options.inputs] Inputs used for signing. Needs to have correct security, keyIndex and address value
-	     * @param {Hash} [options.inputs[].address] Input address trytes
-	     * @param {number} [options.inputs[].keyIndex] Key index at which address was generated
-	     * @param {number} [options.inputs[].security] Security level
-	     * @param {number} [options.inputs[].balance] Balance in iotas
-	     * @param {Hash} [options.address] Remainder address
-	     * @param {Number} [options.security = 2] Security level to be used for getting inputs and remainder address
-	     * @property {Hash} [options.hmacKey] HMAC key used for attaching an HMAC
+	     * @param {function} [callback] Optional callback function
 	     *
-	     * @param {function} [callback] Optional callback
+	     * @example
+	     *
+	     * ```js
+	     *
+	     * const transfers = [
+	     *  {
+	     *    value: 1,
+	     *    address: 'RECEIVINGADDRESS...'
+	     *  }
+	     * ];
+	     *
+	     * prepareTransfers(seed, transfers)
+	     * .then(bundleTrytes => {
+	     *  console.log('Bundle trytes are ready to be attached to the Tangle:');
+	     *  console.log(JSON.stringify(bundleTrytes));
+	     * })
+	     * .catch(error => {
+	     *  console.log(`Something went wrong: ${error}`);
+	     * });
+	     * ```
 	     *
 	     * @return {Promise}
-	     * @fulfil {array} Returns bundle trytes
-	     * @reject {Error}
-	     * - `INVALID_SEED`
-	     * - `INVALID_TRANSFER_ARRAY`
-	     * - `INVALID_INPUT`
-	     * - `INVALID_REMAINDER_ADDRESS`
-	     * - `INSUFFICIENT_BALANCE`
-	     * - `NO_INPUTS`
-	     * - `SENDING_BACK_TO_INPUTS`
-	     * - Fetch error, if connected to network
+	     *
+	     * @fulfil {array} bundleTrytes - Array of transaction trytes
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_SEED`: Make sure that the seed contains only trytes
+	     * - `INVALID_TRANSFER_ARRAY`: Make sure that any objects in the `transfers` argument are valid (for example that the addresses contain only trytes, the values are numbers)
+	     * - `INVALID_INPUT`: Make sure that the `options.inputs[]` argument contains valid input objects
+	     * - `INVALID_REMAINDER_ADDRESS`: If you used the `createPrepareTransfers()` method without a provider, make sure you entered an address in the `options.remainderAddress` argument
+	     * - `INSUFFICIENT_BALANCE`: Make sure that the seed's addresses have enough IOTA tokens to complete the transfer
+	     * - `NO_INPUTS`: Make sure that the `options.inputs[]` argument contains valid input objects
+	     * - `SENDING_BACK_TO_INPUTS`: Make sure that none of the `transfer.address` arguments are in the `options.inputs[].address parameters
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function prepareTransfers(seed, transfers, options, callback) {
 	        if (options === void 0) { options = {}; }
@@ -20169,7 +20913,7 @@
 	            }
 	            if (typeof seed === 'string' ? guards.isTrytes(seed) && seed.length < 81 : isTritArray(seed) && seed.length < 243) {
 	                /* tslint:disable-next-line:no-console */
-	                console.warn('WARNING: Seeds with less length than 81 trytes are not secure! Use a random, 81-trytes long seed!');
+	                console.warn('WARNING: Seeds that are less than 81 trytes long are not secure! Generate a random, 81-trytes seed!');
 	            }
 	        }
 	        if (!guards.isTrytes(seed) && !isTritArray(seed)) {
@@ -20435,6 +21179,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider - Network provider
 	 *
 	 * @param {Function} [attachFn] - Optional `attachToTangle` function to override the
@@ -20446,41 +21192,58 @@
 	    var checkConsistency = src$b.createCheckConsistency(provider);
 	    var sendTransfer = createSendTransfer.createSendTransfer(provider, attachFn);
 	    /**
-	     * Promotes a transaction by adding zero-value spam transactions on top of it.
-	     * Will promote `maximum` transfers on top of the current one with `delay` interval. Promotion
-	     * is interruptable through the `interrupt` option.
+	     * This method promotes only consistent transactions by checking them with the [`checkConsistency()`]{@link #module_core.checkConsistency} method.
+	     *
+	     * ## Related methods
+	     *
+	     * Use the [`isPromotable()`]{@link #module_core.isPromotable} method to check if a transaction can be [promoted](https://docs.iota.org/docs/getting-started/0.1/transactions/reattach-rebroadcast-promote).
+	     *
+	     * If a transaction can't be promoted, use the [`replayBundle()`]{@link #module_core.replayBundle} method to [reattach](https://docs.iota.org/docs/getting-started/0.1/transactions/reattach-rebroadcast-promote) it to the Tangle.
 	     *
 	     * @method promoteTransaction
 	     *
+	     * @summary [Promotes](https://docs.iota.org/docs/getting-started/0.1/transactions/reattach-rebroadcast-promote#promote) a given tail transaction.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Hash} tail - Tail transaction hash. Tail transaction is the transaction in the bundle with
-	     * `currentIndex == 0`.
+	     * @param {Hash} tail - Tail transaction hash
 	     *
-	     * @param {number} depth - The depth at which Random Walk starts. A value of `3` is typically used by wallets,
-	     * meaning that RW starts 3 milestones back.
+	     * @param {number} depth - The [depth](https://docs.iota.org/docs/getting-started/0.1/transactions/depth) at which to start the weighted random walk. The [Trinity wallet](https://trinity.iota.org/) uses a value of `3`,
+	     * meaning that the weighted random walk starts 3 milestones in the past.
 	     *
-	     * @param {number} minWeightMagnitude - Minimum number of trailing zeros in transaction hash. This is used by
-	     * [`attachToTangle`]{@link #module_core.attachToTangle} function to search for a valid `nonce`.
-	     * Currently it is `14` on mainnet & spamnet and `9` on most other testnets.
+	     * @param {number} minWeightMagnitude - [Minimum weight magnitude](https://docs.iota.org/docs/getting-started/0.1/network/minimum-weight-magnitude)
 	     *
-	     * @param {array} [spamTransfers] - Array of spam transfers to promote with.
-	     * By default it will issue an all-9s, zero-value transfer.
+	     * @param {Array} [spamTransfers={address: '9999...999', value:0, tag:'999...999',message: '999...999' }] - Array of transfer objects to use to promote the transaction
 	     *
-	     * @param {object} [options] - Options
+	     * @param {Object} [options] - Options object
 	     *
-	     * @param {number} [options.delay] - Delay between spam transactions in `ms`
+	     * @param {number} [options.delay] - Delay in milliseconds before sending each zero-value transaction
 	     *
-	     * @param {boolean|function} [options.interrupt] - Interrupt signal, which can be a function that evaluates
-	     * to boolean
+	     * @param {boolean|Function} [options.interrupt] - Either a boolean or a function that evaluates to a boolean to stop the method from sending transactions
 	     *
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     *
+	     * ```js
+	     * iota.promoteTransaction('FOSJBUZEHOBDKIOJ9RXBRPPZSJHWMXCDFJLIJSLJG9HRKEEJGAHWATEVCYERPQXDWFHQRGZOGIILZ9999',
+	     * 3,14)
+	     * .then(transactions => {
+	     *   console.log(`Promoted the tail transaction, using the following transactions: \n` +
+	     *   JSON.stringify(transactions));
+	     * })
+	     * .catch(error => {
+	     *     console.log(`Something went wrong: ${error}`);
+	     * })
+	     * ```
 	     *
 	     * @returns {Promise}
-	     * @fulfil {Transaction[]}
-	     * @reject {Error}
-	     * - `INCONSISTENT_SUBTANGLE`: In this case promotion has no effect and a reattachment is required by calling [`replayBundle`]{@link #module_core.replayBundle}.
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} transactions - Array of zero-value transaction objects that were sent
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INCONSISTENT_SUBTANGLE`: In this case, promotion has no effect and a reattachment is required by calling the [`replayBundle()`]{@link #module_core.replayBundle} method
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function promoteTransaction(tailTransaction, depth, minWeightMagnitude, spamTransfers, options, callback) {
 	        var _this = this;
@@ -20556,6 +21319,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider - Network provider
 	 *
 	 * @return {Function} {@link #module_core.replayBundle `replayBundle`}
@@ -20564,46 +21329,55 @@
 	    var getBundle = src$b.createGetBundle(provider);
 	    var sendTrytes = src$b.createSendTrytes(provider, attachFn);
 	    /**
-	     * Reattaches a transfer to the Tangle by selecting tips and performing the Proof-of-Work again.
-	     * Reattachments are useful in case the original transactions are pending, and can be done securely
-	     * as many times as needed.
+	     * This method [reattaches](https://docs.iota.org/docs/getting-started/0.1/transactions/reattach-rebroadcast-promote#reattach) a bundle to the Tangle by calling the [`sendTrytes()`]{@link #module_core.sendTrytes} method.
 	     *
-	     * @example
-	     * ```js
-	     * replayBundle(tail)
-	     *   .then(transactions => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
-	     *   })
-	     * })
-	     * ```
+	     * You can call this function as many times as you need until one of the bundles becomes confirmed.
+	     *
+	     * ## Related methods
+	     *
+	     * Before you call this method, it's worth finding out if you can promote it by calling the [`isPromotable()`]{@link #module_core.isPromotable} method.
 	     *
 	     * @method replayBundle
 	     *
+	     * @summary Reattaches a bundle to the Tangle.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Hash} tail - Tail transaction hash. Tail transaction is the transaction in the bundle with
-	     * `currentIndex == 0`.
+	     * @param {Hash} tail - Tail transaction hash
 	     *
-	     * @param {number} depth - The depth at which Random Walk starts. A value of `3` is typically used by wallets,
-	     * meaning that RW starts 3 milestones back.
+	     * @param {number} depth - The [depth](https://docs.iota.org/docs/getting-started/0.1/transactions/depth) at which to start the weighted random walk. The [Trinity wallet](https://trinity.iota.org/) uses a value of `3`,
+	     * meaning that the weighted random walk starts 3 milestones in the past.
 	     *
-	     * @param {number} minWeightMagnitude - Minimum number of trailing zeros in transaction hash. This is used by
-	     * [`attachToTangle`]{@link #module_core.attachToTangle} function to search for a valid `nonce`.
-	     * Currently it is `14` on mainnet & spamnet and `9` on most other testnets.
+	     * @param {number} minWeightMagnitude - The [minimum weight magnitude](https://docs.iota.org/docs/getting-started/0.1/network/minimum-weight-magnitude) to use for proof of work. **Note:** This value must be at least the same as the minimum weight magnitude of the branch and trunk transactions.
 	     *
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     *
+	     * ```js
+	     * iota.replayBundle(tailTransactionHash)
+	     *   .then(bundle => {
+	     *     console.log(`Successfully reattached ${tailTransactionHash}`);
+	     *     console.log(JSON.stringify(bundle));
+	     *   }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     *   })
+	     * ```
 	     *
 	     * @returns {Promise}
-	     * @fulfil {Transaction[]}
-	     * @reject {Error}
-	     * - `INVALID_DEPTH`
-	     * - `INVALID_MIN_WEIGHT_MAGNITUDE`
-	     * - `INVALID_TRANSACTION_HASH`
-	     * - `INVALID_BUNDLE`
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} bundle - Array of transaction objects in the reattached bundle
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_DEPTH`: Make sure that the `depth` argument is greater than zero
+	     * - `INVALID_MIN_WEIGHT_MAGNITUDE`: Make sure that the minimum weight magnitude is at least the same as the original bundle
+	     * - `INVALID_TRANSACTION_HASH`: Make sure the tail transaction hash is 81 trytes long and its `currentIndex` field is 0
+	     * - `INVALID_BUNDLE`: Check the tail transaction's bundle for the following:
+	     *   - Addresses in value transactions have a 0 trit at the end, which means they were generated using the Kerl hashing function
+	     *   - Transactions in the bundle array are in the same order as their currentIndex field
+	     *   - The total value of all transactions in the bundle sums to 0
+	     *   - The bundle hash is valid
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function replayBundle(tail, depth, minWeightMagnitude, reference, callback) {
 	        return getBundle(tail)
@@ -20627,6 +21401,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider - Network provider
 	 *
 	 * @return {Function} {@link #module_core.sendTrytes `sendTrytes`}
@@ -20636,53 +21412,60 @@
 	    var storeAndBroadcast = src$b.createStoreAndBroadcast(provider);
 	    var attachToTangle = attachFn || src$b.createAttachToTangle(provider);
 	    /**
-	     * [Attaches to Tangle]{@link #module_core.attachToTangle}, [stores]{@link #module_core.storeTransactions}
-	     * and [broadcasts]{@link #module_core.broadcastTransactions} a list of transaction trytes.
+	     * This method takes an array of transaction trytes that don't include a proof of work or
 	     *
-	     * **Note:** Persist the transaction trytes in local storage __before__ calling this command, to ensure
-	     * that reattachment is possible, until your bundle has been included.
+	     * Then, the method calls the following to finalize the bundle and send it to the node:
+	     * - [`getTransactionsToApprove()`]{@link #module_core.getTransactionsToApprove}
+	     * - [`attachToTangle()`]{@link #module_core.attachToTangle}
+	     * - [`storeAndBroadcast()`]{@link #module_core.storeAndBroadcast}
+	     *
+	     * **Note:** Before calling this method, we recommend saving your transaction trytes in local storage.
+	     * By doing so, you make sure that you can always reattach your transactions to the Tangle in case they remain in a pending state.
+	     *
+	     * ## Related methods
+	     *
+	     * To create transaction trytes that don't include a proof of work or trunk and branch transactions, use the [`prepareTransfers()`]{@link #module_core.prepareTransfers} method.
+	     *
+	     * @method sendTrytes
+	     *
+	     * @summary Does tip selection and proof of work for a bundle of transaction trytes before sending the final transactions to the connected IRI node.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Trytes[]} trytes - Array of prepared transaction trytes to attach, store, and send
+	     *
+	     * @param {number} depth - The [depth](https://docs.iota.org/docs/getting-started/0.1/transactions/depth) at which to start the weighted random walk. The [Trinity wallet](https://trinity.iota.org/) uses a value of `3`,
+	     * meaning that the weighted random walk starts 3 milestones in the past.
+	     *
+	     * @param {number} minWeightMagnitude - The [minimum weight magnitude](https://docs.iota.org/docs/getting-started/0.1/network/minimum-weight-magnitude) to use for proof of work. **Note:** This value must be at least the same as the minimum weight magnitude of the branch and trunk transactions.
+	     *
+	     * @param {string} [reference] - Optional reference transaction hash
+	     *
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     * ```js
 	     * prepareTransfers(seed, transfers)
 	     *   .then(trytes => {
-	     *      // Persist trytes locally before sending to network.
-	     *      // This allows for reattachments and prevents key reuse if trytes can't
-	     *      // be recovered by querying the network after broadcasting.
-	     *
 	     *      return iota.sendTrytes(trytes, depth, minWeightMagnitude)
 	     *   })
-	     *   .then(transactions => {
-	     *     // ...
-	     *   })
-	     *   .catch(err => {
-	     *     // ...
+	     *   .then(bundle => {
+	     *     console.log(`Successfully attached transactions to the Tangle`);
+	     *     console.log(JSON.stringify(bundle));
+	     *   }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
 	     *   })
 	     * ```
 	     *
-	     * @method sendTrytes
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Trytes[]} trytes - List of trytes to attach, store and broadcast
-	     *
-	     * @param {number} depth - The depth at which Random Walk starts. A value of `3` is typically used by wallets,
-	     * meaning that RW starts 3 milestones back.
-	     *
-	     * @param {number} minWeightMagnitude - Minimum number of trailing zeros in transaction hash. This is used to
-	     * search for a valid `nonce`. Currently it is `14` on mainnet & spamnet and `9` on most other testnets.
-	     *
-	     * @param {string} [reference] - Optional reference transaction hash
-	     *
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @return {Promise}
-	     * @fulfil {Transaction[]}  Returns list of attached transactions
-	     * @reject {Error}
-	     * - `INVALID_TRANSACTION_TRYTES`
-	     * - `INVALID_DEPTH`
-	     * - `INVALID_MIN_WEIGHT_MAGNITUDE`
-	     * - Fetch error, if connected to network
+	     *
+	     * @fulfil {Transaction[]} bundle - Array of transaction objects that you just sent to the node
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_TRYTES`: Make sure the trytes can be converted to a valid transaction object
+	     * - `INVALID_DEPTH`: Make sure that the `depth` argument is greater than zero
+	     * - `INVALID_MIN_WEIGHT_MAGNITUDE`: Make sure that the minimum weight magnitude is at least the same as the original bundle
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function sendTrytes(trytes, depth, minWeightMagnitude, reference, callback) {
 	        if (reference && typeof reference === 'function') {
@@ -20713,6 +21496,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider
 	 *
 	 * @return {function} {@link #module_core.storeAndBroadcast `storeAndBroadcast`}
@@ -20721,27 +21506,50 @@
 	    var storeTransactions = src$b.createStoreTransactions(provider);
 	    var broadcastTransactions = src$b.createBroadcastTransactions(provider);
 	    /**
-	     * Stores and broadcasts a list of _attached_ transaction trytes by calling
-	     * [`storeTransactions`]{@link #module_core.storeTransactions} and
-	     * [`broadcastTransactions`]{@link #module_core.broadcastTransactions}.
+	     * This method uses the connected IRI node's
+	     * [`broadcastTransactions`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#broadcastTransactions) and [`storeTransactions`](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference#storeTransactions) endpoints to send it the given transaction trytes.
 	     *
-	     * **Note:** Persist the transaction trytes in local storage __before__ calling this command, to ensure
-	     * that reattachment is possible, until your bundle has been included.
+	     * **Note:** Before calling this method, we recommend saving your transaction trytes in local storage.
+	     * By doing so, you make sure that you can always reattach your transactions to the Tangle in case they remain in a pending state.
 	     *
-	     * Any transactions stored with this command will eventaully be erased, as a result of a snapshot.
+	     * ## Related methods
+	     *
+	     * The given transaction trytes must be in a valid bundle and must include a proof of work.
+	     *
+	     * To create a valid bundle, use the `prepareTransfers()` method. For more information about what makes a bundles and transactions valid, see [this guide](https://docs.iota.org/docs/node-software/0.1/iri/concepts/transaction-validation).
+	     *
+	     * To do proof of work, use one of the following methods:
+	     *
+	     * - [`attachToTangle()`]{@link #module_core.attachToTangle}
+	     * - [`sendTrytes()`]{@link #module_core.sendTrytes}
 	     *
 	     * @method storeAndBroadcast
 	     *
+	     * @summary Sends the given transaction trytes to the connected IRI node.
+	     *
 	     * @memberof module:core
 	     *
-	     * @param {Array<Trytes>} trytes - Attached transaction trytes
-	     * @param {Callback} [callback] - Optional callback
+	     * @param {Array<Trytes>} trytes - Array of transaction trytes
+	     * @param {Callback} [callback] - Optional callback function
+	     *
+	     * @example
+	     * ```js
+	     * storeAndBroadcast(trytes)
+	     * .then(transactionTrytes => {
+	     *     console.log(`Successfully sent transactions to the node`);
+	     *     console.log(JSON.stringify(transactionTrytes));
+	     * }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     * })
+	     * ```
 	     *
 	     * @return {Promise<Trytes[]>}
-	     * @fulfil {Trytes[]} Attached transaction trytes
-	     * @reject {Error}
-	     * - `INVALID_ATTACHED_TRYTES`: Invalid attached trytes
-	     * - Fetch error
+	     *
+	     * @fulfil {Trytes[]} transactionTrytes - Attached transaction trytes
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_TRYTES`: Make sure the trytes can be converted to a valid transaction object
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function (trytes, callback) {
 	        return storeTransactions(trytes)
@@ -20769,6 +21577,8 @@
 	 *
 	 * @memberof module:core
 	 *
+	 * @ignore
+	 *
 	 * @param {Provider} provider
 	 *
 	 * @return {function} {@link #module_core.traverseBundle `traverseBundle`}
@@ -20776,36 +21586,49 @@
 	exports.createTraverseBundle = function (provider) {
 	    var getTrytes = src$b.createGetTrytes(provider);
 	    /**
-	     * Fetches the bundle of a given the _tail_ transaction hash, by traversing through `trunkTransaction`.
-	     * It does not validate the bundle.
+	     * Gets all transactions in the bundle of a given tail transaction hash, by traversing its `trunkTransaction` field.
+	     *
+	     * **Note:** This method does not validate the bundle.
+	     *
+	     * ## Related methods
+	     *
+	     * To get and validate all transactions in a bundle, use the [`getBundle()`]{@link #module_core.getBundle} method.
+	     *
+	     * @method traverseBundle
+	     *
+	     * @summary Gets all transaction in the bundle of a given tail transaction hash.
+	     *
+	     * @memberof module:core
+	     *
+	     * @param {Hash} trunkTransaction - Tail transaction hash
+	     * @param {Hash} [bundle=[]] - Array of existing transaction objects to include in the returned bundle
+	     * @param {Callback} [callback] - Optional callback function
 	     *
 	     * @example
 	     *
 	     * ```js
-	     * traverseBundle(tail)
-	     *    .then(bundle => {
-	     *        // ...
-	     *    })
-	     *    .catch(err => {
-	     *        // handle errors
-	     *    })
+	     * traverseBundle(tailTransactionHash)
+	     * .then(bundle => {
+	     *     console.log(`Successfully found the following transactions in the bundle:`);
+	     *     console.log(JSON.stringify(bundle));
+	     * }).catch(error => {
+	     *     console.log(`Something went wrong: ${error}`)
+	     * })
 	     * ```
 	     *
-	     * @method traverseBundle
-	     *
-	     * @memberof module:core
-	     *
-	     * @param {Hash} trunkTransaction - Trunk transaction, should be tail (`currentIndex == 0`)
-	     * @param {Hash} [bundle=[]] - List of accumulated transactions
-	     * @param {Callback} [callback] - Optional callback
-	     *
 	     * @returns {Promise}
-	     * @fulfil {Transaction[]} Bundle as array of transaction objects
-	     * @reject {Error}
-	     * - `INVALID_TRANSACTION_HASH`
-	     * - `INVALID_TAIL_HASH`: Provided transaction is not tail (`currentIndex !== 0`)
-	     * - `INVALID_BUNDLE`: Bundle is syntactically invalid
-	     * - Fetch error
+	     *
+	     * @fulfil {Transaction[]} bundle - Array of transaction objects
+	     *
+	     * @reject {Error} error - An error that contains one of the following:
+	     * - `INVALID_TRANSACTION_HASH`: Make sure the tail transaction hash is 81 trytes long
+	     * -`INVALID_TAIL_TRANSACTION`: Make sure that the tail transaction hash is for a transaction whose `currentIndex` field is 0
+	     * - `INVALID_BUNDLE`: Check the tail transaction's bundle for the following:
+	     *   - Addresses in value transactions have a 0 trit at the end, which means they were generated using the Kerl hashing function
+	     *   - Transactions in the bundle array are in the same order as their currentIndex field
+	     *   - The total value of all transactions in the bundle sums to 0
+	     *   - The bundle hash is valid
+	     * - Fetch error: The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
 	     */
 	    return function traverseBundle(trunkTransaction, bundle, callback) {
 	        if (bundle === void 0) { bundle = []; }
@@ -20843,18 +21666,35 @@
 
 
 	/**
-	 * Generates an address deterministically, according to the given seed, index and security level.
+	 * Generates an address, according to the given seed, index, and security level.
+	 *
+	 * **Note:** This method does not check if the address is [spent](https://docs.iota.org/docs/getting-started/0.1/clients/addresses#spent-addresses).
+	 *
+	 * ## Related methods
+	 *
+	 * To generate an address that has a lower probability of being spent, use the [`getNewAddress()`]{@link #module_core.getNewAddress} method.
 	 *
 	 * @method generateAddress
 	 *
+	 * @summary Generates an address with a specific index and security level.
+	 *
 	 * @memberof module:core
 	 *
-	 * @param {string} seed
-	 * @param {number} index - Private key index
-	 * @param {number} [security=2] - Security level of the private key
-	 * @param {boolean} [checksum=false] - Flag to add 9trytes checksum
+	 * @param {string} seed The seed to use to generate the address
+	 * @param {number} index - The key index to use to generate the address
+	 * @param {number} [security=2] - The [security level](https://docs.iota.org/docs/getting-started/0.1/clients/security-levels) to use to generate the address
+	 * @param {boolean} [checksum=false] - Whether to add the [checksum](https://docs.iota.org/docs/getting-started/0.1/clients/checksums)
 	 *
-	 * @returns {Hash} Address trytes
+	 * @example
+	 * ```js
+	 * const myAddress = generateAddress(seed, 0);
+	 * ```
+	 *
+	 * @returns {Hash} address - An 81-tryte address
+	 *
+	 * @throws {errors.INVALID_SEED}: Make sure that the seed contains only trytes
+	 *
+	 * @throws {errors.INVALID_SECURITY_LEVEL}: Make sure that the security level is a number between 1 and 3
 	 */
 	exports.generateAddress = function (seed, index, security, checksum) {
 	    if (security === void 0) { security = 2; }
@@ -20889,7 +21729,6 @@
 	    IRICommand["GET_NEIGHBORS"] = "getNeighbors";
 	    IRICommand["ADD_NEIGHBORS"] = "addNeighbors";
 	    IRICommand["REMOVE_NEIGHBORS"] = "removeNeighbors";
-	    IRICommand["GET_TIPS"] = "getTips";
 	    IRICommand["FIND_TRANSACTIONS"] = "findTransactions";
 	    IRICommand["GET_TRYTES"] = "getTrytes";
 	    IRICommand["GET_INCLUSION_STATES"] = "getInclusionStates";
@@ -20925,6 +21764,7 @@
 	(function(self) {
 
 	var irrelevant = (function (exports) {
+
 	  var support = {
 	    searchParams: 'URLSearchParams' in self,
 	    iterable: 'Symbol' in self && 'iterator' in Symbol,
@@ -21508,6 +22348,21 @@
 	}
 
 	/**
+	 * Attempts to encode a given input.
+	 *
+	 * @param {String} input The string that needs to be encoded.
+	 * @returns {String|Null} The encoded string.
+	 * @api private
+	 */
+	function encode(input) {
+	  try {
+	    return encodeURIComponent(input);
+	  } catch (e) {
+	    return null;
+	  }
+	}
+
+	/**
 	 * Simple query string parser.
 	 *
 	 * @param {String} query The query string that needs to be parsed.
@@ -21515,7 +22370,7 @@
 	 * @api public
 	 */
 	function querystring(query) {
-	  var parser = /([^=?&]+)=?([^&]*)/g
+	  var parser = /([^=?#&]+)=?([^&]*)/g
 	    , result = {}
 	    , part;
 
@@ -21570,8 +22425,8 @@
 	        value = '';
 	      }
 
-	      key = encodeURIComponent(key);
-	      value = encodeURIComponent(value);
+	      key = encode(key);
+	      value = encode(value);
 
 	      //
 	      // If we failed to encode the strings, we should bail out as we don't
@@ -22149,10 +23004,10 @@
 	            .then(function (json) {
 	            return res.ok
 	                ? json
-	                : Promise.reject(requestError(json.error || json.exception ? json.error || json.exception : res.statusText));
+	                : Promise.reject(new Error(requestError(json.error || json.exception ? json.error || json.exception : res.statusText)));
 	        })["catch"](function (error) {
 	            if (!res.ok && error.type === 'invalid-json') {
-	                throw requestError(res.statusText);
+	                throw new Error(requestError(res.statusText));
 	            }
 	            else {
 	                throw error;
@@ -22206,8 +23061,7 @@
 	                return {
 	                    hashes: responses[0][0].hashes.filter(function (hash) {
 	                        return responses.every(function (response) {
-	                            return response.findIndex(function (res) { return res.hashes.indexOf(hash) > -1; }) >
-	                                -1;
+	                            return response.findIndex(function (res) { return res.hashes.indexOf(hash) > -1; }) > -1;
 	                        });
 	                    })
 	                };
@@ -22280,26 +23134,68 @@
 	    });
 	};
 	/**
-	 * Create an http client to access IRI http API.
+	 * This method creates an HTTP client that you can use to send requests to the [IRI API endpoints](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference).
+	 *
+	 * ## Related methods
+	 *
+	 * To send requests to the IRI node, use the [`send()`]{@link #module_http-client.send} method.
 	 *
 	 * @method createHttpClient
 	 *
-	 * @param {object} [settings={}]
-	 * @param {string} [settings.provider=http://localhost:14265] Uri of IRI node
-	 * @param {string | number} [settings.apiVersion=1] - IOTA Api version to be sent as `X-IOTA-API-Version` header.
-	 * @param {number} [settings.requestBatchSize=1000] - Number of search values per request.
-	 * @return Object
+	 * @summary Creates an HTTP client to access the IRI API.
+	 *
+	 * @memberof module:http-client
+	 *
+	 * @param {Object} [settings={}]
+	 * @param {String} [settings.provider=http://localhost:14265] URI of an IRI node to connect to
+	 * @param {String | number} [settings.apiVersion=1] - IOTA API version to be sent in the `X-IOTA-API-Version` header.
+	 * @param {number} [settings.requestBatchSize=1000] - Number of search values per request
+	 *
+	 * @example
+	 * ```js
+	 * let settings = {
+	 *  provider: 'http://mynode.eu:14265'
+	 * }
+	 *
+	 * let httpClient = HttpClient.createHttpClient(settings);
+	 * ```
+	 *
+	 * @return HTTP client object
 	 */
 	exports.createHttpClient = function (settings$1) {
 	    var currentSettings = settings.getSettingsWithDefaults(__assign({}, settings$1));
 	    return {
 	        /**
-	         * @member send
-	         *
-	         * @param {object} command
-	         *
-	         * @return {object} response
-	         */
+	        * This method uses the HTTP client to send requests to the [IRI API endpoints](https://docs.iota.org/docs/node-software/0.1/iri/references/api-reference).
+	        *
+	        * ## Related methods
+	        *
+	        * To create an HTTP client, use the [`createHttpClient()`]{@link #module_http-client.createHttpClient} method.
+	        *
+	        * @method createHttpClient
+	        *
+	        * @summary Sends an API request to the connected IRI node.
+	        *
+	        * @param {Object} command - The request body for the API endpoint
+	        *
+	        * @example
+	        * ```js
+	        * let httpClient = HttpClient.createHttpClient(settings);
+	        * httpClient.send({command:'getNodeInfo'})
+	        * .then(response => {
+	        *   console.log(response);
+	        * })
+	        * .catch(error => {
+	        *   console.log(error);
+	        * })
+	        * ```
+	        *
+	        * @return {Promise}
+	        *
+	        * @fulfil {Object} response - The response from the IRI node
+	        *
+	        * @reject {Object} error - The connected IOTA node's API returned an error. See the [list of error messages](https://docs.iota.org/docs/node-software/0.1/iri/references/api-errors)
+	        */
 	        send: function (command) {
 	            return bluebird["try"](function () {
 	                var provider = currentSettings.provider, user = currentSettings.user, password = currentSettings.password, requestBatchSize = currentSettings.requestBatchSize, apiVersion = currentSettings.apiVersion, agent = currentSettings.agent;
@@ -22313,13 +23209,45 @@
 	            });
 	        },
 	        /**
-	         * @member setSettings
-	         *
-	         * @param {object} [settings={}]
-	         * @param {string} [settings.provider=http://localhost:14265] Uri of IRI node
-	         * @param {string | number} [settings.apiVersion=1] - IOTA Api version to be sent as `X-IOTA-API-Version` header.
-	         * @param {number} [settings.requestBatchSize=1000] - Number of search values per request.
-	         */
+	        * This method updates the settings of an existing HTTP client.
+	        *
+	        * ## Related methods
+	        *
+	        * To create an HTTP client, use the [`createHttpClient()`]{@link #module_http-client.createHttpClient} method.
+	        *
+	        * @method setSettings
+	        *
+	        * @summary Updates the settings of an existing HTTP client.
+	        *
+	        * @param {Object} [settings={}]
+	        * @param {String} [settings.provider=http://localhost:14265] URI of an IRI node to connect to
+	        * @param {String | number} [settings.apiVersion=1] - IOTA API version to be sent in the `X-IOTA-API-Version` header.
+	        * @param {number} [settings.requestBatchSize=1000] - Number of search values per request.
+	        *
+	        * @example
+	        * ```js
+	        * let settings = {
+	        *   provider: 'https://nodes.devnet.thetangle.org:443'
+	        *   }
+	        *
+	        * let httpClient = http.createHttpClient(settings);
+	        * httpClient.send({command:'getNodeInfo'}).then(res => {
+	        *   console.log(res)
+	        * }).catch(err => {
+	        *   console.log(err)
+	        * });
+	        *
+	        * httpClient.setSettings({provider:'http://newnode.org:14265'});
+	        *
+	        * httpClient.send({command:'getNodeInfo'}).then(res => {
+	        *   console.log(res)
+	        * }).catch(err => {
+	        *   console.log(err)
+	        * })
+	        * ```
+	        *
+	        * @return {void}
+	        */
 	        setSettings: function (newSettings) {
 	            currentSettings = settings.getSettingsWithDefaults(__assign({}, currentSettings, newSettings));
 	        }
@@ -22441,38 +23369,45 @@
 	}
 	exports.returnType = returnType;
 	/**
-	 * Composes API object from it's components
-	 *
 	 * @method composeApi
+	 *
+	 * @summary Creates an API object that's used to send requests to an IRI node.
 	 *
 	 * @memberof module:core
 	 *
-	 * @param {object} [settings={}] - Connection settings
-	 * @param {Provider} [settings.network] - Network provider, defaults to `http-client`.
-	 * @param {string} [settings.provider=http://localhost:14265] Uri of IRI node
-	 * @param {function} [settings.attachToTangle] - Function to override
-	 * [`attachToTangle`]{@link #module_core.attachToTangle} with
-	 * @param {string | number} [settings.apiVersion=1] - IOTA Api version to be sent as `X-IOTA-API-Version` header.
-	 * @param {number} [settings.requestBatchSize=1000] - Number of search values per request.
+	 * @param {Object} [settings={}] - Connection settings.
+	 * @param {Provider} [settings.network=http-client] - Network provider
+	 * @param {string} [settings.provider=http://localhost:14265] - URI of an IRI node
+	 * @param {Function} [settings.attachToTangle=attachToTangle] - Function that overrides the default `attachToTangle` endpoint
+	 * @param {string | number} [settings.apiVersion=1] - IOTA API version to use in the `X-IOTA-API-Version` HTTP header
+	 * @param {number} [settings.requestBatchSize=1000] - Maximum number of parameters that may be sent in batched API request for [`findTransactions`]{@link #module_core.findTransactions}, [`getBalances`]{@link #module_core.getBalances}, [`getInclusionStates`]{@link #module_core.getInclusionStates}, and [`getTrytes`]{@link #module_core.getTrytes}
 	 *
-	 * @return {API}
+	 * @example
+	 * ```js
+	 * const Iota = require('@iota/core`);
+	 *
+	 * const iota = Iota.composeAPI({
+	 *  provider: 'https://nodes.devnet.thetangle.org:443'
+	 * });
+	 * ```
+	 *
+	 * @return {API} iota - API object to use to interact with an IRI node.
 	 */
 	exports.composeAPI = function (settings) {
 	    if (settings === void 0) { settings = {}; }
 	    var provider = src$a.createHttpClient(settings);
 	    var attachToTangle = settings.attachToTangle || src$b.createAttachToTangle(provider);
 	    /**
-	     * Defines network provider configuration and [`attachToTangle`]{@link #module_core.attachToTangle} method.
-	     *
 	     * @method setSettings
+	     *
+	     * @summary Defines network provider configuration and [`attachToTangle`]{@link #module_core.attachToTangle} method.
 	     *
 	     * @memberof API
 	     *
-	     * @param {object} settings - Provider settings object
-	     * @param {string} [settings.provider] - Http `uri` of IRI node
-	     * @param {Provider} [settings.network] - Network provider to override with
-	     * @param {function} [settings.attachToTangle] - AttachToTangle function to override with
-	     * [`attachToTangle`]{@link #module_core.attachToTangle} with
+	     * @param {Object} settings - Provider settings object
+	     * @param {string} [settings.provider] - URI of an IRI node
+	     * @param {Provider} [settings.network] - Network provider
+	     * @param {Function} [settings.attachToTangle] - A new `attachToTangle()` function
 	     */
 	    function setSettings(newSettings) {
 	        if (newSettings === void 0) { newSettings = {}; }
@@ -22484,19 +23419,33 @@
 	        }
 	        provider.setSettings(newSettings);
 	    }
+	    /**
+	     *
+	     * @method overrideNetwork
+	     *
+	     * @summary Overrides the default provider
+	     *
+	     * @memberof API
+	     *
+	     * @ignore
+	     *
+	     * @param {Provider} network - Provider instance to use to override the existing network settings
+	     */
 	    function overrideNetwork(network) {
 	        provider = network;
 	    }
 	    /**
-	     * Overides default [`attachToTangle`]{@link #module_core.attachToTangle} with a local equivalent or
-	     * [`PoWBox`](https://powbox.devnet.iota.org/)
 	     *
 	     * @method overrideAttachToTangle
 	     *
+	     * @summary Overrides the default [`attachToTangle`]{@link #module_core.attachToTangle} method
+	     *
 	     * @memberof API
 	     *
-	     * @param {function} attachToTangle - Function to override
-	     * [`attachToTangle`]{@link #module_core.attachToTangle} with
+	     * @ignore
+	     *
+	     * @param {function} attachToTangle - Function that overrides the
+	     * [`attachToTangle`]{@link #module_core.attachToTangle} method
 	     */
 	    function overrideAttachToTangle(attachFn) {
 	        attachToTangle = attachFn;
@@ -22513,7 +23462,6 @@
 	        getInclusionStates: src$b.createGetInclusionStates(provider),
 	        getNeighbors: src$b.createGetNeighbors(provider),
 	        getNodeInfo: src$b.createGetNodeInfo(provider),
-	        getTips: src$b.createGetTips(provider),
 	        getTransactionsToApprove: src$b.createGetTransactionsToApprove(provider),
 	        getTrytes: src$b.createGetTrytes(provider),
 	        interruptAttachingToTangle: src$b.createInterruptAttachingToTangle(provider),
@@ -22526,7 +23474,6 @@
 	        getAccountData: src$b.createGetAccountData(provider),
 	        getBundle: src$b.createGetBundle(provider),
 	        getBundlesFromAddresses: createGetBundlesFromAddresses.createGetBundlesFromAddresses(provider),
-	        getLatestInclusion: src$b.createGetLatestInclusion(provider),
 	        getNewAddress: src$b.createGetNewAddress(provider),
 	        getTransactionObjects: src$b.createGetTransactionObjects(provider),
 	        findTransactionObjects: src$b.createFindTransactionObjects(provider),
@@ -22580,8 +23527,6 @@
 
 	exports.createGetNodeInfo = createGetNodeInfo.createGetNodeInfo;
 
-	exports.createGetTips = createGetTips.createGetTips;
-
 	exports.createGetTransactionsToApprove = createGetTransactionsToApprove.createGetTransactionsToApprove;
 
 	exports.createGetTrytes = createGetTrytes.createGetTrytes;
@@ -22615,8 +23560,6 @@
 	exports.createGetBundlesFromAddresses = createGetBundlesFromAddresses.createGetBundlesFromAddresses;
 
 	exports.createGetInputs = createGetInputs.createGetInputs;
-
-	exports.createGetLatestInclusion = createGetLatestInclusion.createGetLatestInclusion;
 
 	exports.createGetNewAddress = createGetNewAddress.createGetNewAddress;
 	// createGetUntilFirstUnusedAddress,
@@ -22672,35 +23615,33 @@
 	var src_8$1 = src$b.createGetInclusionStates;
 	var src_9$1 = src$b.createGetNeighbors;
 	var src_10$1 = src$b.createGetNodeInfo;
-	var src_11$1 = src$b.createGetTips;
-	var src_12$1 = src$b.createGetTransactionsToApprove;
-	var src_13$1 = src$b.createGetTrytes;
-	var src_14$1 = src$b.createInterruptAttachingToTangle;
-	var src_15$1 = src$b.createRemoveNeighbors;
-	var src_16$1 = src$b.createStoreTransactions;
-	var src_17$1 = src$b.createWereAddressesSpentFrom;
-	var src_18$1 = src$b.createBroadcastBundle;
-	var src_19$1 = src$b.createFindTransactionObjects;
-	var src_20$1 = src$b.createGetAccountData;
-	var src_21$1 = src$b.createGetBundle;
-	var src_22$1 = src$b.createGetBundlesFromAddresses;
-	var src_23$1 = src$b.createGetInputs;
-	var src_24$1 = src$b.createGetLatestInclusion;
-	var src_25$1 = src$b.createGetNewAddress;
-	var src_26$1 = src$b.createIsAddressUsed;
-	var src_27$1 = src$b.createGetTransactionObjects;
-	var src_28$1 = src$b.isAboveMaxDepth;
-	var src_29$1 = src$b.createIsPromotable;
-	var src_30$1 = src$b.createIsReattachable;
-	var src_31$1 = src$b.createPromoteTransaction;
-	var src_32$1 = src$b.createReplayBundle;
-	var src_33$1 = src$b.createSendTrytes;
-	var src_34$1 = src$b.createPrepareTransfers;
-	var src_35$1 = src$b.createStoreAndBroadcast;
-	var src_36$1 = src$b.createTraverseBundle;
-	var src_37$1 = src$b.generateAddress;
-	var src_38$1 = src$b.errors;
-	var src_39$1 = src$b.composeAPI;
+	var src_11$1 = src$b.createGetTransactionsToApprove;
+	var src_12$1 = src$b.createGetTrytes;
+	var src_13$1 = src$b.createInterruptAttachingToTangle;
+	var src_14$1 = src$b.createRemoveNeighbors;
+	var src_15$1 = src$b.createStoreTransactions;
+	var src_16$1 = src$b.createWereAddressesSpentFrom;
+	var src_17$1 = src$b.createBroadcastBundle;
+	var src_18$1 = src$b.createFindTransactionObjects;
+	var src_19$1 = src$b.createGetAccountData;
+	var src_20$1 = src$b.createGetBundle;
+	var src_21$1 = src$b.createGetBundlesFromAddresses;
+	var src_22$1 = src$b.createGetInputs;
+	var src_23$1 = src$b.createGetNewAddress;
+	var src_24$1 = src$b.createIsAddressUsed;
+	var src_25$1 = src$b.createGetTransactionObjects;
+	var src_26$1 = src$b.isAboveMaxDepth;
+	var src_27$1 = src$b.createIsPromotable;
+	var src_28$1 = src$b.createIsReattachable;
+	var src_29$1 = src$b.createPromoteTransaction;
+	var src_30$1 = src$b.createReplayBundle;
+	var src_31$1 = src$b.createSendTrytes;
+	var src_32$1 = src$b.createPrepareTransfers;
+	var src_33$1 = src$b.createStoreAndBroadcast;
+	var src_34$1 = src$b.createTraverseBundle;
+	var src_35$1 = src$b.generateAddress;
+	var src_36$1 = src$b.errors;
+	var src_37$1 = src$b.composeAPI;
 
 	var errors$a = createCommonjsModule(function (module, exports) {
 	exports.__esModule = true;
@@ -23193,11 +24134,6 @@
 	    function (s) { return Number.isInteger(s) && s >= 0; },
 	    errors$a.INVALID_THRESHOLD,
 	]; };
-	exports.getBalancesThresholdValidator = function (threshold) { return [
-	    threshold,
-	    function (t) { return Number.isInteger(t) && t <= 100; },
-	    errors$a.INVALID_THRESHOLD,
-	]; };
 	exports.stringify = function (value) {
 	    return JSON.stringify(value, null, 1);
 	};
@@ -23238,8 +24174,7 @@
 	var guards_31$4 = guards$4.startOptionValidator;
 	var guards_32$4 = guards$4.startEndOptionsValidator;
 	var guards_33$4 = guards$4.getInputsThresholdValidator;
-	var guards_34$4 = guards$4.getBalancesThresholdValidator;
-	var guards_35$4 = guards$4.stringify;
+	var guards_34$4 = guards$4.stringify;
 
 	var src$c = createCommonjsModule(function (module, exports) {
 	/**
@@ -23251,13 +24186,27 @@
 	/* Address related guards & validators */
 
 	/**
-	 * Checks integrity of given address by validating the checksum.
+	 * This method takes an address with a checksum and validates that the checksum is correct.
+	 *
+	 * ## Related methods
+	 *
+	 * To generate a new address with a checksum, use the [`getNewAddress()`]{@link #module_core.getNewAddress} method.
 	 *
 	 * @method isAddress
 	 *
-	 * @param {string} address - Address trytes, with checksum
+	 * @summary Validates the checksum of the given address.
 	 *
-	 * @return {boolean}
+	 * @memberof module:validators
+	 *
+	 * @param {string} address - Address with a checksum
+	 *
+	 * @example
+	 * ```js
+	 * let valid = Validator.isAddress('9FNJWLMBECSQDKHQAGDHDPXBMZFMQIMAFAUIQTDECJVGKJBKHLEBVU9TWCTPRJGYORFDSYENIQKBVSYKW9NSLGS9UW');
+	 * ```
+	 *
+	 * @return {boolean} valid - Whether the checksum is valid
+	 *
 	 */
 	exports.isAddress = function (address) {
 	    var isValid = false;
@@ -23352,8 +24301,8 @@
 	var src_35$2 = src$c.isUriArray;
 	var src_36$2 = src$c.isAttached;
 	var src_37$2 = src$c.isTail;
-	var src_38$2 = src$c.isHead;
-	var src_39$2 = src$c.isTransaction;
+	var src_38$1 = src$c.isHead;
+	var src_39$1 = src$c.isTransaction;
 
 	/**
 	 * Class to implement Curl sponge.
@@ -23427,6 +24376,7 @@
 	            stateCopy = this._state.slice();
 	            for (var i = 0; i < Curl.STATE_LENGTH; i++) {
 	                this._state[i] =
+	                    // eslint-disable-next-line no-bitwise
 	                    Curl.TRUTH_TABLE[stateCopy[index] + (stateCopy[(index += index < 365 ? 364 : -365)] << 2) + 5];
 	            }
 	        }
@@ -23555,7 +24505,7 @@
 	    var sponge = new Curl(27);
 	    for (var i = 0; i < key.length / Curl.HASH_LENGTH; i++) {
 	        var buffer = key.subarray(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
-	        for (var k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + hashTrits[i * 3 + 1] * 3 + hashTrits[i * 3 + 2] * 9); k++) {
+	        for (var k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + (hashTrits[(i * 3) + 1] * 3) + (hashTrits[(i * 3) + 2] * 9)); k++) {
 	            sponge.reset();
 	            sponge.absorb(buffer, 0, buffer.length);
 	            buffer = sponge.rate();
@@ -23591,7 +24541,7 @@
 	    var buffer = new Int8Array(sig.length);
 	    for (var i = 0; i < (sig.length / Curl.HASH_LENGTH); i++) {
 	        var innerBuffer = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
-	        for (var j = 0; j < (hash[i * 3] + hash[i * 3 + 1] * 3 + hash[i * 3 + 2] * 9) - MIN_TRYTE_VALUE; j++) {
+	        for (var j = 0; j < (hash[i * 3] + (hash[(i * 3) + 1] * 3) + (hash[(i * 3) + 2] * 9)) - MIN_TRYTE_VALUE; j++) {
 	            sponge.reset();
 	            sponge.absorb(innerBuffer, 0, innerBuffer.length);
 	            innerBuffer = sponge.rate();
@@ -23678,6 +24628,7 @@
 	        for (var c = 0; c < numChunks; c++) {
 	            var chunk = siblings.slice(c * Curl.HASH_LENGTH, (c + 1) * Curl.HASH_LENGTH);
 	            sponge.reset();
+	            // eslint-disable-next-line no-bitwise
 	            if ((i & index) === 0) {
 	                sponge.absorb(rate, 0, rate.length);
 	                sponge.absorb(chunk, 0, chunk.length);
@@ -23686,6 +24637,7 @@
 	                sponge.absorb(chunk, 0, chunk.length);
 	                sponge.absorb(rate, 0, rate.length);
 	            }
+	            // eslint-disable-next-line no-bitwise
 	            i <<= 1;
 	            rate = sponge.rate();
 	        }
@@ -23697,10 +24649,11 @@
 	     * @returns The key and leaves for the sub tree.
 	     */
 	    MerkleTree.prototype.getSubtree = function (index) {
+	        var _a;
 	        if (this.root.size === 1) {
 	            return {
-	                key: this.root.left && this.root.left.privateKeyTrits
-	                    ? this.root.left.privateKeyTrits : new Int8Array(), leaves: []
+	                key: ((_a = this.root.left) === null || _a === void 0 ? void 0 : _a.privateKeyTrits) ? this.root.left.privateKeyTrits : new Int8Array(),
+	                leaves: []
 	            };
 	        }
 	        var leaves = [];
@@ -23727,7 +24680,7 @@
 	        }
 	        leaves.reverse();
 	        return {
-	            key: privateKey || new Int8Array(),
+	            key: privateKey !== null && privateKey !== void 0 ? privateKey : new Int8Array(),
 	            leaves: leaves
 	        };
 	    };
@@ -23762,6 +24715,7 @@
 	    return MerkleTree;
 	}());
 
+	/* eslint-disable no-bitwise */
 	var ZERO = new Int8Array([1, 0, 0, -1]);
 	var RADIX = 3;
 	var TRITS_PER_TRYTE = 3;
@@ -23827,7 +24781,7 @@
 	        var tritsIntValue = ((encoder >> i) & 1) !== 0
 	            ? -src_5(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE))
 	            : src_5(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE));
-	        result = result + (Math.pow(27, i) * tritsIntValue);
+	        result += (Math.pow(27, i) * tritsIntValue);
 	    }
 	    return { value: result, end: inputEnd };
 	}
@@ -23909,7 +24863,9 @@
 	        case 0:
 	            return 0;
 	        default:
+	            // eslint-disable-next-line no-case-declarations
 	            var abs = Math.floor(input / RADIX);
+	            // eslint-disable-next-line no-case-declarations
 	            var r = input % RADIX;
 	            if (r > 1) {
 	                abs += 1;
@@ -23941,8 +24897,8 @@
 	        var size = Math.min(length, Curl.HASH_LENGTH) - offset;
 	        var index = 0;
 	        while (index === 0) {
-	            var incrementResult = this.increment(state, offset + size * 2 / 3, offset + size);
-	            size = Math.min(roundThird(offset + size * 2 / 3 + incrementResult), Curl.HASH_LENGTH) - offset;
+	            var incrementResult = this.increment(state, offset + (size * 2 / 3), offset + size);
+	            size = Math.min(roundThird(offset + (size * 2 / 3) + incrementResult), Curl.HASH_LENGTH) - offset;
 	            var curlCopy = {
 	                low: state.low.slice(),
 	                high: state.high.slice()
@@ -24062,7 +25018,9 @@
 	     * @returns The bitwise not of the value.
 	     */
 	    HammingDiver.prototype.bitWiseNot = function (value) {
-	        return bigInt(1).shiftLeft(64).subtract(bigInt(1)).subtract(value);
+	        return bigInt__default['default'](1).shiftLeft(64)
+	            .subtract(bigInt__default['default'](1))
+	            .subtract(value);
 	    };
 	    /**
 	     * Check if we have found the nonce.
@@ -24076,7 +25034,7 @@
 	            var sum = 0;
 	            for (var j = 0; j < securityLevel; j++) {
 	                for (var k = j * 243 / 3; k < (j + 1) * 243 / 3; k++) {
-	                    var bIndex = bigInt(1).shiftLeft(i);
+	                    var bIndex = bigInt__default['default'](1).shiftLeft(i);
 	                    if (low[k].and(bIndex).equals(0)) {
 	                        sum--;
 	                    }
@@ -24106,7 +25064,7 @@
 	    HammingDiver.prototype.trinaryGet = function (low, high, arrLength, index) {
 	        var result = new Int8Array(arrLength);
 	        for (var i = 0; i < arrLength; i++) {
-	            var bIndex = bigInt(index);
+	            var bIndex = bigInt__default['default'](index);
 	            var l = low[i].shiftRight(bIndex).and(1);
 	            var h = high[i].shiftRight(bIndex).and(1);
 	            if (l.equals(1) && h.equals(0)) {
@@ -24124,43 +25082,43 @@
 	    /**
 	     * Max 64 bit value.
 	     */
-	    HammingDiver.MAX_VALUE = bigInt("FFFFFFFFFFFFFFFF", 16);
+	    HammingDiver.MAX_VALUE = bigInt__default['default']("FFFFFFFFFFFFFFFF", 16);
 	    /**
 	     * Min 64 bit value.
 	     */
-	    HammingDiver.MIN_VALUE = bigInt("0000000000000000", 16);
+	    HammingDiver.MIN_VALUE = bigInt__default['default']("0000000000000000", 16);
 	    /**
 	     * High 0
 	     */
-	    HammingDiver.HIGH_0 = bigInt("B6DB6DB6DB6DB6DB", 16);
+	    HammingDiver.HIGH_0 = bigInt__default['default']("B6DB6DB6DB6DB6DB", 16);
 	    /**
 	     * High 1
 	     */
-	    HammingDiver.HIGH_1 = bigInt("8FC7E3F1F8FC7E3F", 16);
+	    HammingDiver.HIGH_1 = bigInt__default['default']("8FC7E3F1F8FC7E3F", 16);
 	    /**
 	     * High 2
 	     */
-	    HammingDiver.HIGH_2 = bigInt("FFC01FFFF803FFFF", 16);
+	    HammingDiver.HIGH_2 = bigInt__default['default']("FFC01FFFF803FFFF", 16);
 	    /**
 	     * High 3
 	     */
-	    HammingDiver.HIGH_3 = bigInt("003FFFFFFFFFFFFF", 16);
+	    HammingDiver.HIGH_3 = bigInt__default['default']("003FFFFFFFFFFFFF", 16);
 	    /**
 	     * Low 0
 	     */
-	    HammingDiver.LOW_0 = bigInt("DB6DB6DB6DB6DB6D", 16);
+	    HammingDiver.LOW_0 = bigInt__default['default']("DB6DB6DB6DB6DB6D", 16);
 	    /**
 	     * Low 1
 	     */
-	    HammingDiver.LOW_1 = bigInt("F1F8FC7E3F1F8FC7", 16);
+	    HammingDiver.LOW_1 = bigInt__default['default']("F1F8FC7E3F1F8FC7", 16);
 	    /**
 	     * Low 2
 	     */
-	    HammingDiver.LOW_2 = bigInt("7FFFE00FFFFC01FF", 16);
+	    HammingDiver.LOW_2 = bigInt__default['default']("7FFFE00FFFFC01FF", 16);
 	    /**
 	     * Low 3
 	     */
-	    HammingDiver.LOW_3 = bigInt("FFC0000007FFFFFF", 16);
+	    HammingDiver.LOW_3 = bigInt__default['default']("FFC0000007FFFFFF", 16);
 	    /**
 	     * Number of rounds
 	     */
@@ -24313,7 +25271,7 @@
 	    return {
 	        seed: seed,
 	        mode: mode,
-	        sideKey: mode === "restricted" ? (sideKey || "").padEnd(81, "9") : undefined,
+	        sideKey: mode === "restricted" ? (sideKey !== null && sideKey !== void 0 ? sideKey : "").padEnd(81, "9") : undefined,
 	        security: security,
 	        start: 0,
 	        count: 1,
@@ -24349,6 +25307,7 @@
 	 * @returns The prepared message, the channel state will also be updated.
 	 */
 	function createMessage(channelState, message) {
+	    var _a;
 	    if (!src_16$2(message)) {
 	        throw new Error("The message must be in trytes");
 	    }
@@ -24360,7 +25319,7 @@
 	    var messageLengthTrits = pascalEncode(messageTrits.length);
 	    var subtree = tree.getSubtree(channelState.index);
 	    var sponge = new Curl(27);
-	    var sideKeyTrits = src_2(channelState.sideKey || "9".repeat(81));
+	    var sideKeyTrits = src_2((_a = channelState.sideKey) !== null && _a !== void 0 ? _a : "9".repeat(81));
 	    sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
 	    sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
 	    var payload = concatenate([indexTrits, messageLengthTrits]);
@@ -24384,8 +25343,8 @@
 	    if (nextThird !== 0) {
 	        payload = concatenate([payload, new Int8Array(3 - nextThird).fill(0)]);
 	    }
-	    var messageAddress = channelState.mode === "public" ?
-	        tree.root.addressTrits : maskHash(tree.root.addressTrits);
+	    var messageAddress = channelState.mode === "public"
+	        ? tree.root.addressTrits : maskHash(tree.root.addressTrits);
 	    var maskedAuthenticatedMessage = {
 	        payload: src_3(payload),
 	        root: src_3(tree.root.addressTrits),
@@ -24403,18 +25362,18 @@
 	}
 
 	/*! *****************************************************************************
-	Copyright (c) Microsoft Corporation. All rights reserved.
-	Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-	this file except in compliance with the License. You may obtain a copy of the
-	License at http://www.apache.org/licenses/LICENSE-2.0
+	Copyright (c) Microsoft Corporation.
 
-	THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-	KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-	WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-	MERCHANTABLITY OR NON-INFRINGEMENT.
+	Permission to use, copy, modify, and/or distribute this software for any
+	purpose with or without fee is hereby granted.
 
-	See the Apache Version 2.0 License for specific language governing permissions
-	and limitations under the License.
+	THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+	REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+	AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+	INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+	LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+	OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+	PERFORMANCE OF THIS SOFTWARE.
 	***************************************************************************** */
 
 	var __assign = function() {
@@ -24429,10 +25388,11 @@
 	};
 
 	function __awaiter(thisArg, _arguments, P, generator) {
+	    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 	    return new (P || (P = Promise))(function (resolve, reject) {
 	        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
 	        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-	        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+	        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
 	        step((generator = generator.apply(thisArg, _arguments || [])).next());
 	    });
 	}
@@ -24475,7 +25435,7 @@
 	function parseMessage(payload, root, channelKey) {
 	    var payloadTrits = src_2(payload);
 	    var rootTrits = src_2(root);
-	    var channelKeyTrits = src_2(channelKey || "9".repeat(81));
+	    var channelKeyTrits = src_2(channelKey !== null && channelKey !== void 0 ? channelKey : "9".repeat(81));
 	    // Get data positions in payload
 	    var indexData = pascalDecode(payloadTrits);
 	    var index = indexData.value;
@@ -24492,7 +25452,7 @@
 	    // Decrypt the metadata
 	    var nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + Curl.HASH_LENGTH), sponge);
 	    var message = unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
-	    var nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + Curl.HASH_LENGTH / 3), sponge);
+	    var nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + (Curl.HASH_LENGTH / 3)), sponge);
 	    var hmac = sponge.rate();
 	    // Check the security level is valid
 	    var securityLevel = checksumSecurity(hmac);
@@ -24638,9 +25598,9 @@
 	 * Fetch the next message from a list of channels.
 	 * @param {API} api - The api to use for fetching.
 	 * @param {Object[]} channels - The list of channel details to check for new messages.
-	 * @param {string} channels[].root - The root within the mam channel to fetch the message.
-	 * @param {MamMode} channels[].mode - The mode to use for fetching.
-	 * @param {string=} channels[].sideKey - The sideKey if mode is restricted.
+	 * @param {string} channels.root - The root within the mam channel to fetch the message.
+	 * @param {MamMode} channels.mode - The mode to use for fetching.
+	 * @param {string} channels.sideKey - The sideKey if mode is restricted.
 	 * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
 	 * throws exception if transactions found on address are invalid.
 	 */
@@ -24651,9 +25611,9 @@
 	            switch (_a.label) {
 	                case 0:
 	                    addresses = channels.map(function (c) {
-	                        return c.mode === "public"
+	                        return (c.mode === "public"
 	                            ? c.root
-	                            : src_3(maskHash(src_2(c.root)));
+	                            : src_3(maskHash(src_2(c.root))));
 	                    });
 	                    return [4 /*yield*/, api.findTransactionObjects({ addresses: addresses })];
 	                case 1:
@@ -24743,7 +25703,7 @@
 
 	exports.asciiToTrytes = src_1;
 	exports.channelRoot = channelRoot;
-	exports.composeAPI = src_39$1;
+	exports.composeAPI = src_37$1;
 	exports.createChannel = createChannel;
 	exports.createMessage = createMessage;
 	exports.decodeAddress = decodeAddress;

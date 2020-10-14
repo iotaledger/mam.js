@@ -12,6 +12,7 @@ export class HammingDiver {
      * Max 64 bit value.
      */
     private static readonly MAX_VALUE: bigInt.BigInteger = bigInt("FFFFFFFFFFFFFFFF", 16);
+
     /**
      * Min 64 bit value.
      */
@@ -21,34 +22,42 @@ export class HammingDiver {
      * High 0
      */
     private static readonly HIGH_0: bigInt.BigInteger = bigInt("B6DB6DB6DB6DB6DB", 16);
+
     /**
      * High 1
      */
     private static readonly HIGH_1: bigInt.BigInteger = bigInt("8FC7E3F1F8FC7E3F", 16);
+
     /**
      * High 2
      */
     private static readonly HIGH_2: bigInt.BigInteger = bigInt("FFC01FFFF803FFFF", 16);
+
     /**
      * High 3
      */
     private static readonly HIGH_3: bigInt.BigInteger = bigInt("003FFFFFFFFFFFFF", 16);
+
     /**
      * Low 0
      */
     private static readonly LOW_0: bigInt.BigInteger = bigInt("DB6DB6DB6DB6DB6D", 16);
+
     /**
      * Low 1
      */
     private static readonly LOW_1: bigInt.BigInteger = bigInt("F1F8FC7E3F1F8FC7", 16);
+
     /**
      * Low 2
      */
     private static readonly LOW_2: bigInt.BigInteger = bigInt("7FFFE00FFFFC01FF", 16);
+
     /**
      * Low 3
      */
     private static readonly LOW_3: bigInt.BigInteger = bigInt("FFC0000007FFFFFF", 16);
+
     /**
      * Number of rounds
      */
@@ -69,8 +78,8 @@ export class HammingDiver {
         let index = 0;
 
         while (index === 0) {
-            const incrementResult = this.increment(state, offset + size * 2 / 3, offset + size);
-            size = Math.min(roundThird(offset + size * 2 / 3 + incrementResult), Curl.HASH_LENGTH) - offset;
+            const incrementResult = this.increment(state, offset + (size * 2 / 3), offset + size);
+            size = Math.min(roundThird(offset + (size * 2 / 3) + incrementResult), Curl.HASH_LENGTH) - offset;
 
             const curlCopy: PearlDiverSearchStates = {
                 low: state.low.slice(),
@@ -210,7 +219,9 @@ export class HammingDiver {
      * @returns The bitwise not of the value.
      */
     private bitWiseNot(value: bigInt.BigInteger): bigInt.BigInteger {
-        return bigInt(1).shiftLeft(64).subtract(bigInt(1)).subtract(value);
+        return bigInt(1).shiftLeft(64)
+            .subtract(bigInt(1))
+            .subtract(value);
     }
 
     /**
@@ -222,7 +233,6 @@ export class HammingDiver {
      */
     private check(
         securityLevel: number, low: bigInt.BigInteger[], high: bigInt.BigInteger[]): number {
-
         for (let i = 0; i < 64; i++) {
             let sum = 0;
 

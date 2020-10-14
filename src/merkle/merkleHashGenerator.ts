@@ -16,7 +16,7 @@ export function generateAddress(seedTrits: Int8Array, index: number, security: n
     /**
      * The private key generated with the address.
      */
-    privateKey: Int8Array
+    privateKey: Int8Array;
 } {
     const ss = subseed(seedTrits, index);
     const dg = digestFromSubseed(ss, security);
