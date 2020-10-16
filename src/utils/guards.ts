@@ -1,5 +1,5 @@
-import { isTrytes } from "@iota/validators";
 import { MamMode } from "../models/mamMode";
+import { TrytesHelper } from "./trytesHelper";
 
 /**
  * Validate the mode and key.
@@ -15,7 +15,7 @@ export function validateModeKey(mode: MamMode, sideKey?: string): void {
         if (!sideKey) {
             throw new Error("You must provide a sideKey for restricted mode");
         }
-        if (!isTrytes(sideKey)) {
+        if (!TrytesHelper.isTrytes(sideKey)) {
             throw new Error("The sideKey must be in trytes");
         }
         if (sideKey.length > 81) {

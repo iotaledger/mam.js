@@ -1,43 +1,65 @@
-import { trits, trytes } from "@iota/converter";
-import { API, Transaction } from "@iota/core";
+import { IClient, IIndexationPayload, IMessage, IMessages } from "@iota/iota2.js";
+import { Blake2b } from "../crypto/blake2b";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
 import { validateModeKey } from "../utils/guards";
 import { maskHash } from "../utils/mask";
+import { TrytesHelper } from "../utils/trytesHelper";
 import { parseMessage } from "./parser";
 
 /**
  * Attach the mam message to the tangle.
- * @param api The api to use for attaching.
+ * @param client The client to use for sending.
  * @param mamMessage The message to attach.
- * @param depth The depth to perform the attach.
- * @param mwm The mwm to perform the attach.
  * @param tag Optional tag for the transactions.
  * @returns The transactions that were attached.
  */
 export async function mamAttach(
-    api: API,
+    client: IClient,
     mamMessage: IMamMessage,
-    depth: number,
-    mwm: number,
-    tag?: string): Promise<Readonly<Transaction[]>> {
-    const transfers = [
-        {
-            address: mamMessage.address,
-            value: 0,
-            message: mamMessage.payload,
-            tag
-        }
-    ];
-    const preparedTrytes = await api.prepareTransfers("9".repeat(81), transfers);
+    tag?: string): Promise<{
+        messageId: string;
+        message: IMessage;
+    }> {
+    if (tag !== undefined && typeof tag !== "string") {
+        throw new Error("MWM and depth are no longer needed when calling mamAttach");
+    }
+    const tagLength = tag ? tag.length : 0;
+    const data = Buffer.alloc(1 + tagLength + mamMessage.payload.length);
+    data.writeUInt8(tagLength, 0);
+    if (tag) {
+        data.write(tag, 1, "ascii");
+    }
+    data.write(mamMessage.payload, 1 + tagLength, "ascii");
 
-    return api.sendTrytes(preparedTrytes, depth, mwm);
+    const indexationPayload: IIndexationPayload = {
+        type: 2,
+        index: Blake2b.sum256(Buffer.from(mamMessage.address)).toString("hex"),
+        data: data.toString("hex")
+    };
+
+    const tips = await client.tips();
+
+    const message: IMessage = {
+        version: 1,
+        parent1MessageId: tips.tip1MessageId,
+        parent2MessageId: tips.tip2MessageId,
+        payload: indexationPayload,
+        nonce: 0
+    };
+
+    const messageId = await client.messageSubmit(message);
+
+    return {
+        message,
+        messageId
+    };
 }
 
 /**
  * Fetch a mam message from a channel.
- * @param api The api to use for fetching.
+ * @param client The client to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
@@ -45,7 +67,7 @@ export async function mamAttach(
  * throws exception if transactions found on address are invalid.
  */
 export async function mamFetch(
-    api: API,
+    client: IClient,
     root: string,
     mode: MamMode,
     sideKey?: string): Promise<IMamFetchedMessage | undefined> {
@@ -53,9 +75,19 @@ export async function mamFetch(
 
     const messageAddress = decodeAddress(root, mode);
 
-    const txObjects = await api.findTransactionObjects({ addresses: [messageAddress] });
+    const messagesResponse: IMessages = await client.messagesFind(
+        Blake2b.sum256(Buffer.from(messageAddress)).toString("hex"));
 
-    return decodeTransactions(txObjects, messageAddress, root, sideKey);
+    const messages: IMessage[] = [];
+
+    for (const messageId of messagesResponse.messageIds) {
+        const message = await client.message(messageId);
+        if (message) {
+            messages.push(message);
+        }
+    }
+
+    return decodeMessages(messages, root, sideKey);
 }
 
 /**
@@ -67,7 +99,7 @@ export async function mamFetch(
 export function decodeAddress(root: string, mode: MamMode): string {
     return mode === "public"
         ? root
-        : trytes(maskHash(trits(root)));
+        : TrytesHelper.fromTrits(maskHash(TrytesHelper.toTrits(root)));
 }
 
 /**
@@ -75,7 +107,7 @@ export function decodeAddress(root: string, mode: MamMode): string {
  * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
  * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
  * same amount of messages as your limit you should probably read again.
- * @param api The api to use for fetching.
+ * @param client The client to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
@@ -83,7 +115,7 @@ export function decodeAddress(root: string, mode: MamMode): string {
  * @returns The array of retrieved messages.
  */
 export async function mamFetchAll(
-    api: API,
+    client: IClient,
     root: string,
     mode: MamMode,
     sideKey?: string,
@@ -96,7 +128,7 @@ export async function mamFetchAll(
     let fetchRoot: string | undefined = root;
 
     do {
-        const fetched: IMamFetchedMessage | undefined = await mamFetch(api, fetchRoot, mode, sideKey);
+        const fetched: IMamFetchedMessage | undefined = await mamFetch(client, fetchRoot, mode, sideKey);
         if (fetched) {
             messages.push(fetched);
             fetchRoot = fetched.nextRoot;
@@ -109,103 +141,47 @@ export async function mamFetchAll(
 }
 
 /**
- * Fetch the next message from a list of channels.
- * @param {API} api - The api to use for fetching.
- * @param {Object[]} channels - The list of channel details to check for new messages.
- * @param {string} channels.root - The root within the mam channel to fetch the message.
- * @param {MamMode} channels.mode - The mode to use for fetching.
- * @param {string} channels.sideKey - The sideKey if mode is restricted.
- * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
- * throws exception if transactions found on address are invalid.
- */
-export async function mamFetchCombined(
-    api: API,
-    channels: {
-        /**
-         * The root within the mam channel to fetch the message.
-         */
-        root: string;
-        /**
-         * The mode to use for fetching.
-         */
-        mode: MamMode;
-        /**
-         * The sideKey if mode is restricted.
-         */
-        sideKey?: string;
-    }[]): Promise<(IMamFetchedMessage | undefined)[]> {
-    const addresses: string[] = channels.map(c =>
-        (c.mode === "public"
-            ? c.root
-            : trytes(maskHash(trits(c.root)))));
-
-    const txObjects = await api.findTransactionObjects({ addresses });
-    const messages: (IMamFetchedMessage | undefined)[] = [];
-
-    for (let i = 0; i < addresses.length; i++) {
-        messages.push(
-            await decodeTransactions(
-                txObjects.filter(t => t.address === addresses[i]),
-                addresses[i],
-                channels[i].root,
-                channels[i].sideKey)
-        );
-    }
-
-    return messages;
-}
-
-/**
- * Decode transactions from an address to try and find a MAM message.
- * @param txObjects The objects returned from the fetch.
- * @param address The address that the data was fetched from.
+ * Decode messages from an address to try and find a MAM message.
+ * @param messages The objects returned from the fetch.
  * @param root The root within the mam channel to fetch the message.
  * @param sideKey The sideKey if mode is restricted.
  * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
  */
-export async function decodeTransactions(
-    txObjects: Readonly<Transaction[]>,
-    address: string,
+export async function decodeMessages(
+    messages: IMessage[],
     root: string,
     sideKey?: string):
     Promise<IMamFetchedMessage | undefined> {
-    if (!txObjects || txObjects.length === 0) {
+    if (!messages || messages.length === 0) {
         return;
     }
 
-    const tails = txObjects.filter(tx => tx.currentIndex === 0);
-    const notTails = txObjects.filter(tx => tx.currentIndex !== 0);
+    for (const message of messages) {
+        // We only use indexation payload for storing mam messages
+        if (message.payload && message.payload.type === 2) {
+            const data = Buffer.from(message.payload.data, "hex");
 
-    for (let i = 0; i < tails.length; i++) {
-        let msg = tails[i].signatureMessageFragment;
+            // We have a minimum size for the message payload
+            if (data.length > 100) {
+                const tagLength = data.readUInt8(0);
+                if (tagLength === 0 || tagLength > 27) {
+                    return;
+                }
+                const tag = data.slice(1, 1 + tagLength).toString();
+                const msg = data.slice(1 + tagLength).toString();
 
-        let currentTx = tails[i];
-        for (let j = 0; j < tails[i].lastIndex; j++) {
-            const nextTx = notTails.find(tx => tx.hash === currentTx.trunkTransaction);
-            if (!nextTx) {
-                // This is an incomplete transaction chain so move onto
-                // the next tail
-                break;
-            }
-
-            msg += nextTx.signatureMessageFragment;
-            currentTx = nextTx;
-
-            // If we now have all the transactions which make up this message
-            // try and parse the message
-            if (j === tails[i].lastIndex - 1) {
                 try {
                     const parsed = parseMessage(msg, root, sideKey);
                     return {
                         root,
                         ...parsed,
-                        tag: tails[i].tag
+                        tag
                     };
-                } catch (err) {
-                    throw new Error(`Failed while trying to read MAM channel from address ${address}.\n${err.message}`);
+                } catch {
                 }
             }
         }
     }
 }
+

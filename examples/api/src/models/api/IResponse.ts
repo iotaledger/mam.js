@@ -1,11 +1,16 @@
 export interface IResponse {
     /**
-     * What the request successful.
-     */
-    success: boolean;
-
-    /**
      * A message for the response.
      */
-    message: string;
+    error?: string;
+
+    /**
+     * Alternative response code.
+     */
+    status?: number;
+
+    /**
+     * Additional response headers.
+     */
+    headers?: { [id: string]: string };
 }

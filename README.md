@@ -1,16 +1,8 @@
 # mam.js
 
-> This package is currently in beta
+> We strongly advise that you update your apps to use [IOTA Streams](https://github.com/iotaledger/streams) - this package is unlikely to be maintained.
 
-Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript.
-
-This repo is an alternative to `mam.client.js` that does not use the WASM wrapped version of the rust lib. Messages published/fetched by the other package can be used with this package and vice versa.
-
-The code being pure JavaScript runs slower than the WASM version, but is considerably smaller in resource overhead. The size of `mam.client.js` is 3.3Mb (1.4Mb compressed), this lib is 51Kb (15Kb compressed).
-
-This package uses the standard `iota.js` for all its tangle operations, so providers/attachToTangle etc can be configured with the same flexibility they can in that package.
-
-The methods in this package are different to `mam.client.js` in order to try and simplify its usage.
+Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA Chrysalis Phase 2.
 
 ## Installing
 
@@ -37,6 +29,7 @@ If you want to use this module in a browser `<script>` tag see the example Brows
 ## Example Usage
 
 ```js
+const { SingleNodeClient } = require('@iota/iota2.js');
 const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam.js');
 
 // Setup the details for the channel.
@@ -60,21 +53,21 @@ const mamMessage = createMessage(channelState, 'MY9MESSAGE');
 const decodedMessage = parseMessage(mamMessage.payload, mamMessage.root, sideKey);
 
 // If we want to attach the message to the tangle we first compose the API
-const api = composeAPI({ provider: "https://altnodes.devnet.iota.org:443" });
+const client = SingleNodeClient("https://altnodes.devnet.iota.org:443");
 // And then attach the message, tagging it if required.
 // Attaching will return the actual transactions attached to the tangle if you need them.
-await mamAttach(api, mamMessage, 3, 9, "MY9MAM");
+await mamAttach(api, mamMessage, "MY9MAM");
 
 // We can also fetch a message given its root and channel details.
 // The fetched data will contain the nextRoot and the message.
-const fetched = await mamFetch(api, mamMessage.root, mode, sideKey)
+const fetched = await mamFetch(client, mamMessage.root, mode, sideKey)
 
 // If you want to fetch multiple messages from a channel
 // you need either its initial root (or start from another root).
 const channelState = createChannel(seed, 2, mode, sideKey);
 const initialRoot = channelRoot(channelState);
 const chunkSize = 4;
-const chunk = await mamFetchAll(api, initialRoot, mode, sideKey, chunkSize);
+const chunk = await mamFetchAll(client, initialRoot, mode, sideKey, chunkSize);
 
 // If you want to fetch the next message from a list of channels
 const channels = [
@@ -95,4 +88,4 @@ To see the MAMv0 in action demonstration code using this library can be found in
 
 ## License
 
-MIT License - Copyright (c) 2019 IOTA Stiftung
+MIT License - Copyright (c) 2020 IOTA Stiftung

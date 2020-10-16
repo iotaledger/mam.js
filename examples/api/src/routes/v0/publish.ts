@@ -1,12 +1,8 @@
-import { composeAPI, LoadBalancerSettings } from "@iota/client-load-balancer";
-import { composeAPI as composeAPICore } from "@iota/core";
-import { createChannel, createMessage, mamAttach } from "@iota/mam.js";
-import { isTag, isTrytes, isTrytesOfExactLength } from "@iota/validators";
-import { ServiceFactory } from "../../factories/serviceFactory";
+import { SingleNodeClient } from "@iota/iota2.js";
+import { createChannel, createMessage, mamAttach, TrytesHelper } from "@iota/mam.js";
 import { IPublishRequest } from "../../models/api/v0/IPublishRequest";
 import { IPublishResponse } from "../../models/api/v0/IPublishResponse";
 import { IConfiguration } from "../../models/configuration/IConfiguration";
-import { TrytesHelper } from "../../utils/trytesHelper";
 import { ValidationHelper } from "../../utils/validationHelper";
 
 /**
@@ -40,15 +36,14 @@ export async function publish(config: IConfiguration, request: IPublishRequest):
 
     if (request.mode === "restricted") {
         ValidationHelper.string("key", request.key);
-    } else {
-        if (request.key) {
-            throw new Error("The key is only used in restricted mode.");
-        }
+    } else if (request.key) {
+        throw new Error("The key is only used in restricted mode.");
     }
 
     ValidationHelper.string("seed", request.seed);
-    if (!isTrytesOfExactLength(request.seed, 81)) {
-        throw new Error(`The seed field must only contain trytes, and be 81 characters long, its is ${request.seed.length}.`);
+    if (!TrytesHelper.isHash(request.seed)) {
+        throw new Error(
+            `The seed field must only contain trytes, and be 81 characters long, its is ${request.seed.length}.`);
     }
 
     if (request.index !== undefined && request.index !== null) {
@@ -58,31 +53,17 @@ export async function publish(config: IConfiguration, request: IPublishRequest):
     ValidationHelper.oneOf("dataType", request.dataType, ["trytes", "text", "json"]);
     ValidationHelper.isEmpty("data", request.data);
 
-    if (request.dataType === "trytes" && !isTrytes(request.data)) {
+    if (request.dataType === "trytes" && !TrytesHelper.isTrytes(request.data as string)) {
         throw new Error("The data field must only contain trytes.");
     }
 
-    if (request.tag && !isTag(request.tag)) {
+    if (request.tag && !TrytesHelper.isTag(request.tag)) {
         throw new Error("The tag field must only contain trytes.");
     }
 
-    let api;
-    let mwm = 0;
-    let depth = 0;
-
-    if (request.provider.startsWith("http")) {
-        api = composeAPICore({
-            provider: request.provider
-        });
-        mwm = request.mwm;
-        depth = request.depth;
-    } else {
-        const loadBalancerSettings = ServiceFactory.get<LoadBalancerSettings>(
-            `${request.provider}-load-balancer-settings`
-        );
-
-        api = composeAPI(loadBalancerSettings);
-    }
+    const client = new SingleNodeClient(
+        request.provider.startsWith("http") ? request.provider : config.nodes[request.provider]
+    );
 
     const channelState = createChannel(request.seed, 2, request.mode, request.key);
 
@@ -94,18 +75,16 @@ export async function publish(config: IConfiguration, request: IPublishRequest):
     if (request.dataType === "json") {
         data = TrytesHelper.objectToTrytes(request.data);
     } else if (request.dataType === "text") {
-        data = TrytesHelper.stringToTrytes(request.data);
+        data = TrytesHelper.stringToTrytes(request.data as string);
     } else {
         data = request.data;
     }
 
     const mamMessage = createMessage(channelState, data);
 
-    await mamAttach(api, mamMessage, depth, mwm, request.tag);
+    await mamAttach(client, mamMessage, request.tag);
 
     return {
-        success: true,
-        message: "OK",
         nextIndex: channelState.start,
         publishedRoot: mamMessage.root
     };

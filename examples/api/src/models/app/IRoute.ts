@@ -1,3 +1,4 @@
+import { IResponse } from "../api/IResponse";
 import { IConfiguration } from "../configuration/IConfiguration";
 
 export interface IRoute {
@@ -26,6 +27,10 @@ export interface IRoute {
      */
     dataResponse?: boolean;
     /**
+     * Skip authentication for this path.
+     */
+    skipAuth?: boolean;
+    /**
      * Perform inline function instead of module load.
      * @param config The confiuration.
      * @param params The request parameters.
@@ -36,5 +41,5 @@ export interface IRoute {
         config: IConfiguration,
         params: unknown,
         body?: unknown,
-        headers?: { [id: string]: unknown }): Promise<unknown>;
+        headers?: { [id: string]: unknown }): Promise<IResponse>;
 }

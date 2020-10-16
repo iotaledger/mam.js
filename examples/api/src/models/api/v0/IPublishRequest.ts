@@ -42,7 +42,7 @@ export interface IPublishRequest {
     /**
      * What is the data to publish in the channel.
      */
-    data: any;
+    data: unknown;
 
     /**
      * An optional tag to include with the transaction.

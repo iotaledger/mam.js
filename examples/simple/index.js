@@ -1,6 +1,5 @@
-const { composeAPI } = require('@iota/core');
-const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
-const { createChannel, createMessage, parseMessage, mamAttach, mamFetch } = require('@iota/mam.js');
+const { SingleNodeClient } = require("@iota/iota2.js");
+const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam.js');
 const crypto = require('crypto');
 const fs = require('fs');
 
@@ -24,7 +23,7 @@ async function run(asciiMessage) {
     }
 
     // Create a MAM message using the channel state.
-    const mamMessage = createMessage(channelState, asciiToTrytes(asciiMessage));
+    const mamMessage = createMessage(channelState, TrytesHelper.fromAscii(asciiMessage));
 
     // Display the details for the MAM message.
     console.log('Seed:', channelState.seed);
@@ -49,19 +48,20 @@ async function run(asciiMessage) {
 
     // So far we have shown how to create and parse a message
     // but now we actually want to attach the message to the tangle
-    const api = composeAPI({ provider: "http://bare01.devnet.iota.cafe:14265" });
+    const client = new SingleNodeClient("http://localhost:14265");
 
     // Attach the message.
     console.log('Attaching to tangle, please wait...')
-    await mamAttach(api, mamMessage, 3, 9, "MY9MAM");
+    const { messageId } = await mamAttach(client, mamMessage, "MY9MAM");
+    console.log(`Message Id`, messageId);
     console.log(`You can view the mam channel here https://utils.iota.org/mam/${mamMessage.root}/${mode}/${sideKey}/devnet`);
 
     // Try fetching it as well.
     console.log('Fetching from tangle, please wait...');
-    const fetched = await mamFetch(api, mamMessage.root, mode, sideKey)
+    const fetched = await mamFetch(client, mamMessage.root, mode, sideKey)
     if (fetched) {
         console.log('Fetched Root', fetched.root);
-        console.log('Fetched', trytesToAscii(fetched.message));
+        console.log('Fetched', TrytesHelper.toAscii(fetched.message));
         console.log('Fetched Next Root', fetched.nextRoot);
     } else {
         console.log('Nothing was fetched from the MAM channel');

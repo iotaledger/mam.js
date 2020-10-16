@@ -1,9 +1,9 @@
-import { trits, trytes } from "@iota/converter";
 import { MerkleTree } from "../merkle/merkleTree";
 import { Curl } from "../signing/curl";
 import { checksumSecurity, digestFromSignature, PRIVATE_KEY_FRAGMENT_LENGTH } from "../signing/iss-p27";
 import { unmask } from "../utils/mask";
 import { pascalDecode } from "../utils/pascal";
+import { TrytesHelper } from "../utils/trytesHelper";
 
 /**
  * Parse the trytes back to the original message.
@@ -22,9 +22,9 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
      */
     message: string;
 } {
-    const payloadTrits = trits(payload);
-    const rootTrits = trits(root);
-    const channelKeyTrits = trits(channelKey ?? "9".repeat(81));
+    const payloadTrits = TrytesHelper.toTrits(payload);
+    const rootTrits = TrytesHelper.toTrits(root);
+    const channelKeyTrits = TrytesHelper.toTrits(channelKey ?? "9".repeat(81));
 
     // Get data positions in payload
     const indexData = pascalDecode(payloadTrits);
@@ -74,12 +74,12 @@ export function parseMessage(payload: string, root: string, channelKey?: string)
     }
 
     // Make sure the root matches the calculated one
-    if (trytes(recalculatedRoot) !== root) {
+    if (TrytesHelper.fromTrits(recalculatedRoot) !== root) {
         throw new Error("Signature did not match expected root");
     }
 
     return {
-        nextRoot: trytes(nextRoot),
-        message: trytes(message)
+        nextRoot: TrytesHelper.fromTrits(nextRoot),
+        message: TrytesHelper.fromTrits(message)
     };
 }

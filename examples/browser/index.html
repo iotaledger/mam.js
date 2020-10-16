@@ -55,7 +55,7 @@
             }
 
             // Create a MAM message using the channel state.
-            const mamMessage = mam.createMessage(channelState, mam.asciiToTrytes(asciiMessage));
+            const mamMessage = mam.createMessage(channelState, mam.TrytesHelper.fromAscii(asciiMessage));
 
             // Display the details for the MAM message.
             consoleLog('Seed:', channelState.seed);
@@ -80,11 +80,12 @@
 
             // So far we have shown how to create and parse a message
             // but now we actually want to attach the message to the tangle
-            const api = mam.composeAPI({ provider: "http://bare01.devnet.iota.cafe:14265" });
+            const client = new mam.SingleNodeClient("http://localhost:14265");
 
             // Attach the message.
             consoleLog('Attaching to tangle, please wait...')
-            await mam.mamAttach(api, mamMessage, 3, 9, "MY9MAM");
+            const { messageId } = await mam.mamAttach(client, mamMessage, "MY9MAM");
+            console.log(`Message Id`, messageId);
             consoleLog(`You can view the latest message in the mam channel here`);
             consoleLink(`https://utils.iota.org/mam/${mamMessage.root}/${mode}/${sideKey}/devnet`);
 
@@ -101,9 +102,9 @@
 
             // Try fetching it as well.
             consoleLog('Fetching from tangle, please wait...');
-            const fetched = await mam.mamFetch(api, mamMessage.root, mode, sideKey)
+            const fetched = await mam.mamFetch(client, mamMessage.root, mode, sideKey)
             if (fetched) {
-                consoleLog('Fetched', mam.trytesToAscii(fetched.message));
+                consoleLog('Fetched', mam.TrytesHelper.toAscii(fetched.message));
             } else {
                 consoleLog('Nothing was fetched from the MAM channel');
             }

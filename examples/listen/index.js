@@ -1,17 +1,16 @@
-const { composeAPI } = require('@iota/core');
-const { trytesToAscii } = require('@iota/converter')
-const { createChannel, channelRoot, mamFetchAll } = require('@iota/mam.js');
+const { SingleNodeClient } = require("@iota/iota2.js");
+const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam.js');
 const fs = require('fs');
 
 async function run(root, mode, sideKey, interval) {
-    const api = composeAPI({ provider: "http://bare01.devnet.iota.cafe:14265" });
+    const client = new SingleNodeClient("http://localhost:14265");
 
     setInterval(async () => {
         console.log('Fetching from tangle, please wait...');
-        const fetched = await mamFetchAll(api, root, mode, sideKey);
+        const fetched = await mamFetchAll(client, root, mode, sideKey);
         if (fetched && fetched.length > 0) {
             for (let i = 0; i < fetched.length; i++) {
-                console.log('Fetched', trytesToAscii(fetched[i].message));
+                console.log('Fetched', TrytesHelper.toAscii(fetched[i].message));
             }
             root = fetched[fetched.length - 1].nextRoot;
         } else {

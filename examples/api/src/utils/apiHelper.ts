@@ -1,7 +1,8 @@
-import { join } from "path";
+import path from "path";
 import { inspect } from "util";
-import { initServices } from "../initServices";
+import { HttpStatusCodes } from "../errors/httpStatusCodes";
 import { IDataResponse } from "../models/api/IDataResponse";
+import { IResponse } from "../models/api/IResponse";
 import { IHttpRequest } from "../models/app/IHttpRequest";
 import { IHttpResponse } from "../models/app/IHttpResponse";
 import { IRoute } from "../models/app/IRoute";
@@ -22,7 +23,7 @@ export function findRoute(findRoutes: IRoute[], url: string, method: string): {
     /**
      * Matching parameters for the route.
      */
-    params: { [id: string]: string },
+    params: { [id: string]: string };
 } | undefined {
     const urlParts = url.replace(/\/$/, "").split("/");
 
@@ -41,7 +42,7 @@ export function findRoute(findRoutes: IRoute[], url: string, method: string): {
                     // Its a param match in the url
                     // or an undefined parameter past the end of the match
                     if (i < urlParts.length) {
-                        params[routeParts[i].substr(1).replace("?", "")] = urlParts[i];
+                        params[routeParts[i].slice(1).replace("?", "")] = urlParts[i];
                     }
                 } else {
                     break;
@@ -56,7 +57,6 @@ export function findRoute(findRoutes: IRoute[], url: string, method: string): {
             }
         }
     }
-    return undefined;
 }
 
 /**
@@ -66,7 +66,7 @@ export function findRoute(findRoutes: IRoute[], url: string, method: string): {
  * @param config The configuration.
  * @param route The route.
  * @param pathParams The params extracted from the url.
- * @param logHook Optional hook for logging errors.
+ * @param verboseLogging Log full details of requests.
  */
 export async function executeRoute(
     req: IHttpRequest,
@@ -74,12 +74,11 @@ export async function executeRoute(
     config: IConfiguration,
     route: IRoute,
     pathParams: { [id: string]: string },
-    logHook?: (message: string, statusCode: number, params: unknown) => Promise<void>): Promise<void> {
-
-    let response;
+    verboseLogging: boolean): Promise<void> {
+    let response: IResponse;
     const start = Date.now();
     let filteredParams;
-    let status = 400;
+    let status = HttpStatusCodes.BAD_REQUEST;
 
     try {
         let params;
@@ -93,63 +92,73 @@ export async function executeRoute(
 
         filteredParams = logParams(params);
 
-        console.log(`===> ${route.method.toUpperCase()} ${route.path}`);
-        console.log(inspect(filteredParams, false, null, false));
+        if (verboseLogging) {
+            console.log(`===> ${route.method.toUpperCase()} ${route.path}`);
+            console.log(inspect(filteredParams, false, undefined, false));
+        }
 
         if (route.func) {
             let modulePath;
             if (route.folder) {
-                modulePath = join(__dirname, "..", "routes", route.folder, route.func);
+                modulePath = path.join(__dirname, "..", "routes", route.folder, route.func);
             } else {
-                modulePath = join(__dirname, "..", "routes", route.func);
+                modulePath = path.join(__dirname, "..", "routes", route.func);
             }
             let mod;
             try {
-                // tslint:disable-next-line:non-literal-require
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
                 mod = require(modulePath);
             } catch (err) {
                 console.error(err);
             }
             if (mod) {
                 if (mod[route.func]) {
-                    await initServices(config);
                     response = await mod[route.func](config, params, body, req.headers || {});
-                    status = 200;
+                    if (!response.error) {
+                        status = HttpStatusCodes.SUCCESS;
+                    }
                 } else {
-                    status = 400;
                     response = {
-                        success: false,
-                        message: `Route '${route.path}' module '${modulePath}' does not contain a method '${route.func}'`
+                        error: `Route '${route.path}' module '${modulePath}' does not contain a method '${route.func}'`
                     };
                 }
             } else {
-                status = 400;
-                response = { success: false, message: `Route '${route.path}' module '${modulePath}' failed to load` };
+                response = { error: `Route '${route.path}' module '${modulePath}' failed to load` };
             }
-        } else if (route.inline !== undefined) {
-            await initServices(config);
+        } else if (route.inline) {
             response = await route.inline(config, params, body, req.headers || {});
-            status = 200;
+            if (!response.error) {
+                status = HttpStatusCodes.SUCCESS;
+            }
         } else {
-            status = 400;
-            response = { success: false, message: `Route ${route.path} has no func or inline property set` };
+            response = { error: `Route ${route.path} has no func or inline property set` };
         }
     } catch (err) {
-        status = err.httpCode || 400;
-        response = { success: false, message: err.message };
-        if (logHook) {
-            await logHook(err.message, status, filteredParams);
-        }
+        status = err.httpCode || status;
+        response = { error: err.message };
     }
 
-    console.log(`<=== duration: ${Date.now() - start}ms`);
-    console.log(inspect(response, false, null, false));
+    if (verboseLogging || response.error) {
+        console.log(`<=== duration: ${Date.now() - start}ms`);
+        console.log(inspect(response, false, undefined, false));
+    }
+
+    if (response.status) {
+        status = response.status;
+        delete response.status;
+    }
+    if (response.headers) {
+        for (const header in response.headers) {
+            res.setHeader(header, response.headers[header]);
+        }
+        delete response.headers;
+    }
 
     if (route.dataResponse) {
         const dataResponse = response as IDataResponse;
-        if (!dataResponse.success) {
-            status = 400;
-        }
+
+        res.status(status);
+
         if (dataResponse.contentType) {
             res.setHeader("Content-Type", dataResponse.contentType);
         }
@@ -160,10 +169,12 @@ export async function executeRoute(
         res.setHeader(
             "Content-Disposition", `${dataResponse.inline ? "inline" : "attachment"}${filename}`);
 
-        res.setHeader(
-            "Content-Length", dataResponse.data.length);
+        if (dataResponse.data) {
+            res.setHeader(
+                "Content-Length", dataResponse.data.length);
 
-        res.status(status).send(dataResponse.data);
+            res.send(dataResponse.data);
+        }
     } else {
         res.setHeader("Content-Type", "application/json");
         res.status(status).send(JSON.stringify(response));
@@ -176,26 +187,25 @@ export async function executeRoute(
  * @param obj The object to convert.
  * @returns The converted object.
  */
-// tslint:disable: no-any
-function logParams(obj: { [id: string]: any }): { [id: string]: string } {
-    const newobj: { [id: string]: any } = {};
+function logParams(obj: { [id: string]: unknown }): { [id: string]: unknown } {
+    const newobj: { [id: string]: unknown } = {};
     for (const key in obj) {
-        if (key.indexOf("pass") >= 0) {
+        if (key.includes("pass")) {
             newobj[key] = "*************";
-        } else if (key.indexOf("base64") >= 0 || key.indexOf("binaryData") >= 0) {
+        } else if (key.includes("base64") || key.includes("binaryData")) {
             newobj[key] = "<base64>";
-        } else {
-            if (obj[key] !== undefined && obj[key] !== null) {
-                if (obj[key].constructor.name === "Object") {
-                    newobj[key] = logParams(obj[key]);
-                } else if (Array.isArray(obj[key])) {
-                    newobj[key] = obj[key].map(logParams);
-                } else {
-                    newobj[key] = obj[key];
-                }
+        } else if (obj[key] !== undefined && obj[key] !== null) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const prop = obj[key] as any;
+            if (prop.constructor.name === "Object") {
+                newobj[key] = logParams(prop as { [id: string]: unknown });
+            } else if (Array.isArray(prop)) {
+                newobj[key] = prop.map(item => logParams(item));
             } else {
-                newobj[key] = obj[key];
+                newobj[key] = prop;
             }
+        } else {
+            newobj[key] = obj[key];
         }
     }
     return newobj;
@@ -212,10 +222,9 @@ function logParams(obj: { [id: string]: any }): { [id: string]: string } {
 export function cors(
     req: IHttpRequest,
     res: IHttpResponse,
-    allowOrigins: string | string[] | undefined,
-    allowMethods: string | undefined,
-    allowHeaders: string | undefined): void {
-
+    allowOrigins?: string | string[],
+    allowMethods?: string,
+    allowHeaders?: string): void {
     if (!allowOrigins || allowOrigins === "*") {
         res.setHeader("Access-Control-Allow-Origin", "*");
     } else if (allowOrigins) {
@@ -223,7 +232,7 @@ export function cors(
         const origins = Array.isArray(allowOrigins) ? allowOrigins : allowOrigins.split(";");
         let isAllowed;
         for (const origin of origins) {
-            if (requestOrigin === origin) {
+            if (requestOrigin === origin || origin === "*") {
                 isAllowed = origin;
                 break;
             }
@@ -236,12 +245,21 @@ export function cors(
     if (req.method === "OPTIONS") {
         res.setHeader(
             "Access-Control-Allow-Methods",
-            allowMethods || "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+            allowMethods ?? "GET, POST, OPTIONS, PUT, PATCH, DELETE"
         );
 
         res.setHeader(
             "Access-Control-Allow-Headers",
-            allowHeaders || "X-Requested-With, Access-Control-Allow-Origin, X-HTTP-Method-Override, Content-Type, Authorization, Accept"
+            allowHeaders ?? [
+                "X-Requested-With",
+                "Access-Control-Allow-Origin",
+                "X-HTTP-Method-Override",
+                "Content-Type",
+                "Authorization",
+                "Accept",
+                "Accept-Encoding",
+                "X-API-KEY"
+            ].join(",")
         );
     }
 }

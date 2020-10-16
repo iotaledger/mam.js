@@ -1,5 +1,5 @@
-import { trits } from "@iota/converter";
 import { Curl } from "../signing/curl";
+import { TrytesHelper } from "../utils/trytesHelper";
 import { generateAddress } from "./merkleHashGenerator";
 import { MerkleNode } from "./merkleNode";
 
@@ -21,7 +21,7 @@ export class MerkleTree {
      * @param security The security level to create the hashes.
      */
     constructor(seed: string, index: number, count: number, security: number) {
-        const seedTrits = trits(seed);
+        const seedTrits = TrytesHelper.toTrits(seed);
         const leaves = [];
 
         for (let i = 0; i < count; i++) {

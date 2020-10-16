@@ -9,50 +9,74 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decodeTransactions = exports.mamFetchCombined = exports.mamFetchAll = exports.decodeAddress = exports.mamFetch = exports.mamAttach = void 0;
-const converter_1 = require("@iota/converter");
+exports.decodeMessages = exports.mamFetchAll = exports.decodeAddress = exports.mamFetch = exports.mamAttach = void 0;
+const blake2b_1 = require("../crypto/blake2b");
 const guards_1 = require("../utils/guards");
 const mask_1 = require("../utils/mask");
+const trytesHelper_1 = require("../utils/trytesHelper");
 const parser_1 = require("./parser");
 /**
  * Attach the mam message to the tangle.
- * @param api The api to use for attaching.
+ * @param client The client to use for sending.
  * @param mamMessage The message to attach.
- * @param depth The depth to perform the attach.
- * @param mwm The mwm to perform the attach.
  * @param tag Optional tag for the transactions.
  * @returns The transactions that were attached.
  */
-function mamAttach(api, mamMessage, depth, mwm, tag) {
+function mamAttach(client, mamMessage, tag) {
     return __awaiter(this, void 0, void 0, function* () {
-        const transfers = [
-            {
-                address: mamMessage.address,
-                value: 0,
-                message: mamMessage.payload,
-                tag
-            }
-        ];
-        const preparedTrytes = yield api.prepareTransfers("9".repeat(81), transfers);
-        return api.sendTrytes(preparedTrytes, depth, mwm);
+        if (tag !== undefined && typeof tag !== "string") {
+            throw new Error("MWM and depth are no longer needed when calling mamAttach");
+        }
+        const tagLength = tag ? tag.length : 0;
+        const data = Buffer.alloc(1 + tagLength + mamMessage.payload.length);
+        data.writeUInt8(tagLength, 0);
+        if (tag) {
+            data.write(tag, 1, "ascii");
+        }
+        data.write(mamMessage.payload, 1 + tagLength, "ascii");
+        const indexationPayload = {
+            type: 2,
+            index: blake2b_1.Blake2b.sum256(Buffer.from(mamMessage.address)).toString("hex"),
+            data: data.toString("hex")
+        };
+        const tips = yield client.tips();
+        const message = {
+            version: 1,
+            parent1MessageId: tips.tip1MessageId,
+            parent2MessageId: tips.tip2MessageId,
+            payload: indexationPayload,
+            nonce: 0
+        };
+        const messageId = yield client.messageSubmit(message);
+        return {
+            message,
+            messageId
+        };
     });
 }
 exports.mamAttach = mamAttach;
 /**
  * Fetch a mam message from a channel.
- * @param api The api to use for fetching.
+ * @param client The client to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
  * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
  */
-function mamFetch(api, root, mode, sideKey) {
+function mamFetch(client, root, mode, sideKey) {
     return __awaiter(this, void 0, void 0, function* () {
         guards_1.validateModeKey(mode, sideKey);
         const messageAddress = decodeAddress(root, mode);
-        const txObjects = yield api.findTransactionObjects({ addresses: [messageAddress] });
-        return decodeTransactions(txObjects, messageAddress, root, sideKey);
+        const messagesResponse = yield client.messagesFind(blake2b_1.Blake2b.sum256(Buffer.from(messageAddress)).toString("hex"));
+        const messages = [];
+        for (const messageId of messagesResponse.messageIds) {
+            const message = yield client.message(messageId);
+            if (message) {
+                messages.push(message);
+            }
+        }
+        return decodeMessages(messages, root, sideKey);
     });
 }
 exports.mamFetch = mamFetch;
@@ -65,7 +89,7 @@ exports.mamFetch = mamFetch;
 function decodeAddress(root, mode) {
     return mode === "public"
         ? root
-        : converter_1.trytes(mask_1.maskHash(converter_1.trits(root)));
+        : trytesHelper_1.TrytesHelper.fromTrits(mask_1.maskHash(trytesHelper_1.TrytesHelper.toTrits(root)));
 }
 exports.decodeAddress = decodeAddress;
 /**
@@ -73,21 +97,21 @@ exports.decodeAddress = decodeAddress;
  * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
  * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
  * same amount of messages as your limit you should probably read again.
- * @param api The api to use for fetching.
+ * @param client The client to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
  * @param limit Limit the number of messages retrieved.
  * @returns The array of retrieved messages.
  */
-function mamFetchAll(api, root, mode, sideKey, limit) {
+function mamFetchAll(client, root, mode, sideKey, limit) {
     return __awaiter(this, void 0, void 0, function* () {
         guards_1.validateModeKey(mode, sideKey);
         const localLimit = limit === undefined ? Number.MAX_VALUE : limit;
         const messages = [];
         let fetchRoot = root;
         do {
-            const fetched = yield mamFetch(api, fetchRoot, mode, sideKey);
+            const fetched = yield mamFetch(client, fetchRoot, mode, sideKey);
             if (fetched) {
                 messages.push(fetched);
                 fetchRoot = fetched.nextRoot;
@@ -101,71 +125,40 @@ function mamFetchAll(api, root, mode, sideKey, limit) {
 }
 exports.mamFetchAll = mamFetchAll;
 /**
- * Fetch the next message from a list of channels.
- * @param {API} api - The api to use for fetching.
- * @param {Object[]} channels - The list of channel details to check for new messages.
- * @param {string} channels.root - The root within the mam channel to fetch the message.
- * @param {MamMode} channels.mode - The mode to use for fetching.
- * @param {string} channels.sideKey - The sideKey if mode is restricted.
- * @returns The decoded messages and the nextRoot if successful for each channel, undefined if no messages found,
- * throws exception if transactions found on address are invalid.
- */
-function mamFetchCombined(api, channels) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const addresses = channels.map(c => (c.mode === "public"
-            ? c.root
-            : converter_1.trytes(mask_1.maskHash(converter_1.trits(c.root)))));
-        const txObjects = yield api.findTransactionObjects({ addresses });
-        const messages = [];
-        for (let i = 0; i < addresses.length; i++) {
-            messages.push(yield decodeTransactions(txObjects.filter(t => t.address === addresses[i]), addresses[i], channels[i].root, channels[i].sideKey));
-        }
-        return messages;
-    });
-}
-exports.mamFetchCombined = mamFetchCombined;
-/**
- * Decode transactions from an address to try and find a MAM message.
- * @param txObjects The objects returned from the fetch.
- * @param address The address that the data was fetched from.
+ * Decode messages from an address to try and find a MAM message.
+ * @param messages The objects returned from the fetch.
  * @param root The root within the mam channel to fetch the message.
  * @param sideKey The sideKey if mode is restricted.
  * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
  */
-function decodeTransactions(txObjects, address, root, sideKey) {
+function decodeMessages(messages, root, sideKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!txObjects || txObjects.length === 0) {
+        if (!messages || messages.length === 0) {
             return;
         }
-        const tails = txObjects.filter(tx => tx.currentIndex === 0);
-        const notTails = txObjects.filter(tx => tx.currentIndex !== 0);
-        for (let i = 0; i < tails.length; i++) {
-            let msg = tails[i].signatureMessageFragment;
-            let currentTx = tails[i];
-            for (let j = 0; j < tails[i].lastIndex; j++) {
-                const nextTx = notTails.find(tx => tx.hash === currentTx.trunkTransaction);
-                if (!nextTx) {
-                    // This is an incomplete transaction chain so move onto
-                    // the next tail
-                    break;
-                }
-                msg += nextTx.signatureMessageFragment;
-                currentTx = nextTx;
-                // If we now have all the transactions which make up this message
-                // try and parse the message
-                if (j === tails[i].lastIndex - 1) {
+        for (const message of messages) {
+            // We only use indexation payload for storing mam messages
+            if (message.payload && message.payload.type === 2) {
+                const data = Buffer.from(message.payload.data, "hex");
+                // We have a minimum size for the message payload
+                if (data.length > 100) {
+                    const tagLength = data.readUInt8(0);
+                    if (tagLength === 0 || tagLength > 27) {
+                        return;
+                    }
+                    const tag = data.slice(1, 1 + tagLength).toString();
+                    const msg = data.slice(1 + tagLength).toString();
                     try {
                         const parsed = parser_1.parseMessage(msg, root, sideKey);
-                        return Object.assign(Object.assign({ root }, parsed), { tag: tails[i].tag });
+                        return Object.assign(Object.assign({ root }, parsed), { tag });
                     }
-                    catch (err) {
-                        throw new Error(`Failed while trying to read MAM channel from address ${address}.\n${err.message}`);
+                    catch (_a) {
                     }
                 }
             }
         }
     });
 }
-exports.decodeTransactions = decodeTransactions;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2xpZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL21hbS9jbGllbnQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBQUEsK0NBQWdEO0FBS2hELDRDQUFrRDtBQUNsRCx3Q0FBeUM7QUFDekMscUNBQXdDO0FBRXhDOzs7Ozs7OztHQVFHO0FBQ0gsU0FBc0IsU0FBUyxDQUMzQixHQUFRLEVBQ1IsVUFBdUIsRUFDdkIsS0FBYSxFQUNiLEdBQVcsRUFDWCxHQUFZOztRQUNaLE1BQU0sU0FBUyxHQUFHO1lBQ2Q7Z0JBQ0ksT0FBTyxFQUFFLFVBQVUsQ0FBQyxPQUFPO2dCQUMzQixLQUFLLEVBQUUsQ0FBQztnQkFDUixPQUFPLEVBQUUsVUFBVSxDQUFDLE9BQU87Z0JBQzNCLEdBQUc7YUFDTjtTQUNKLENBQUM7UUFDRixNQUFNLGNBQWMsR0FBRyxNQUFNLEdBQUcsQ0FBQyxnQkFBZ0IsQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLEVBQUUsQ0FBQyxFQUFFLFNBQVMsQ0FBQyxDQUFDO1FBRTdFLE9BQU8sR0FBRyxDQUFDLFVBQVUsQ0FBQyxjQUFjLEVBQUUsS0FBSyxFQUFFLEdBQUcsQ0FBQyxDQUFDO0lBQ3RELENBQUM7Q0FBQTtBQWpCRCw4QkFpQkM7QUFFRDs7Ozs7Ozs7R0FRRztBQUNILFNBQXNCLFFBQVEsQ0FDMUIsR0FBUSxFQUNSLElBQVksRUFDWixJQUFhLEVBQ2IsT0FBZ0I7O1FBQ2hCLHdCQUFlLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQyxDQUFDO1FBRS9CLE1BQU0sY0FBYyxHQUFHLGFBQWEsQ0FBQyxJQUFJLEVBQUUsSUFBSSxDQUFDLENBQUM7UUFFakQsTUFBTSxTQUFTLEdBQUcsTUFBTSxHQUFHLENBQUMsc0JBQXNCLENBQUMsRUFBRSxTQUFTLEVBQUUsQ0FBQyxjQUFjLENBQUMsRUFBRSxDQUFDLENBQUM7UUFFcEYsT0FBTyxrQkFBa0IsQ0FBQyxTQUFTLEVBQUUsY0FBYyxFQUFFLElB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
+exports.decodeMessages = decodeMessages;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2xpZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL21hbS9jbGllbnQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7O0FBQ0EsK0NBQTRDO0FBSTVDLDRDQUFrRDtBQUNsRCx3Q0FBeUM7QUFDekMsd0RBQXFEO0FBQ3JELHFDQUF3QztBQUV4Qzs7Ozs7O0dBTUc7QUFDSCxTQUFzQixTQUFTLENBQzNCLE1BQWUsRUFDZixVQUF1QixFQUN2QixHQUFZOztRQUlaLElBQUksR0FBRyxLQUFLLFNBQVMsSUFBSSxPQUFPLEdBQUcsS0FBSyxRQUFRLEVBQUU7WUFDOUMsTUFBTSxJQUFJLEtBQUssQ0FBQywyREFBMkQsQ0FBQyxDQUFDO1NBQ2hGO1FBQ0QsTUFBTSxTQUFTLEdBQUcsR0FBRyxDQUFDLENBQUMsQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7UUFDdkMsTUFBTSxJQUFJLEdBQUcsTUFBTSxDQUFDLEtBQUssQ0FBQyxDQUFDLEdBQUcsU0FBUyxHQUFHLFVBQVUsQ0FBQyxPQUFPLENBQUMsTUFBTSxDQUFDLENBQUM7UUFDckUsSUFBSSxDQUFDLFVBQVUsQ0FBQyxTQUFTLEVBQUUsQ0FBQyxDQUFDLENBQUM7UUFDOUIsSUFBSSxHQUFHLEVBQUU7WUFDTCxJQUFJLENBQUMsS0FBSyxDQUFDLEdBQUcsRUFBRSxDQUFDLEVBQUUsT0FBTyxDQUFDLENBQUM7U0FDL0I7UUFDRCxJQUFJLENBQUMsS0FBSyxDQUFDLFVBQVUsQ0FBQyxPQUFPLEVBQUUsQ0FBQyxHQUFHLFNBQVMsRUFBRSxPQUFPLENBQUMsQ0FBQztRQUV2RCxNQUFNLGlCQUFpQixHQUF1QjtZQUMxQyxJQUFJLEVBQUUsQ0FBQztZQUNQLEtBQUssRUFBRSxpQkFBTyxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDLFFBQVEsQ0FBQyxLQUFLLENBQUM7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

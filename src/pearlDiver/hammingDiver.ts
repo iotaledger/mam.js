@@ -219,6 +219,7 @@ export class HammingDiver {
      * @returns The bitwise not of the value.
      */
     private bitWiseNot(value: bigInt.BigInteger): bigInt.BigInteger {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return bigInt(1).shiftLeft(64)
             .subtract(bigInt(1))
             .subtract(value);

@@ -1,13 +1,9 @@
-import { composeAPI, LoadBalancerSettings } from "@iota/client-load-balancer";
-import { composeAPI as composeAPICore } from "@iota/core";
-import { mamFetch } from "@iota/mam.js";
-import { isTrytesOfExactLength } from "@iota/validators";
+import { SingleNodeClient } from "@iota/iota2.js";
+import { mamFetch, TrytesHelper } from "@iota/mam.js";
 import { HttpError } from "../../errors/httpError";
-import { ServiceFactory } from "../../factories/serviceFactory";
 import { IFetchRequest } from "../../models/api/v0/IFetchRequest";
 import { IFetchResponse } from "../../models/api/v0/IFetchResponse";
 import { IConfiguration } from "../../models/configuration/IConfiguration";
-import { TrytesHelper } from "../../utils/trytesHelper";
 import { ValidationHelper } from "../../utils/validationHelper";
 
 /**
@@ -29,34 +25,23 @@ export async function fetch(config: IConfiguration, request: IFetchRequest): Pro
 
     if (request.mode === "restricted") {
         ValidationHelper.string("key", request.key);
-    } else {
-        if (request.key) {
-            throw new Error("The key is only used in restricted mode.");
-        }
+    } else if (request.key) {
+        throw new Error("The key is only used in restricted mode.");
     }
 
     ValidationHelper.string("root", request.root);
-    if (!isTrytesOfExactLength(request.root, 81)) {
-        throw new Error(`The root field must only contain trytes, and be 81 characters long, its is ${request.root.length}.`);
+    if (!TrytesHelper.isHash(request.root)) {
+        throw new Error(
+            `The root field must only contain trytes, and be 81 characters long, its is ${request.root.length}.`);
     }
 
     ValidationHelper.oneOf("dataType", request.dataType, ["trytes", "text", "json"]);
 
-    let api;
+    const client = new SingleNodeClient(
+        request.provider.startsWith("http") ? request.provider : config.nodes[request.provider]
+    );
 
-    if (request.provider.startsWith("http")) {
-        api = composeAPICore({
-            provider: request.provider
-        });
-    } else {
-        const loadBalancerSettings = ServiceFactory.get<LoadBalancerSettings>(
-            `${request.provider}-load-balancer-settings`
-        );
-
-        api = composeAPI(loadBalancerSettings);
-    }
-
-    const response = await mamFetch(api, request.root, request.mode, request.key);
+    const response = await mamFetch(client, request.root, request.mode, request.key);
 
     if (response) {
         let data;
@@ -69,13 +54,10 @@ export async function fetch(config: IConfiguration, request: IFetchRequest): Pro
         }
 
         return {
-            success: true,
-            message: "OK",
             data,
             nextRoot: response.nextRoot,
             tag: response.tag
         };
-    } else {
-        throw new HttpError("No data found on root", 404);
     }
+    throw new HttpError("No data found on root", 404);
 }

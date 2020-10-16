@@ -1,5 +1,3 @@
-import { trits, trytes } from "@iota/converter";
-import { isTrytes, isTrytesOfExactLength } from "@iota/validators";
 import { MerkleTree } from "../merkle/merkleTree";
 import { IMamChannelState } from "../models/IMamChannelState";
 import { IMamMessage } from "../models/IMamMessage";
@@ -11,6 +9,7 @@ import { concatenate } from "../utils/arrayHelper";
 import { validateModeKey } from "../utils/guards";
 import { mask, maskHash } from "../utils/mask";
 import { pascalEncode } from "../utils/pascal";
+import { TrytesHelper } from "../utils/trytesHelper";
 
 /**
  * Create a new channel object.
@@ -21,7 +20,7 @@ import { pascalEncode } from "../utils/pascal";
  * @returns The new channel state.
  */
 export function createChannel(seed: string, security: number, mode: MamMode, sideKey?: string): IMamChannelState {
-    if (!isTrytesOfExactLength(seed, 81)) {
+    if (!TrytesHelper.isHash(seed)) {
         throw new Error("The seed must be 81 trytes long");
     }
     if (security < 1 || security > 3) {
@@ -66,7 +65,7 @@ export function channelRoot(channelState: IMamChannelState): string {
         channelState.count,
         channelState.security);
 
-    return trytes(tree.root.addressTrits);
+    return TrytesHelper.fromTrits(tree.root.addressTrits);
 }
 
 /**
@@ -76,7 +75,7 @@ export function channelRoot(channelState: IMamChannelState): string {
  * @returns The prepared message, the channel state will also be updated.
  */
 export function createMessage(channelState: IMamChannelState, message: string): IMamMessage {
-    if (!isTrytes(message)) {
+    if (!TrytesHelper.isTrytes(message)) {
         throw new Error("The message must be in trytes");
     }
     const tree = new MerkleTree(
@@ -92,7 +91,7 @@ export function createMessage(channelState: IMamChannelState, message: string): 
 
     const nextRootTrits = nextRootTree.root.addressTrits;
 
-    const messageTrits = trits(message);
+    const messageTrits = TrytesHelper.toTrits(message);
     const indexTrits = pascalEncode(channelState.index);
     const messageLengthTrits = pascalEncode(messageTrits.length);
 
@@ -100,7 +99,7 @@ export function createMessage(channelState: IMamChannelState, message: string): 
 
     const sponge = new Curl(27);
 
-    const sideKeyTrits = trits(channelState.sideKey ?? "9".repeat(81));
+    const sideKeyTrits = TrytesHelper.toTrits(channelState.sideKey ?? "9".repeat(81));
     sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
     sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
 
@@ -140,9 +139,9 @@ export function createMessage(channelState: IMamChannelState, message: string): 
         ? tree.root.addressTrits : maskHash(tree.root.addressTrits);
 
     const maskedAuthenticatedMessage: IMamMessage = {
-        payload: trytes(payload),
-        root: trytes(tree.root.addressTrits),
-        address: trytes(messageAddress)
+        payload: TrytesHelper.fromTrits(payload),
+        root: TrytesHelper.fromTrits(tree.root.addressTrits),
+        address: TrytesHelper.fromTrits(messageAddress)
     };
 
     if (channelState.index === channelState.count - 1) {
@@ -152,7 +151,7 @@ export function createMessage(channelState: IMamChannelState, message: string): 
         channelState.index++;
     }
 
-    channelState.nextRoot = trytes(nextRootTrits);
+    channelState.nextRoot = TrytesHelper.fromTrits(nextRootTrits);
 
     return maskedAuthenticatedMessage;
 }

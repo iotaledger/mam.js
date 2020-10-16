@@ -1,6 +1,6 @@
-/* eslint-disable no-bitwise */
-import { value as tritsValue } from "@iota/converter";
+import { TrytesHelper } from "./trytesHelper";
 
+/* eslint-disable no-bitwise */
 const ZERO = new Int8Array([1, 0, 0, -1]);
 const RADIX: number = 3;
 const TRITS_PER_TRYTE: number = 3;
@@ -25,7 +25,7 @@ export function pascalEncode(value: number): Int8Array {
 
     for (let i = 0; i < length - TRITS_PER_TRYTE; i += TRITS_PER_TRYTE) {
         const tritValue = trits.slice(i, i + TRITS_PER_TRYTE);
-        const tritsAsInt = tritsValue(tritValue);
+        const tritsAsInt = TrytesHelper.tritsValue(tritValue);
 
         if (tritsAsInt >= 0) {
             encoding |= 1 << index;
@@ -38,7 +38,7 @@ export function pascalEncode(value: number): Int8Array {
     }
 
     const v = trits.slice(length - TRITS_PER_TRYTE, length - TRITS_PER_TRYTE + length);
-    if (tritsValue(v) < 0) {
+    if (TrytesHelper.tritsValue(v) < 0) {
         encoding |= 1 << index;
         for (let k = 0; k < v.length; k++) {
             trits[k + length - TRITS_PER_TRYTE] = -trits[k + length - TRITS_PER_TRYTE];
@@ -80,13 +80,13 @@ export function pascalDecode(value: Int8Array): {
     }
     const encoderStart = end(value);
     const inputEnd = encoderStart + (encoderStart / TRITS_PER_TRYTE);
-    const encoder = tritsValue(value.slice(encoderStart, inputEnd));
+    const encoder = TrytesHelper.tritsValue(value.slice(encoderStart, inputEnd));
 
     let result = 0;
     for (let i = 0; i < encoderStart / TRITS_PER_TRYTE; i++) {
         const tritsIntValue = ((encoder >> i) & 1) !== 0
-            ? -tritsValue(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE))
-            : tritsValue(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE));
+            ? -TrytesHelper.tritsValue(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE))
+            : TrytesHelper.tritsValue(value.slice(i * TRITS_PER_TRYTE, (i + 1) * TRITS_PER_TRYTE));
 
         result += (Math.pow(27, i) * tritsIntValue);
     }
@@ -142,7 +142,7 @@ function minTrits(input: number, basis: number): number {
  * @private
  */
 function end(input: Int8Array): number {
-    if (tritsValue(input.slice(0, TRITS_PER_TRYTE)) > 0) {
+    if (TrytesHelper.tritsValue(input.slice(0, TRITS_PER_TRYTE)) > 0) {
         return TRITS_PER_TRYTE;
     }
 
