@@ -9,19 +9,7 @@ Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript
 Install this package using the following commands:
 
 ```shell
-npm install @iota/mam.js
-```
-
-or
-
-```shell
-yarn add @iota/mam.js
-```
-
-or direct from the repo
-
-```shell
-npm install iotaledger/mam.js
+npm install iotaledger/mam.js#feature/chrysalis-p2
 ```
 
 If you want to use this module in a browser `<script>` tag see the example Browser [./examples/browser/index.html](./examples/browser/index.html)
