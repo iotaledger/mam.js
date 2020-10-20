@@ -172,22 +172,22 @@ export function checksumSecurity(hash: Int8Array): number {
  */
 export function digestFromSignature(hash: Int8Array, sig: Int8Array): Int8Array {
     const sponge = new Curl(27);
-    const buffer: Int8Array = new Int8Array(sig.length);
+    const bytes: Int8Array = new Int8Array(sig.length);
 
     for (let i = 0; i < (sig.length / Curl.HASH_LENGTH); i++) {
-        let innerBuffer = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
+        let innerBytes = sig.slice(i * Curl.HASH_LENGTH, (i + 1) * Curl.HASH_LENGTH);
 
         for (let j = 0; j < (hash[i * 3] + (hash[(i * 3) + 1] * 3) + (hash[(i * 3) + 2] * 9)) - MIN_TRYTE_VALUE; j++) {
             sponge.reset();
-            sponge.absorb(innerBuffer, 0, innerBuffer.length);
-            innerBuffer = sponge.rate();
+            sponge.absorb(innerBytes, 0, innerBytes.length);
+            innerBytes = sponge.rate();
         }
 
-        buffer.set(innerBuffer, i * Curl.HASH_LENGTH);
+        bytes.set(innerBytes, i * Curl.HASH_LENGTH);
     }
 
     sponge.reset();
-    sponge.absorb(buffer, 0, buffer.length);
+    sponge.absorb(bytes, 0, bytes.length);
 
     return sponge.rate();
 }

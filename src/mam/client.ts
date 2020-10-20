@@ -1,5 +1,4 @@
-import { IClient, IIndexationPayload, IMessage, IMessages } from "@iota/iota2.js";
-import { Blake2b } from "../crypto/blake2b";
+import { IClient, IIndexationPayload, IMessage, IMessages, Blake2b, Converter } from "@iota/iota2.js";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
@@ -26,17 +25,17 @@ export async function mamAttach(
         throw new Error("MWM and depth are no longer needed when calling mamAttach");
     }
     const tagLength = tag ? tag.length : 0;
-    const data = Buffer.alloc(1 + tagLength + mamMessage.payload.length);
-    data.writeUInt8(tagLength, 0);
+    const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
+    data[0] = tagLength;
     if (tag) {
-        data.write(tag, 1, "ascii");
+        data.set(Converter.asciiToBytes(tag), 1);
     }
-    data.write(mamMessage.payload, 1 + tagLength, "ascii");
+    data.set(Converter.asciiToBytes(mamMessage.payload), 1 + tagLength);
 
     const indexationPayload: IIndexationPayload = {
         type: 2,
-        index: Blake2b.sum256(Buffer.from(mamMessage.address)).toString("hex"),
-        data: data.toString("hex")
+        index: Converter.bytesToHex(Blake2b.sum256(Converter.asciiToBytes(mamMessage.address))),
+        data: Converter.bytesToHex(data)
     };
 
     const tips = await client.tips();
@@ -76,7 +75,7 @@ export async function mamFetch(
     const messageAddress = decodeAddress(root, mode);
 
     const messagesResponse: IMessages = await client.messagesFind(
-        Blake2b.sum256(Buffer.from(messageAddress)).toString("hex"));
+        Converter.bytesToHex(Blake2b.sum256(Converter.asciiToBytes(messageAddress))));
 
     const messages: IMessage[] = [];
 
@@ -160,16 +159,16 @@ export async function decodeMessages(
     for (const message of messages) {
         // We only use indexation payload for storing mam messages
         if (message.payload && message.payload.type === 2) {
-            const data = Buffer.from(message.payload.data, "hex");
+            const data = Converter.hexToBytes(message.payload.data);
 
             // We have a minimum size for the message payload
             if (data.length > 100) {
-                const tagLength = data.readUInt8(0);
+                const tagLength = data[0];
                 if (tagLength === 0 || tagLength > 27) {
                     return;
                 }
-                const tag = data.slice(1, 1 + tagLength).toString();
-                const msg = data.slice(1 + tagLength).toString();
+                const tag = Converter.bytesToAscii(data.slice(1, 1 + tagLength));
+                const msg = Converter.bytesToAscii(data.slice(1 + tagLength));
 
                 try {
                     const parsed = parseMessage(msg, root, sideKey);

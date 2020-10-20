@@ -1,9 +1,6 @@
 ## Classes
 
 <dl>
-<dt><a href="#Blake2b">Blake2b</a></dt>
-<dd><p>Class to help with Blake2B Signature scheme.</p>
-</dd>
 <dt><a href="#TextHelper">TextHelper</a></dt>
 <dd><p>Helper functions for use with text.</p>
 </dd>
@@ -46,35 +43,6 @@ same amount of messages as your limit you should probably read again.</p>
 <dd><p>Parse the trytes back to the original message.</p>
 </dd>
 </dl>
-
-<a name="Blake2b"></a>
-
-## Blake2b
-Class to help with Blake2B Signature scheme.
-
-**Kind**: global class  
-
-* [Blake2b](#Blake2b)
-    * [.SIZE_256](#Blake2b.SIZE_256)
-    * [.sum256(data)](#Blake2b.sum256) ⇒
-
-<a name="Blake2b.SIZE_256"></a>
-
-### Blake2b.SIZE\_256
-Blake2b 256.
-
-**Kind**: static property of [<code>Blake2b</code>](#Blake2b)  
-<a name="Blake2b.sum256"></a>
-
-### Blake2b.sum256(data) ⇒
-Perform Sum 256 on the data.
-
-**Kind**: static method of [<code>Blake2b</code>](#Blake2b)  
-**Returns**: The sum 256 of the data.  
-
-| Param | Description |
-| --- | --- |
-| data | The data to operate on. |
 
 <a name="TextHelper"></a>
 

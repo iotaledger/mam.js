@@ -1,8 +1,5 @@
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
-import replace from '@rollup/plugin-replace';
-import builtins from 'rollup-plugin-node-builtins';
-import globals from 'rollup-plugin-node-globals';
 import { terser } from 'rollup-plugin-terser';
 
 const plugins = [
@@ -10,19 +7,7 @@ const plugins = [
     resolve({
         browser: process.env.BROWSER
     }),
-    replace({
-        'process.env.NODE_ENV': JSON.stringify('production')
-    })
 ];
-
-if (process.env.BROWSER) {
-    plugins.push(globals());
-    plugins.push(builtins());
-}
-
-if (process.env.MINIFY) {
-    plugins.push(terser());
-}
 
 if (process.env.MINIFY) {
     plugins.push(terser());
