@@ -6,7 +6,7 @@ const trytesHelper_1 = require("./trytesHelper");
  * Validate the mode and key.
  * @param mode The mamMode to validate.
  * @param sideKey The sideKey to validate.
- * @private
+ * @internal
  */
 function validateModeKey(mode, sideKey) {
     if (mode !== "public" && mode !== "private" && mode !== "restricted") {

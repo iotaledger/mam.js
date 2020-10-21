@@ -8,7 +8,7 @@ const iss_p27_1 = require("../signing/iss-p27");
  * @param index The index of the address to generate.
  * @param security The security level of the address to generate.
  * @returns The address and the private key.
- * @private
+ * @internal
  */
 function generateAddress(seedTrits, index, security) {
     const ss = iss_p27_1.subseed(seedTrits, index);

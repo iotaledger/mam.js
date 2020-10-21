@@ -7,7 +7,7 @@ const merkleHashGenerator_1 = require("./merkleHashGenerator");
 const merkleNode_1 = require("./merkleNode");
 /**
  * Class to represent a merkle tree.
- * @private
+ * @internal
  */
 class MerkleTree {
     /**

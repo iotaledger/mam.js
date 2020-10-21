@@ -6626,7 +6626,7 @@
 	exports.Curl = void 0;
 	/**
 	 * Class to implement Curl sponge.
-	 * @private
+	 * @internal
 	 */
 	class Curl {
 	    /**
@@ -6925,6 +6925,7 @@
 	TrytesHelper.ALPHABET = "9ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	/**
 	 * Trytes to trits lookup table.
+	 * @internal
 	 */
 	TrytesHelper.TRYTES_TRITS = [
 	    new Int8Array([0, 0, 0]),
@@ -6963,6 +6964,7 @@
 	exports.digestFromSignature = exports.checksumSecurity = exports.signature = exports.privateKeyFromSubseed = exports.address = exports.digestFromSubseed = exports.subseed = exports.PRIVATE_KEY_FRAGMENT_LENGTH = void 0;
 
 	const PRIVATE_KEY_NUM_FRAGMENTS = 27;
+	/* @internal */
 	exports.PRIVATE_KEY_FRAGMENT_LENGTH = PRIVATE_KEY_NUM_FRAGMENTS * curl.Curl.HASH_LENGTH;
 	const MIN_TRYTE_VALUE = -13;
 	const MAX_TRYTE_VALUE = 13;
@@ -6973,7 +6975,7 @@
 	 * @param seed The seed trits.
 	 * @param index The index for the subseed.
 	 * @returns The subseed trits.
-	 * @private
+	 * @internal
 	 */
 	function subseed(seed, index) {
 	    const sponge = new curl.Curl(27);
@@ -7000,7 +7002,7 @@
 	 * @param subSeed The subseed to get the digest for.
 	 * @param securityLevel The security level to get the digest.
 	 * @returns The digest trits.
-	 * @private
+	 * @internal
 	 */
 	function digestFromSubseed(subSeed, securityLevel) {
 	    const curl1 = new curl.Curl(27);
@@ -7026,7 +7028,7 @@
 	 * Get the address from the digests.
 	 * @param digests The digests to get the address for.
 	 * @returns The address trits.
-	 * @private
+	 * @internal
 	 */
 	function address(digests) {
 	    const sponge = new curl.Curl(27);
@@ -7041,7 +7043,7 @@
 	 * @param subSeed The subseed to get the private key for.
 	 * @param securityLevel The security level for the private key.
 	 * @returns The private key trits.
-	 * @private
+	 * @internal
 	 */
 	function privateKeyFromSubseed(subSeed, securityLevel) {
 	    const keyLength = securityLevel * exports.PRIVATE_KEY_FRAGMENT_LENGTH;
@@ -7064,7 +7066,7 @@
 	 * @param hashTrits The trits to create the signature for.
 	 * @param key The key to use for signing.
 	 * @returns The signature trits.
-	 * @private
+	 * @internal
 	 */
 	function signature(hashTrits, key) {
 	    const signatures = new Int8Array(key.length);
@@ -7085,7 +7087,7 @@
 	 * Check the security level.
 	 * @param hash The hash to check.
 	 * @returns The security level
-	 * @private
+	 * @internal
 	 */
 	function checksumSecurity(hash) {
 	    if (hash.slice(0, curl.Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
@@ -7102,7 +7104,7 @@
 	 * @param hash The hash to get the digest.
 	 * @param sig The signature.
 	 * @returns The digest.
-	 * @private
+	 * @internal
 	 */
 	function digestFromSignature(hash, sig) {
 	    const sponge = new curl.Curl(27);
@@ -7134,7 +7136,7 @@
 	 * @param index The index of the address to generate.
 	 * @param security The security level of the address to generate.
 	 * @returns The address and the private key.
-	 * @private
+	 * @internal
 	 */
 	function generateAddress(seedTrits, index, security) {
 	    const ss = issP27.subseed(seedTrits, index);
@@ -7153,7 +7155,7 @@
 	exports.MerkleNode = void 0;
 	/**
 	 * Class to represent a node in a merkle tree.
-	 * @private
+	 * @internal
 	 */
 	class MerkleNode {
 	    /**
@@ -7184,7 +7186,7 @@
 
 	/**
 	 * Class to represent a merkle tree.
-	 * @private
+	 * @internal
 	 */
 	class MerkleTree {
 	    /**
@@ -7312,14 +7314,17 @@
 	exports.roundThird = exports.pascalDecode = exports.pascalEncode = void 0;
 
 	/* eslint-disable no-bitwise */
+	/* @internal */
 	const ZERO = new Int8Array([1, 0, 0, -1]);
+	/* @internal */
 	const RADIX = 3;
+	/* @internal */
 	const TRITS_PER_TRYTE = 3;
 	/**
 	 * Perform pascal encoding of the value.
 	 * @param value The value to encode.
 	 * @returns The trits for the encoded value.
-	 * @private
+	 * @internal
 	 */
 	function pascalEncode(value) {
 	    if (value === 0) {
@@ -7360,7 +7365,7 @@
 	 * Decode the pascal encoded trits.
 	 * @param value The value to decode.
 	 * @returns The decoded value.
-	 * @private
+	 * @internal
 	 */
 	function pascalDecode(value) {
 	    if (value.length >= ZERO.length &&
@@ -7387,7 +7392,7 @@
 	 * Get the encoded length of the value.
 	 * @param value The value.
 	 * @returns The length.
-	 * @private
+	 * @internal
 	 */
 	function encodedLength(value) {
 	    const length = roundThird(minTrits(Math.abs(value), 1));
@@ -7397,7 +7402,7 @@
 	 * Round the number to the third.
 	 * @param value The value to round.
 	 * @returns The rounded number.
-	 * @private
+	 * @internal
 	 */
 	function roundThird(value) {
 	    const rem = value % RADIX;
@@ -7412,7 +7417,7 @@
 	 * @param input The input to calculate from.
 	 * @param basis The basis of the calculation.
 	 * @returns The number of trits.
-	 * @private
+	 * @internal
 	 */
 	function minTrits(input, basis) {
 	    if (input <= basis) {
@@ -7424,7 +7429,7 @@
 	 * Calculate the end for the input.
 	 * @param input The input to calculate for.
 	 * @returns The calculated end.
-	 * @private
+	 * @internal
 	 */
 	function end(input) {
 	    if (trytesHelper.TrytesHelper.tritsValue(input.slice(0, TRITS_PER_TRYTE)) > 0) {
@@ -7437,7 +7442,7 @@
 	 * @param input The input value to convert.
 	 * @param trits The trits.
 	 * @returns The end conversion.
-	 * @private
+	 * @internal
 	 */
 	function valueToTrits(input, trits) {
 	    const endWrite = writeTrits(input, trits, 0);
@@ -7455,7 +7460,7 @@
 	 * @param trits The trits to write to.
 	 * @param index The index to write at.
 	 * @returns The length.
-	 * @private
+	 * @internal
 	 */
 	function writeTrits(input, trits, index) {
 	    switch (input) {
@@ -7489,7 +7494,7 @@
 
 	/**
 	 * Class to perform Hamming calculation for nonce.
-	 * @private
+	 * @internal
 	 */
 	class HammingDiver {
 	    /**
@@ -7603,12 +7608,7 @@
 	            for (let stateIndex = 0; stateIndex < curl.Curl.STATE_LENGTH; stateIndex++) {
 	                const alpha = curlScratchpad.low[curlScratchpadIndex];
 	                const beta = curlScratchpad.high[curlScratchpadIndex];
-	                if (curlScratchpadIndex < 365) {
-	                    curlScratchpadIndex += 364;
-	                }
-	                else {
-	                    curlScratchpadIndex += -365;
-	                }
+	                curlScratchpadIndex += curlScratchpadIndex < 365 ? 364 : -365;
 	                const gamma = curlScratchpad.high[curlScratchpadIndex];
 	                const lowXorBeta = curlScratchpad.low[curlScratchpadIndex].xor(beta);
 	                const notGamma = this.bitWiseNot(gamma);
@@ -7744,7 +7744,7 @@
 	 * Concatentate a list of arrays.
 	 * @param arrays The arrays to concatenate.
 	 * @returns The concatenated arrays.
-	 * @private
+	 * @internal
 	 */
 	function concatenate(arrays) {
 	    let totalLength = 0;
@@ -7771,7 +7771,7 @@
 	 * Validate the mode and key.
 	 * @param mode The mamMode to validate.
 	 * @param sideKey The sideKey to validate.
-	 * @private
+	 * @internal
 	 */
 	function validateModeKey(mode, sideKey) {
 	    if (mode !== "public" && mode !== "private" && mode !== "restricted") {
@@ -7804,7 +7804,7 @@
 	 * Create the mask hash for the key.
 	 * @param keyTrits The key to create the mask hash for.
 	 * @returns The masked hash.
-	 * @private
+	 * @internal
 	 */
 	function maskHash(keyTrits) {
 	    const sponge = new curl.Curl(81);
@@ -7819,7 +7819,7 @@
 	 * @param payload The payload to apply the mask to.
 	 * @param sponge The sponge to use.
 	 * @returns The masked payload.
-	 * @private
+	 * @internal
 	 */
 	function mask(payload, sponge) {
 	    const keyChunk = sponge.rate();
@@ -7841,7 +7841,7 @@
 	 * @param payload The payload to unmask.
 	 * @param sponge The sponge to use.
 	 * @returns The unmasked payload.
-	 * @private
+	 * @internal
 	 */
 	function unmask(payload, sponge) {
 	    const unmasked = new Int8Array(payload);
@@ -7867,7 +7867,7 @@
 	 * @param left The left part.
 	 * @param right The right part.
 	 * @returns The sum.
-	 * @private
+	 * @internal
 	 */
 	function tritSum(left, right) {
 	    const sum = left + right;

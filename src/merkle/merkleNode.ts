@@ -1,6 +1,6 @@
 /**
  * Class to represent a node in a merkle tree.
- * @private
+ * @internal
  */
 export class MerkleNode {
     /**

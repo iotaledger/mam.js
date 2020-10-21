@@ -6,7 +6,7 @@ const curl_1 = require("../signing/curl");
  * Create the mask hash for the key.
  * @param keyTrits The key to create the mask hash for.
  * @returns The masked hash.
- * @private
+ * @internal
  */
 function maskHash(keyTrits) {
     const sponge = new curl_1.Curl(81);
@@ -21,7 +21,7 @@ exports.maskHash = maskHash;
  * @param payload The payload to apply the mask to.
  * @param sponge The sponge to use.
  * @returns The masked payload.
- * @private
+ * @internal
  */
 function mask(payload, sponge) {
     const keyChunk = sponge.rate();
@@ -43,7 +43,7 @@ exports.mask = mask;
  * @param payload The payload to unmask.
  * @param sponge The sponge to use.
  * @returns The unmasked payload.
- * @private
+ * @internal
  */
 function unmask(payload, sponge) {
     const unmasked = new Int8Array(payload);
@@ -69,7 +69,7 @@ exports.unmask = unmask;
  * @param left The left part.
  * @param right The right part.
  * @returns The sum.
- * @private
+ * @internal
  */
 function tritSum(left, right) {
     const sum = left + right;

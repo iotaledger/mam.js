@@ -6,7 +6,8 @@
       "moduleResolution": "node",
       "outDir": "./es",
       "esModuleInterop": true,
-      "inlineSourceMap": true
+      "inlineSourceMap": true,
+      "stripInternal": true
     },
     "include": [
       "src"

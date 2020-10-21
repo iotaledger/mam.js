@@ -6,7 +6,7 @@ import { address, digestFromSubseed, privateKeyFromSubseed, subseed } from "../s
  * @param index The index of the address to generate.
  * @param security The security level of the address to generate.
  * @returns The address and the private key.
- * @private
+ * @internal
  */
 export function generateAddress(seedTrits: Int8Array, index: number, security: number): {
     /**

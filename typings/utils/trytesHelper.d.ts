@@ -7,10 +7,6 @@ export declare class TrytesHelper {
      */
     static ALPHABET: string;
     /**
-     * Trytes to trits lookup table.
-     */
-    private static readonly TRYTES_TRITS;
-    /**
      * Is the string trytes length 81.
      * @param trytes The trytes to test.
      * @returns True if it is trytes 81 chars long.

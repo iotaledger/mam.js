@@ -5,7 +5,7 @@ import { PearlDiverSearchStates } from "./pearlDiverSearchStates";
 
 /**
  * Class to perform Hamming calculation for nonce.
- * @private
+ * @internal
  */
 export class HammingDiver {
     /**
@@ -195,11 +195,7 @@ export class HammingDiver {
             for (let stateIndex = 0; stateIndex < Curl.STATE_LENGTH; stateIndex++) {
                 const alpha = curlScratchpad.low[curlScratchpadIndex];
                 const beta = curlScratchpad.high[curlScratchpadIndex];
-                if (curlScratchpadIndex < 365) {
-                    curlScratchpadIndex += 364;
-                } else {
-                    curlScratchpadIndex += -365;
-                }
+                curlScratchpadIndex += curlScratchpadIndex < 365 ? 364 : -365;
                 const gamma = curlScratchpad.high[curlScratchpadIndex];
                 const lowXorBeta = curlScratchpad.low[curlScratchpadIndex].xor(beta);
                 const notGamma = this.bitWiseNot(gamma);

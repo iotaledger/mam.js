@@ -5,7 +5,7 @@ import { TrytesHelper } from "./trytesHelper";
  * Validate the mode and key.
  * @param mode The mamMode to validate.
  * @param sideKey The sideKey to validate.
- * @private
+ * @internal
  */
 export function validateModeKey(mode: MamMode, sideKey?: string): void {
     if (mode !== "public" && mode !== "private" && mode !== "restricted") {

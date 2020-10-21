@@ -2,7 +2,7 @@ import bigInt from "big-integer";
 
 /**
  * PearDiverSearchStates for storing states during search.
- * @private
+ * @internal
  */
 export interface PearlDiverSearchStates {
     /**

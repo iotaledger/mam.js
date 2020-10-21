@@ -11,6 +11,7 @@ export class TrytesHelper {
 
     /**
      * Trytes to trits lookup table.
+     * @internal
      */
     private static readonly TRYTES_TRITS: Int8Array[] = [
         new Int8Array([0, 0, 0]),

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Curl = void 0;
 /**
  * Class to implement Curl sponge.
- * @private
+ * @internal
  */
 class Curl {
     /**

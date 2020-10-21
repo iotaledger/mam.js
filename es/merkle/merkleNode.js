@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MerkleNode = void 0;
 /**
  * Class to represent a node in a merkle tree.
- * @private
+ * @internal
  */
 class MerkleNode {
     /**

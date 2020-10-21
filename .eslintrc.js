@@ -25,6 +25,11 @@ module.exports = {
         "jsdoc",
         "unicorn"
     ],
+    "settings": {
+        "jsdoc": {
+            "ignoreInternal": true
+        }
+    },
     "rules": {
         "@typescript-eslint/adjacent-overload-signatures": [
             "error"

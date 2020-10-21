@@ -1,6 +1,6 @@
 /**
  * Class to implement Curl sponge.
- * @private
+ * @internal
  */
 export class Curl {
     /**
