@@ -1,4 +1,4 @@
-**[@iota/mam.js](../README.md)**
+**[@iota/mam2.js](../README.md)**
 
 > [Globals](../README.md) / TrytesHelper
 

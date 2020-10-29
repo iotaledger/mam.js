@@ -4,6 +4,8 @@
 
 Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA Chrysalis Phase 2.
 
+The package name has been changed to `@iota/mam2.js` to allow for side-by-side usage with the current `@iota/mam.js`
+
 ## Installing
 
 Install this package using the following commands:
@@ -18,7 +20,7 @@ If you want to use this module in a browser `<script>` tag see the example Brows
 
 ```js
 const { SingleNodeClient } = require('@iota/iota2.js');
-const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam.js');
+const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam2.js');
 
 // Setup the details for the channel.
 const seed = 'ENTER A SEED';

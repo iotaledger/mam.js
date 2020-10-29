@@ -1,5 +1,5 @@
 {
-    "name": "@iota/mam.js",
+    "name": "@iota/mam2.js",
     "version": "1.0.0-beta.11",
     "description": "Pure JavaScript implementation of Masked Authentication Message v0 for IOTA",
     "scripts": {
