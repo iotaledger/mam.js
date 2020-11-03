@@ -74,18 +74,20 @@ export async function mamFetch(
 
     const messageAddress = decodeAddress(root, mode);
 
-    const messagesResponse: IMessages = await client.messagesFind(messageAddress);
+    try {
+        const messagesResponse: IMessages = await client.messagesFind(messageAddress);
 
-    const messages: IMessage[] = [];
+        const messages: IMessage[] = [];
 
-    for (const messageId of messagesResponse.messageIds) {
-        const message = await client.message(messageId);
-        if (message) {
-            messages.push(message);
+        for (const messageId of messagesResponse.messageIds) {
+            try {
+                const message = await client.message(messageId);
+                messages.push(message);
+            } catch { }
         }
-    }
 
-    return decodeMessages(messages, root, sideKey);
+        return await decodeMessages(messages, root, sideKey);
+    } catch {}
 }
 
 /**

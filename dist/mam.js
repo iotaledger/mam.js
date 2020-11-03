@@ -1559,15 +1559,19 @@
 	    return __awaiter(this, void 0, void 0, function* () {
 	        guards.validateModeKey(mode, sideKey);
 	        const messageAddress = decodeAddress(root, mode);
-	        const messagesResponse = yield client.messagesFind(messageAddress);
-	        const messages = [];
-	        for (const messageId of messagesResponse.messageIds) {
-	            const message = yield client.message(messageId);
-	            if (message) {
-	                messages.push(message);
+	        try {
+	            const messagesResponse = yield client.messagesFind(messageAddress);
+	            const messages = [];
+	            for (const messageId of messagesResponse.messageIds) {
+	                try {
+	                    const message = yield client.message(messageId);
+	                    messages.push(message);
+	                }
+	                catch (_a) { }
 	            }
+	            return yield decodeMessages(messages, root, sideKey);
 	        }
-	        return decodeMessages(messages, root, sideKey);
+	        catch (_b) { }
 	    });
 	}
 	exports.mamFetch = mamFetch;
