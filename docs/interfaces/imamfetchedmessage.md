@@ -1,4 +1,4 @@
-**[@iota/mam2.js](../README.md)**
+**[@iota/mam-chrysalis.js](../README.md)**
 
 > [Globals](../README.md) / IMamFetchedMessage
 

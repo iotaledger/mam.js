@@ -41,7 +41,7 @@ fetch(
             console.log("Publish Success");
             console.log("Published root", publishResponse.publishedRoot);
             console.log("Next index to publish", publishResponse.nextIndex);
-            console.log("View on Tangle", `https://utils.iota.org/mam/${publishResponse.publishedRoot}/${mode}/${key}/${provider}`);
+            console.log("View on Tangle", `https://explorer.iota.org/${provider}/streams/0/${publishResponse.publishedRoot}/${mode}/${key}`);
 
             fetch(
                 `${API_ENDPOINT}/v0/fetch?provider=${provider}&mode=${mode}&key=${key}&root=${publishResponse.publishedRoot}&dataType=json`,

@@ -1,5 +1,5 @@
 import { SingleNodeClient } from "@iota/iota2.js";
-import { createChannel, createMessage, mamAttach, TrytesHelper } from "@iota/mam.js";
+import { createChannel, createMessage, mamAttach, TrytesHelper } from "@iota/mam-chrysalis.js";
 import { IPublishRequest } from "../../models/api/v0/IPublishRequest";
 import { IPublishResponse } from "../../models/api/v0/IPublishResponse";
 import { IConfiguration } from "../../models/configuration/IConfiguration";

@@ -1,5 +1,5 @@
 const { SingleNodeClient } = require("@iota/iota2.js");
-const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam.js');
+const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam-chrysalis.js');
 const crypto = require('crypto');
 const fs = require('fs');
 
@@ -54,7 +54,7 @@ async function run(asciiMessage) {
     console.log('Attaching to tangle, please wait...')
     const { messageId } = await mamAttach(client, mamMessage, "MY9MAM");
     console.log(`Message Id`, messageId);
-    console.log(`You can view the mam channel here https://utils.iota.org/mam/${mamMessage.root}/${mode}/${sideKey}/devnet`);
+    console.log(`You can view the mam channel here https://explorer.iota.org/devnet/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
 
     // Try fetching it as well.
     console.log('Fetching from tangle, please wait...');

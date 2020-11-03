@@ -1,5 +1,5 @@
 const { SingleNodeClient } = require("@iota/iota2.js");
-const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam.js');
+const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam-chrysalis.js');
 const fs = require('fs');
 
 async function run(root, mode, sideKey, interval) {

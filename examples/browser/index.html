@@ -87,7 +87,7 @@
             const { messageId } = await mam.mamAttach(client, mamMessage, "MY9MAM");
             console.log(`Message Id`, messageId);
             consoleLog(`You can view the latest message in the mam channel here`);
-            consoleLink(`https://utils.iota.org/mam/${mamMessage.root}/${mode}/${sideKey}/devnet`);
+            consoleLink(`https://explorer.iota.org/devnet/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
 
             // Initial root
             const initialRoot = mam.channelRoot({
@@ -97,7 +97,7 @@
 
             if (initialRoot !== mamMessage.root) {
                 consoleLog(`You can view all the messages in the mam channel here`);
-                consoleLink(`https://utils.iota.org/mam/${initialRoot}/${mode}/${sideKey}/devnet`);
+                consoleLink(`https://explorer.iota.org/devnet/streams/0/${initialRoot}/${mode}/${sideKey}`);
             }
 
             // Try fetching it as well.

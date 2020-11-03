@@ -1,8 +1,8 @@
-**[@iota/mam2.js](README.md)**
+**[@iota/mam-chrysalis.js](README.md)**
 
 > Globals
 
-# @iota/mam2.js
+# @iota/mam-chrysalis.js
 
 ## Index
 

@@ -28,7 +28,8 @@
     },
     "dependencies": {
         "@iota/iota2.js": "github:obany/iota2.js",
-        "@iota/mam.js": "file:../..",
+        "@iota/mam-chrysalis.js": "file:../..",
+        "@iota/mam-chrysalis.js": "file:../..",
         "body-parser": "^1.19.0",
         "express": "^4.17.1"
     },

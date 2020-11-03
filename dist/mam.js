@@ -1527,7 +1527,7 @@
 	        data.set(iota2_js_1__default['default'].Converter.asciiToBytes(mamMessage.payload), 1 + tagLength);
 	        const indexationPayload = {
 	            type: 2,
-	            index: iota2_js_1__default['default'].Converter.bytesToHex(iota2_js_1__default['default'].Blake2b.sum256(iota2_js_1__default['default'].Converter.asciiToBytes(mamMessage.address))),
+	            index: mamMessage.address,
 	            data: iota2_js_1__default['default'].Converter.bytesToHex(data)
 	        };
 	        const tips = yield client.tips();
@@ -1559,7 +1559,7 @@
 	    return __awaiter(this, void 0, void 0, function* () {
 	        guards.validateModeKey(mode, sideKey);
 	        const messageAddress = decodeAddress(root, mode);
-	        const messagesResponse = yield client.messagesFind(iota2_js_1__default['default'].Converter.bytesToHex(iota2_js_1__default['default'].Blake2b.sum256(iota2_js_1__default['default'].Converter.asciiToBytes(messageAddress))));
+	        const messagesResponse = yield client.messagesFind(messageAddress);
 	        const messages = [];
 	        for (const messageId of messagesResponse.messageIds) {
 	            const message = yield client.message(messageId);
