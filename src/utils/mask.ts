@@ -1,4 +1,4 @@
-import { Curl } from "../signing/curl";
+import { Curl } from "@iota/iota2.js";
 
 /**
  * Create the mask hash for the key.

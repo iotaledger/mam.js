@@ -1,4 +1,4 @@
-import { Curl } from "../signing/curl";
+import { Curl } from "@iota/iota2.js";
 import { TrytesHelper } from "../utils/trytesHelper";
 import { generateAddress } from "./merkleHashGenerator";
 import { MerkleNode } from "./merkleNode";

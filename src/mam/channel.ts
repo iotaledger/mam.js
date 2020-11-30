@@ -1,9 +1,9 @@
+import { Curl } from "@iota/iota2.js";
 import { MerkleTree } from "../merkle/merkleTree";
 import { IMamChannelState } from "../models/IMamChannelState";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
 import { HammingDiver } from "../pearlDiver/hammingDiver";
-import { Curl } from "../signing/curl";
 import { signature } from "../signing/iss-p27";
 import { concatenate } from "../utils/arrayHelper";
 import { validateModeKey } from "../utils/guards";

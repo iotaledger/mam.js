@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
+import { Curl } from "@iota/iota2.js";
 import * as crypto from "crypto";
-import { Curl } from "../../src/signing/curl";
 import { mask, maskHash, unmask } from "../../src/utils/mask";
 import { TrytesHelper } from "../../src/utils/trytesHelper";
 

@@ -1,4 +1,4 @@
-import { Curl } from "../signing/curl";
+import { Curl } from "@iota/iota2.js";
 
 const PRIVATE_KEY_NUM_FRAGMENTS: number = 27;
 /* @internal */

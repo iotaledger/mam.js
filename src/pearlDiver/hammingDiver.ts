@@ -1,5 +1,5 @@
+import { Curl } from "@iota/iota2.js";
 import bigInt from "big-integer";
-import { Curl } from "../signing/curl";
 import { roundThird } from "../utils/pascal";
 import { PearlDiverSearchStates } from "./pearlDiverSearchStates";
 

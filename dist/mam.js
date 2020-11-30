@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('@iota/iota2.js'), require('big-integer')) :
 	typeof define === 'function' && define.amd ? define(['@iota/iota2.js', 'big-integer'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.mam = factory(global.iota2_js_1, global.bigInt));
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.mam = factory(global.Iota2, global.bigInt));
 }(this, (function (iota2_js_1, require$$0) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -28,105 +28,6 @@
 	function commonjsRequire () {
 		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
 	}
-
-	var curl = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.Curl = void 0;
-	/**
-	 * Class to implement Curl sponge.
-	 * @internal
-	 */
-	class Curl {
-	    /**
-	     * Create a new instance of Curl.
-	     * @param rounds The number of rounds to perform.
-	     */
-	    constructor(rounds = Curl.NUMBER_OF_ROUNDS) {
-	        if (rounds !== 27 && rounds !== 81) {
-	            throw new Error("Illegal number of rounds. Only `27` and `81` rounds are supported.");
-	        }
-	        this._state = new Int8Array(Curl.STATE_LENGTH);
-	        this._rounds = rounds;
-	    }
-	    /**
-	     * Resets the state
-	     */
-	    reset() {
-	        this._state = new Int8Array(Curl.STATE_LENGTH);
-	    }
-	    /**
-	     * Get the state of the sponge.
-	     * @param len The length of the state to get.
-	     * @returns The state.
-	     */
-	    rate(len = Curl.HASH_LENGTH) {
-	        return this._state.slice(0, len);
-	    }
-	    /**
-	     * Absorbs trits given an offset and length
-	     * @param trits The trits to absorb.
-	     * @param offset The offset to start abororbing from the array.
-	     * @param length The length of trits to absorb.
-	     */
-	    absorb(trits, offset, length) {
-	        do {
-	            const limit = length < Curl.HASH_LENGTH ? length : Curl.HASH_LENGTH;
-	            this._state.set(trits.subarray(offset, offset + limit));
-	            this.transform();
-	            length -= Curl.HASH_LENGTH;
-	            offset += limit;
-	        } while (length > 0);
-	    }
-	    /**
-	     * Squeezes trits given an offset and length
-	     * @param trits The trits to squeeze.
-	     * @param offset The offset to start squeezing from the array.
-	     * @param length The length of trits to squeeze.
-	     */
-	    squeeze(trits, offset, length) {
-	        do {
-	            const limit = length < Curl.HASH_LENGTH ? length : Curl.HASH_LENGTH;
-	            trits.set(this._state.subarray(0, limit), offset);
-	            this.transform();
-	            length -= Curl.HASH_LENGTH;
-	            offset += limit;
-	        } while (length > 0);
-	    }
-	    /**
-	     * Sponge transform function
-	     */
-	    transform() {
-	        let stateCopy;
-	        let index = 0;
-	        for (let round = 0; round < this._rounds; round++) {
-	            stateCopy = this._state.slice();
-	            for (let i = 0; i < Curl.STATE_LENGTH; i++) {
-	                this._state[i] =
-	                    // eslint-disable-next-line no-bitwise
-	                    Curl.TRUTH_TABLE[stateCopy[index] + (stateCopy[(index += index < 365 ? 364 : -365)] << 2) + 5];
-	            }
-	        }
-	    }
-	}
-	exports.Curl = Curl;
-	/**
-	 * The Hash Length
-	 */
-	Curl.HASH_LENGTH = 243;
-	/**
-	 * The State Length.
-	 */
-	Curl.STATE_LENGTH = 3 * Curl.HASH_LENGTH;
-	/**
-	 * The default number of rounds.
-	 */
-	Curl.NUMBER_OF_ROUNDS = 81;
-	/**
-	 * Truth Table.
-	 */
-	Curl.TRUTH_TABLE = [1, 0, -1, 2, 1, -1, 0, 2, -1, 1, 0];
-
-	});
 
 	var textHelper = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -373,7 +274,7 @@
 
 	const PRIVATE_KEY_NUM_FRAGMENTS = 27;
 	/* @internal */
-	exports.PRIVATE_KEY_FRAGMENT_LENGTH = PRIVATE_KEY_NUM_FRAGMENTS * curl.Curl.HASH_LENGTH;
+	exports.PRIVATE_KEY_FRAGMENT_LENGTH = PRIVATE_KEY_NUM_FRAGMENTS * iota2_js_1__default['default'].Curl.HASH_LENGTH;
 	const MIN_TRYTE_VALUE = -13;
 	const MAX_TRYTE_VALUE = 13;
 	const MIN_TRIT_VALUE = -1;
@@ -386,7 +287,7 @@
 	 * @internal
 	 */
 	function subseed(seed, index) {
-	    const sponge = new curl.Curl(27);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
 	    const subseedPreimage = seed.slice();
 	    let localIndex = index;
 	    while (localIndex-- > 0) {
@@ -400,7 +301,7 @@
 	        }
 	    }
 	    sponge.absorb(subseedPreimage, 0, subseedPreimage.length);
-	    const ss = new Int8Array(curl.Curl.HASH_LENGTH);
+	    const ss = new Int8Array(iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    sponge.squeeze(ss, 0, ss.length);
 	    return ss;
 	}
@@ -413,11 +314,11 @@
 	 * @internal
 	 */
 	function digestFromSubseed(subSeed, securityLevel) {
-	    const curl1 = new curl.Curl(27);
-	    const curl2 = new curl.Curl(27);
-	    const curl3 = new curl.Curl(27);
-	    const length = securityLevel * exports.PRIVATE_KEY_FRAGMENT_LENGTH / curl.Curl.HASH_LENGTH;
-	    const digest = new Int8Array(curl.Curl.HASH_LENGTH);
+	    const curl1 = new iota2_js_1__default['default'].Curl(27);
+	    const curl2 = new iota2_js_1__default['default'].Curl(27);
+	    const curl3 = new iota2_js_1__default['default'].Curl(27);
+	    const length = securityLevel * exports.PRIVATE_KEY_FRAGMENT_LENGTH / iota2_js_1__default['default'].Curl.HASH_LENGTH;
+	    const digest = new Int8Array(iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    curl1.absorb(subSeed, 0, subSeed.length);
 	    for (let i = 0; i < length; i++) {
 	        curl1.squeeze(digest, 0, digest.length);
@@ -439,9 +340,9 @@
 	 * @internal
 	 */
 	function address(digests) {
-	    const sponge = new curl.Curl(27);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
 	    sponge.absorb(digests, 0, digests.length);
-	    const addressTrits = new Int8Array(curl.Curl.HASH_LENGTH);
+	    const addressTrits = new Int8Array(iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    sponge.squeeze(addressTrits, 0, addressTrits.length);
 	    return addressTrits;
 	}
@@ -457,13 +358,13 @@
 	    const keyLength = securityLevel * exports.PRIVATE_KEY_FRAGMENT_LENGTH;
 	    const keyTrits = new Int8Array(keyLength);
 	    const actualKeyTrits = new Int8Array(keyLength);
-	    const sponge = new curl.Curl(27);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
 	    sponge.absorb(subSeed, 0, subSeed.length);
 	    sponge.squeeze(keyTrits, 0, keyTrits.length);
-	    for (let i = 0; i < keyLength / curl.Curl.HASH_LENGTH; i++) {
-	        const offset = i * curl.Curl.HASH_LENGTH;
+	    for (let i = 0; i < keyLength / iota2_js_1__default['default'].Curl.HASH_LENGTH; i++) {
+	        const offset = i * iota2_js_1__default['default'].Curl.HASH_LENGTH;
 	        sponge.reset();
-	        sponge.absorb(keyTrits, offset, curl.Curl.HASH_LENGTH);
+	        sponge.absorb(keyTrits, offset, iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	        actualKeyTrits.set(sponge.rate(), offset);
 	    }
 	    return actualKeyTrits;
@@ -478,15 +379,15 @@
 	 */
 	function signature(hashTrits, key) {
 	    const signatures = new Int8Array(key.length);
-	    const sponge = new curl.Curl(27);
-	    for (let i = 0; i < key.length / curl.Curl.HASH_LENGTH; i++) {
-	        let buffer = key.subarray(i * curl.Curl.HASH_LENGTH, (i + 1) * curl.Curl.HASH_LENGTH);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
+	    for (let i = 0; i < key.length / iota2_js_1__default['default'].Curl.HASH_LENGTH; i++) {
+	        let buffer = key.subarray(i * iota2_js_1__default['default'].Curl.HASH_LENGTH, (i + 1) * iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	        for (let k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + (hashTrits[(i * 3) + 1] * 3) + (hashTrits[(i * 3) + 2] * 9)); k++) {
 	            sponge.reset();
 	            sponge.absorb(buffer, 0, buffer.length);
 	            buffer = sponge.rate();
 	        }
-	        signatures.set(buffer, i * curl.Curl.HASH_LENGTH);
+	        signatures.set(buffer, i * iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    }
 	    return signatures;
 	}
@@ -498,10 +399,10 @@
 	 * @internal
 	 */
 	function checksumSecurity(hash) {
-	    if (hash.slice(0, curl.Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
+	    if (hash.slice(0, iota2_js_1__default['default'].Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
 	        return 1;
 	    }
-	    if (hash.slice(0, 2 * curl.Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
+	    if (hash.slice(0, 2 * iota2_js_1__default['default'].Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
 	        return 2;
 	    }
 	    return hash.reduce((a, b) => a + b, 0) === 0 ? 3 : 0;
@@ -515,16 +416,16 @@
 	 * @internal
 	 */
 	function digestFromSignature(hash, sig) {
-	    const sponge = new curl.Curl(27);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
 	    const bytes = new Int8Array(sig.length);
-	    for (let i = 0; i < (sig.length / curl.Curl.HASH_LENGTH); i++) {
-	        let innerBytes = sig.slice(i * curl.Curl.HASH_LENGTH, (i + 1) * curl.Curl.HASH_LENGTH);
+	    for (let i = 0; i < (sig.length / iota2_js_1__default['default'].Curl.HASH_LENGTH); i++) {
+	        let innerBytes = sig.slice(i * iota2_js_1__default['default'].Curl.HASH_LENGTH, (i + 1) * iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	        for (let j = 0; j < (hash[i * 3] + (hash[(i * 3) + 1] * 3) + (hash[(i * 3) + 2] * 9)) - MIN_TRYTE_VALUE; j++) {
 	            sponge.reset();
 	            sponge.absorb(innerBytes, 0, innerBytes.length);
 	            innerBytes = sponge.rate();
 	        }
-	        bytes.set(innerBytes, i * curl.Curl.HASH_LENGTH);
+	        bytes.set(innerBytes, i * iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    }
 	    sponge.reset();
 	    sponge.absorb(bytes, 0, bytes.length);
@@ -622,11 +523,11 @@
 	     * @returns The new sibling root.
 	     */
 	    static root(rate, siblings, index) {
-	        const sponge = new curl.Curl(27);
+	        const sponge = new iota2_js_1__default['default'].Curl(27);
 	        let i = 1;
-	        const numChunks = Math.ceil(siblings.length / curl.Curl.HASH_LENGTH);
+	        const numChunks = Math.ceil(siblings.length / iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	        for (let c = 0; c < numChunks; c++) {
-	            const chunk = siblings.slice(c * curl.Curl.HASH_LENGTH, (c + 1) * curl.Curl.HASH_LENGTH);
+	            const chunk = siblings.slice(c * iota2_js_1__default['default'].Curl.HASH_LENGTH, (c + 1) * iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	            sponge.reset();
 	            // eslint-disable-next-line no-bitwise
 	            if ((i & index) === 0) {
@@ -696,10 +597,10 @@
 	            const right = (i + 1 < leaves.length) ? leaves[i + 1] : undefined;
 	            let addressTrits;
 	            if (right) {
-	                const sponge = new curl.Curl(27);
+	                const sponge = new iota2_js_1__default['default'].Curl(27);
 	                sponge.absorb(left.addressTrits, 0, left.addressTrits.length);
 	                sponge.absorb(right.addressTrits, 0, right.addressTrits.length);
-	                addressTrits = new Int8Array(curl.Curl.HASH_LENGTH);
+	                addressTrits = new Int8Array(iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	                sponge.squeeze(addressTrits, 0, addressTrits.length);
 	            }
 	            else {
@@ -897,8 +798,8 @@
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.HammingDiver = void 0;
-	const big_integer_1 = __importDefault(require$$0__default['default']);
 
+	const big_integer_1 = __importDefault(require$$0__default['default']);
 
 	/**
 	 * Class to perform Hamming calculation for nonce.
@@ -915,11 +816,11 @@
 	     */
 	    search(trits, securityLevel, length, offset) {
 	        const state = this.prepareTrits(trits, offset);
-	        let size = Math.min(length, curl.Curl.HASH_LENGTH) - offset;
+	        let size = Math.min(length, iota2_js_1__default['default'].Curl.HASH_LENGTH) - offset;
 	        let index = 0;
 	        while (index === 0) {
 	            const incrementResult = this.increment(state, offset + (size * 2 / 3), offset + size);
-	            size = Math.min(pascal.roundThird(offset + (size * 2 / 3) + incrementResult), curl.Curl.HASH_LENGTH) - offset;
+	            size = Math.min(pascal.roundThird(offset + (size * 2 / 3) + incrementResult), iota2_js_1__default['default'].Curl.HASH_LENGTH) - offset;
 	            const curlCopy = {
 	                low: state.low.slice(),
 	                high: state.high.slice()
@@ -936,7 +837,7 @@
 	     * @returns The prepared trits.
 	     */
 	    prepareTrits(trits, offset) {
-	        const initialState = this.tritsToBigInt(trits, curl.Curl.STATE_LENGTH);
+	        const initialState = this.tritsToBigInt(trits, iota2_js_1__default['default'].Curl.STATE_LENGTH);
 	        initialState.low[offset] = HammingDiver.LOW_0;
 	        initialState.low[offset + 1] = HammingDiver.LOW_1;
 	        initialState.low[offset + 2] = HammingDiver.LOW_2;
@@ -1010,10 +911,10 @@
 	        let curlScratchpadIndex = 0;
 	        for (let round = 0; round < HammingDiver.ROUNDS; round++) {
 	            const curlScratchpad = {
-	                low: searchStates.low.slice(0, curl.Curl.STATE_LENGTH),
-	                high: searchStates.high.slice(0, curl.Curl.STATE_LENGTH)
+	                low: searchStates.low.slice(0, iota2_js_1__default['default'].Curl.STATE_LENGTH),
+	                high: searchStates.high.slice(0, iota2_js_1__default['default'].Curl.STATE_LENGTH)
 	            };
-	            for (let stateIndex = 0; stateIndex < curl.Curl.STATE_LENGTH; stateIndex++) {
+	            for (let stateIndex = 0; stateIndex < iota2_js_1__default['default'].Curl.STATE_LENGTH; stateIndex++) {
 	                const alpha = curlScratchpad.low[curlScratchpadIndex];
 	                const beta = curlScratchpad.high[curlScratchpadIndex];
 	                curlScratchpadIndex += curlScratchpadIndex < 365 ? 364 : -365;
@@ -1215,9 +1116,9 @@
 	 * @internal
 	 */
 	function maskHash(keyTrits) {
-	    const sponge = new curl.Curl(81);
+	    const sponge = new iota2_js_1__default['default'].Curl(81);
 	    sponge.absorb(keyTrits, 0, keyTrits.length);
-	    const finalKeyTrits = new Int8Array(curl.Curl.HASH_LENGTH);
+	    const finalKeyTrits = new Int8Array(iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    sponge.squeeze(finalKeyTrits, 0, finalKeyTrits.length);
 	    return finalKeyTrits;
 	}
@@ -1231,13 +1132,13 @@
 	 */
 	function mask(payload, sponge) {
 	    const keyChunk = sponge.rate();
-	    const numChunks = Math.ceil(payload.length / curl.Curl.HASH_LENGTH);
+	    const numChunks = Math.ceil(payload.length / iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	    for (let c = 0; c < numChunks; c++) {
-	        const chunk = payload.slice(c * curl.Curl.HASH_LENGTH, (c + 1) * curl.Curl.HASH_LENGTH);
+	        const chunk = payload.slice(c * iota2_js_1__default['default'].Curl.HASH_LENGTH, (c + 1) * iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	        sponge.absorb(chunk, 0, chunk.length);
 	        const state = sponge.rate();
 	        for (let i = 0; i < chunk.length; i++) {
-	            payload[(c * curl.Curl.HASH_LENGTH) + i] = tritSum(chunk[i], keyChunk[i]);
+	            payload[(c * iota2_js_1__default['default'].Curl.HASH_LENGTH) + i] = tritSum(chunk[i], keyChunk[i]);
 	            keyChunk[i] = state[i];
 	        }
 	    }
@@ -1253,18 +1154,18 @@
 	 */
 	function unmask(payload, sponge) {
 	    const unmasked = new Int8Array(payload);
-	    const limit = Math.ceil(unmasked.length / curl.Curl.HASH_LENGTH) * curl.Curl.HASH_LENGTH;
+	    const limit = Math.ceil(unmasked.length / iota2_js_1__default['default'].Curl.HASH_LENGTH) * iota2_js_1__default['default'].Curl.HASH_LENGTH;
 	    let state;
 	    for (let c = 0; c < limit; c++) {
-	        const indexInChunk = c % curl.Curl.HASH_LENGTH;
+	        const indexInChunk = c % iota2_js_1__default['default'].Curl.HASH_LENGTH;
 	        if (indexInChunk === 0) {
 	            state = sponge.rate();
 	        }
 	        if (state) {
 	            unmasked[c] = tritSum(unmasked[c], -state[indexInChunk]);
 	        }
-	        if (indexInChunk === curl.Curl.HASH_LENGTH - 1) {
-	            sponge.absorb(unmasked, Math.floor(c / curl.Curl.HASH_LENGTH) * curl.Curl.HASH_LENGTH, curl.Curl.HASH_LENGTH);
+	        if (indexInChunk === iota2_js_1__default['default'].Curl.HASH_LENGTH - 1) {
+	            sponge.absorb(unmasked, Math.floor(c / iota2_js_1__default['default'].Curl.HASH_LENGTH) * iota2_js_1__default['default'].Curl.HASH_LENGTH, iota2_js_1__default['default'].Curl.HASH_LENGTH);
 	        }
 	    }
 	    return unmasked;
@@ -1371,7 +1272,7 @@
 	    const indexTrits = pascal.pascalEncode(channelState.index);
 	    const messageLengthTrits = pascal.pascalEncode(messageTrits.length);
 	    const subtree = tree.getSubtree(channelState.index);
-	    const sponge = new curl.Curl(27);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
 	    const sideKeyTrits = trytesHelper.TrytesHelper.toTrits((_a = channelState.sideKey) !== null && _a !== void 0 ? _a : "9".repeat(81));
 	    sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
 	    sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
@@ -1382,13 +1283,13 @@
 	    payload = arrayHelper.concatenate([payload, maskedNextRoot]);
 	    // Calculate the nonce for the message so far
 	    const hammingDiver$1 = new hammingDiver.HammingDiver();
-	    const nonceTrits = hammingDiver$1.search(sponge.rate(curl.Curl.STATE_LENGTH), channelState.security, curl.Curl.HASH_LENGTH / 3, 0);
+	    const nonceTrits = hammingDiver$1.search(sponge.rate(iota2_js_1__default['default'].Curl.STATE_LENGTH), channelState.security, iota2_js_1__default['default'].Curl.HASH_LENGTH / 3, 0);
 	    mask_1.mask(nonceTrits, sponge);
 	    payload = arrayHelper.concatenate([payload, nonceTrits]);
 	    // Create the signature and add the sibling information
 	    const sig = issP27.signature(sponge.rate(), subtree.key);
 	    const subtreeTrits = arrayHelper.concatenate(subtree.leaves.map(l => l.addressTrits));
-	    const siblingsCount = subtreeTrits.length / curl.Curl.HASH_LENGTH;
+	    const siblingsCount = subtreeTrits.length / iota2_js_1__default['default'].Curl.HASH_LENGTH;
 	    const encryptedSignature = mask_1.mask(arrayHelper.concatenate([sig, pascal.pascalEncode(siblingsCount), subtreeTrits]), sponge);
 	    // Insert the signature and pad if necessary
 	    payload = arrayHelper.concatenate([payload, encryptedSignature]);
@@ -1443,17 +1344,17 @@
 	    const messageData = pascal.pascalDecode(payloadTrits.slice(indexData.end));
 	    const messageLength = messageData.value;
 	    const nextRootStart = indexData.end + messageData.end;
-	    const messageStart = nextRootStart + curl.Curl.HASH_LENGTH;
+	    const messageStart = nextRootStart + iota2_js_1__default['default'].Curl.HASH_LENGTH;
 	    const messageEnd = messageStart + messageLength;
 	    // Hash the key, root and payload
-	    const sponge = new curl.Curl(27);
+	    const sponge = new iota2_js_1__default['default'].Curl(27);
 	    sponge.absorb(channelKeyTrits, 0, channelKeyTrits.length);
 	    sponge.absorb(rootTrits, 0, rootTrits.length);
 	    sponge.absorb(payloadTrits, 0, nextRootStart);
 	    // Decrypt the metadata
-	    const nextRoot = mask_1.unmask(payloadTrits.slice(nextRootStart, nextRootStart + curl.Curl.HASH_LENGTH), sponge);
+	    const nextRoot = mask_1.unmask(payloadTrits.slice(nextRootStart, nextRootStart + iota2_js_1__default['default'].Curl.HASH_LENGTH), sponge);
 	    const message = mask_1.unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
-	    const nonce = mask_1.unmask(payloadTrits.slice(messageEnd, messageEnd + (curl.Curl.HASH_LENGTH / 3)), sponge);
+	    const nonce = mask_1.unmask(payloadTrits.slice(messageEnd, messageEnd + (iota2_js_1__default['default'].Curl.HASH_LENGTH / 3)), sponge);
 	    const hmac = sponge.rate();
 	    // Check the security level is valid
 	    const securityLevel = issP27.checksumSecurity(hmac);
@@ -1473,7 +1374,7 @@
 	    let recalculatedRoot = sponge.rate();
 	    if (siblingsCount !== 0) {
 	        const siblingsStart = (securityLevel * issP27.PRIVATE_KEY_FRAGMENT_LENGTH) + siblingsCountData.end;
-	        const siblings = decryptedMetadata.slice(siblingsStart, siblingsStart + (siblingsCount * curl.Curl.HASH_LENGTH));
+	        const siblings = decryptedMetadata.slice(siblingsStart, siblingsStart + (siblingsCount * iota2_js_1__default['default'].Curl.HASH_LENGTH));
 	        recalculatedRoot = merkleTree.MerkleTree.root(recalculatedRoot, siblings, index);
 	    }
 	    // Make sure the root matches the calculated one
@@ -1532,11 +1433,9 @@
 	        };
 	        const tips = yield client.tips();
 	        const message = {
-	            version: 1,
 	            parent1MessageId: tips.tip1MessageId,
 	            parent2MessageId: tips.tip2MessageId,
-	            payload: indexationPayload,
-	            nonce: 0
+	            payload: indexationPayload
 	        };
 	        const messageId = yield client.messageSubmit(message);
 	        return {

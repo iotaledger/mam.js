@@ -21,11 +21,13 @@ export default {
         name: 'mam',
         compact: process.env.MINIFY,
         globals: {
-            "big-integer": "bigInt"
+            "big-integer": "bigInt",
+            "crypto": "crypto",
+            '@iota/iota2.js': 'Iota2'
         }
     },
     plugins,
     external: process.env.BROWSER
-        ? ['big-integer']
-        : ['@iota/iota2.js', 'big-integer']
+        ? ['@iota/iota2.js', 'big-integer', 'crypto']
+        : ['@iota/iota2.js', 'big-integer', 'crypto']
 }

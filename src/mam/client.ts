@@ -1,4 +1,4 @@
-import { IClient, IIndexationPayload, IMessage, IMessages, Converter } from "@iota/iota2.js";
+import { IClient, IIndexationPayload, IMessage, IMessagesResponse, Converter } from "@iota/iota2.js";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
@@ -41,11 +41,9 @@ export async function mamAttach(
     const tips = await client.tips();
 
     const message: IMessage = {
-        version: 1,
         parent1MessageId: tips.tip1MessageId,
         parent2MessageId: tips.tip2MessageId,
-        payload: indexationPayload,
-        nonce: 0
+        payload: indexationPayload
     };
 
     const messageId = await client.messageSubmit(message);
@@ -75,7 +73,7 @@ export async function mamFetch(
     const messageAddress = decodeAddress(root, mode);
 
     try {
-        const messagesResponse: IMessages = await client.messagesFind(messageAddress);
+        const messagesResponse: IMessagesResponse = await client.messagesFind(messageAddress);
 
         const messages: IMessage[] = [];
 
