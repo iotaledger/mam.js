@@ -1,4 +1,4 @@
-import { Curl } from "@iota/iota2.js";
+import { Curl } from "@iota/iota.js";
 import { MerkleTree } from "../merkle/merkleTree";
 import { IMamChannelState } from "../models/IMamChannelState";
 import { IMamMessage } from "../models/IMamMessage";

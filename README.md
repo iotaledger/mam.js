@@ -2,7 +2,7 @@
 
 > We strongly advise that you update your apps to use [IOTA Streams](https://github.com/iotaledger/streams) - this package is unlikely to be maintained.
 
-Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA Chrysalis Phase 2.
+Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA Chrysalis.
 
 The package name has been changed to `@iota/mam-chrysalis.js` to allow for side-by-side usage with the current `@iota/mam.js`
 
@@ -11,7 +11,7 @@ The package name has been changed to `@iota/mam-chrysalis.js` to allow for side-
 Install this package using the following commands:
 
 ```shell
-npm install iotaledger/mam.js#feature/chrysalis-p2
+npm install iotaledger/mam.js#chrysalis
 ```
 
 If you want to use this module in a browser `<script>` tag see the example Browser [./examples/browser/index.html](./examples/browser/index.html)
@@ -19,7 +19,7 @@ If you want to use this module in a browser `<script>` tag see the example Brows
 ## Example Usage
 
 ```js
-const { SingleNodeClient } = require('@iota/iota2.js');
+const { SingleNodeClient } = require('@iota/iota.js');
 const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam-chrysalis.js');
 
 // Setup the details for the channel.

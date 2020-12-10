@@ -1,4 +1,4 @@
-import { Curl } from "@iota/iota2.js";
+import { Curl } from "@iota/iota.js";
 
 const PRIVATE_KEY_NUM_FRAGMENTS: number = 27;
 /* @internal */

@@ -1,4 +1,4 @@
-const { SingleNodeClient } = require("@iota/iota2.js");
+const { SingleNodeClient } = require("@iota/iota.js");
 const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam-chrysalis.js');
 const fs = require('fs');
 

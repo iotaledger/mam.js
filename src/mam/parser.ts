@@ -1,4 +1,4 @@
-import { Curl } from "@iota/iota2.js";
+import { Curl } from "@iota/iota.js";
 import { MerkleTree } from "../merkle/merkleTree";
 import { checksumSecurity, digestFromSignature, PRIVATE_KEY_FRAGMENT_LENGTH } from "../signing/iss-p27";
 import { unmask } from "../utils/mask";

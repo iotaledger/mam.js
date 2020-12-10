@@ -23,11 +23,11 @@ export default {
         globals: {
             "big-integer": "bigInt",
             "crypto": "crypto",
-            '@iota/iota2.js': 'Iota2'
+            '@iota/iota.js': 'Iota'
         }
     },
     plugins,
     external: process.env.BROWSER
-        ? ['@iota/iota2.js', 'big-integer', 'crypto']
-        : ['@iota/iota2.js', 'big-integer', 'crypto']
+        ? ['@iota/iota.js', 'big-integer', 'crypto']
+        : ['@iota/iota.js', 'big-integer', 'crypto']
 }

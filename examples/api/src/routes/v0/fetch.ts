@@ -1,4 +1,4 @@
-import { SingleNodeClient } from "@iota/iota2.js";
+import { SingleNodeClient } from "@iota/iota.js";
 import { mamFetch, TrytesHelper } from "@iota/mam-chrysalis.js";
 import { HttpError } from "../../errors/httpError";
 import { IFetchRequest } from "../../models/api/v0/IFetchRequest";

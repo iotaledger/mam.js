@@ -1,4 +1,4 @@
-import { IClient, IIndexationPayload, IMessage, IMessagesResponse, Converter } from "@iota/iota2.js";
+import { IClient, IIndexationPayload, IMessage, IMessagesResponse, Converter } from "@iota/iota.js";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";

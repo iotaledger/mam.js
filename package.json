@@ -24,7 +24,7 @@
     "author": "Martyn Janes <martyn.janes@iota.org>",
     "license": "MIT",
     "dependencies": {
-        "@iota/iota2.js": "github:obany/iota2.js",
+        "@iota/iota.js": "github:iotaledger/iota.js#chrysalis",
         "big-integer": "^1.6.48"
     },
     "devDependencies": {

@@ -1,4 +1,4 @@
-import { Curl } from "@iota/iota2.js";
+import { Curl } from "@iota/iota.js";
 
 /**
  * Create the mask hash for the key.
