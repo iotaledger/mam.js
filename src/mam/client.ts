@@ -25,6 +25,9 @@ export async function mamAttach(
         throw new Error("MWM and depth are no longer needed when calling mamAttach");
     }
     const tagLength = tag ? tag.length : 0;
+    if (tagLength > 27) {
+        throw new Error("The tag length is too long");
+    }
     const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
     data[0] = tagLength;
     if (tag) {
@@ -85,7 +88,7 @@ export async function mamFetch(
         }
 
         return await decodeMessages(messages, root, sideKey);
-    } catch {}
+    } catch { }
 }
 
 /**
@@ -176,8 +179,7 @@ export async function decodeMessages(
                         ...parsed,
                         tag
                     };
-                } catch {
-                }
+                } catch {}
             }
         }
     }

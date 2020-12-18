@@ -133,7 +133,7 @@ ___
 
 ### objectFromTrytes
 
-▸ `Static`**objectFromTrytes**\<T>(`trytes`: string): T \| undefined
+▸ `Static`**objectFromTrytes**<T\>(`trytes`: string): T \| undefined
 
 Convert an object from Trytes.
 

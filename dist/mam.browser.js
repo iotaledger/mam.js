@@ -15,18 +15,24 @@
 		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 	}
 
-	function createCommonjsModule(fn, basedir, module) {
-		return module = {
-			path: basedir,
-			exports: {},
-			require: function (path, base) {
-				return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-			}
-		}, fn(module, module.exports), module.exports;
+	function getAugmentedNamespace(n) {
+		if (n.__esModule) return n;
+		var a = Object.defineProperty({}, '__esModule', {value: true});
+		Object.keys(n).forEach(function (k) {
+			var d = Object.getOwnPropertyDescriptor(n, k);
+			Object.defineProperty(a, k, d.get ? d : {
+				enumerable: true,
+				get: function () {
+					return n[k];
+				}
+			});
+		});
+		return a;
 	}
 
-	function commonjsRequire () {
-		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
+	function createCommonjsModule(fn) {
+	  var module = { exports: {} };
+		return fn(module, module.exports), module.exports;
 	}
 
 	var textHelper = createCommonjsModule(function (module, exports) {
@@ -1420,6 +1426,9 @@
 	            throw new Error("MWM and depth are no longer needed when calling mamAttach");
 	        }
 	        const tagLength = tag ? tag.length : 0;
+	        if (tagLength > 27) {
+	            throw new Error("The tag length is too long");
+	        }
 	        const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
 	        data[0] = tagLength;
 	        if (tag) {
@@ -1547,8 +1556,7 @@
 	                        const parsed = parser.parseMessage(msg, root, sideKey);
 	                        return Object.assign(Object.assign({ root }, parsed), { tag });
 	                    }
-	                    catch (_a) {
-	                    }
+	                    catch (_a) { }
 	                }
 	            }
 	        }
@@ -1558,25 +1566,37 @@
 
 	});
 
-	var IMamChannelState = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
+	var IMamChannelState = /*#__PURE__*/Object.freeze({
+		__proto__: null
 	});
 
-	var IMamFetchedMessage = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
+	var IMamFetchedMessage = /*#__PURE__*/Object.freeze({
+		__proto__: null
 	});
 
-	var IMamMessage = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
+	var IMamMessage = /*#__PURE__*/Object.freeze({
+		__proto__: null
 	});
 
-	var mamMode = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
+	var mamMode = /*#__PURE__*/Object.freeze({
+		__proto__: null
 	});
+
+	var require$$3 = /*@__PURE__*/getAugmentedNamespace(IMamChannelState);
+
+	var require$$4 = /*@__PURE__*/getAugmentedNamespace(IMamFetchedMessage);
+
+	var require$$5 = /*@__PURE__*/getAugmentedNamespace(IMamMessage);
+
+	var require$$6 = /*@__PURE__*/getAugmentedNamespace(mamMode);
 
 	var es = createCommonjsModule(function (module, exports) {
 	var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -1596,10 +1616,10 @@
 	__exportStar(channel, exports);
 	__exportStar(client, exports);
 	__exportStar(parser, exports);
-	__exportStar(IMamChannelState, exports);
-	__exportStar(IMamFetchedMessage, exports);
-	__exportStar(IMamMessage, exports);
-	__exportStar(mamMode, exports);
+	__exportStar(require$$3, exports);
+	__exportStar(require$$4, exports);
+	__exportStar(require$$5, exports);
+	__exportStar(require$$6, exports);
 	__exportStar(trytesHelper, exports);
 
 	});

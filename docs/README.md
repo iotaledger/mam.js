@@ -110,7 +110,7 @@ ___
 
 ### decodeMessages
 
-▸ **decodeMessages**(`messages`: IMessage[], `root`: string, `sideKey?`: undefined \| string): Promise\<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined>
+▸ **decodeMessages**(`messages`: IMessage[], `root`: string, `sideKey?`: undefined \| string): Promise<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined\>
 
 Decode messages from an address to try and find a MAM message.
 
@@ -122,7 +122,7 @@ Name | Type | Description |
 `root` | string | The root within the mam channel to fetch the message. |
 `sideKey?` | undefined \| string | The sideKey if mode is restricted. |
 
-**Returns:** Promise\<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined>
+**Returns:** Promise<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined\>
 
 The decoded message and the nextRoot if successful, undefined if no messages found,
 throws exception if transactions found on address are invalid.
@@ -131,7 +131,7 @@ ___
 
 ### mamAttach
 
-▸ **mamAttach**(`client`: IClient, `mamMessage`: [IMamMessage](interfaces/imammessage.md), `tag?`: undefined \| string): Promise\<{ message: IMessage ; messageId: string  }>
+▸ **mamAttach**(`client`: IClient, `mamMessage`: [IMamMessage](interfaces/imammessage.md), `tag?`: undefined \| string): Promise<{ message: IMessage ; messageId: string  }\>
 
 Attach the mam message to the tangle.
 
@@ -143,7 +143,7 @@ Name | Type | Description |
 `mamMessage` | [IMamMessage](interfaces/imammessage.md) | The message to attach. |
 `tag?` | undefined \| string | Optional tag for the transactions. |
 
-**Returns:** Promise\<{ message: IMessage ; messageId: string  }>
+**Returns:** Promise<{ message: IMessage ; messageId: string  }\>
 
 The transactions that were attached.
 
@@ -151,7 +151,7 @@ ___
 
 ### mamFetch
 
-▸ **mamFetch**(`client`: IClient, `root`: string, `mode`: MamMode, `sideKey?`: undefined \| string): Promise\<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined>
+▸ **mamFetch**(`client`: IClient, `root`: string, `mode`: MamMode, `sideKey?`: undefined \| string): Promise<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined\>
 
 Fetch a mam message from a channel.
 
@@ -164,7 +164,7 @@ Name | Type | Description |
 `mode` | MamMode | The mode to use for fetching. |
 `sideKey?` | undefined \| string | The sideKey if mode is restricted. |
 
-**Returns:** Promise\<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined>
+**Returns:** Promise<[IMamFetchedMessage](interfaces/imamfetchedmessage.md) \| undefined\>
 
 The decoded message and the nextRoot if successful, undefined if no messages found,
 throws exception if transactions found on address are invalid.
@@ -173,7 +173,7 @@ ___
 
 ### mamFetchAll
 
-▸ **mamFetchAll**(`client`: IClient, `root`: string, `mode`: MamMode, `sideKey?`: undefined \| string, `limit?`: undefined \| number): Promise\<[IMamFetchedMessage](interfaces/imamfetchedmessage.md)[]>
+▸ **mamFetchAll**(`client`: IClient, `root`: string, `mode`: MamMode, `sideKey?`: undefined \| string, `limit?`: undefined \| number): Promise<[IMamFetchedMessage](interfaces/imamfetchedmessage.md)[]\>
 
 Fetch all the mam message from a channel.
 If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
@@ -190,7 +190,7 @@ Name | Type | Description |
 `sideKey?` | undefined \| string | The sideKey if mode is restricted. |
 `limit?` | undefined \| number | Limit the number of messages retrieved. |
 
-**Returns:** Promise\<[IMamFetchedMessage](interfaces/imamfetchedmessage.md)[]>
+**Returns:** Promise<[IMamFetchedMessage](interfaces/imamfetchedmessage.md)[]\>
 
 The array of retrieved messages.
 
