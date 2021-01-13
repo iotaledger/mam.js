@@ -405,13 +405,27 @@
 	 * @internal
 	 */
 	function checksumSecurity(hash) {
-	    if (hash.slice(0, iota_js_1__default['default'].Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
+	    const dataSum1 = hash.slice(0, iota_js_1__default['default'].Curl.HASH_LENGTH / 3);
+	    let sum1 = 0;
+	    for (let i = 0; i < dataSum1.length; i++) {
+	        sum1 += dataSum1[i];
+	    }
+	    if (sum1 === 0) {
 	        return 1;
 	    }
-	    if (hash.slice(0, 2 * iota_js_1__default['default'].Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
+	    const dataSum2 = hash.slice(0, 2 * iota_js_1__default['default'].Curl.HASH_LENGTH / 3);
+	    let sum2 = 0;
+	    for (let i = 0; i < dataSum2.length; i++) {
+	        sum2 += dataSum2[i];
+	    }
+	    if (sum2 === 0) {
 	        return 2;
 	    }
-	    return hash.reduce((a, b) => a + b, 0) === 0 ? 3 : 0;
+	    let sum3 = 0;
+	    for (let i = 0; i < hash.length; i++) {
+	        sum3 += hash[i];
+	    }
+	    return sum3 === 0 ? 3 : 0;
 	}
 	exports.checksumSecurity = checksumSecurity;
 	/**
@@ -1435,15 +1449,13 @@
 	            data.set(iota_js_1__default['default'].Converter.asciiToBytes(tag), 1);
 	        }
 	        data.set(iota_js_1__default['default'].Converter.asciiToBytes(mamMessage.payload), 1 + tagLength);
+	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.asciiToBytes(mamMessage.address)));
 	        const indexationPayload = {
 	            type: 2,
-	            index: mamMessage.address,
+	            index: hashedAddress,
 	            data: iota_js_1__default['default'].Converter.bytesToHex(data)
 	        };
-	        const tips = yield client.tips();
 	        const message = {
-	            parent1MessageId: tips.tip1MessageId,
-	            parent2MessageId: tips.tip2MessageId,
 	            payload: indexationPayload
 	        };
 	        const messageId = yield client.messageSubmit(message);
@@ -1467,8 +1479,9 @@
 	    return __awaiter(this, void 0, void 0, function* () {
 	        guards.validateModeKey(mode, sideKey);
 	        const messageAddress = decodeAddress(root, mode);
+	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.asciiToBytes(messageAddress)));
 	        try {
-	            const messagesResponse = yield client.messagesFind(messageAddress);
+	            const messagesResponse = yield client.messagesFind(hashedAddress);
 	            const messages = [];
 	            for (const messageId of messagesResponse.messageIds) {
 	                try {
@@ -1536,13 +1549,14 @@
 	 * throws exception if transactions found on address are invalid.
 	 */
 	function decodeMessages(messages, root, sideKey) {
+	    var _a;
 	    return __awaiter(this, void 0, void 0, function* () {
 	        if (!messages || messages.length === 0) {
 	            return;
 	        }
 	        for (const message of messages) {
 	            // We only use indexation payload for storing mam messages
-	            if (message.payload && message.payload.type === 2) {
+	            if (((_a = message.payload) === null || _a === void 0 ? void 0 : _a.type) === iota_js_1__default['default'].INDEXATION_PAYLOAD_TYPE && message.payload.data) {
 	                const data = iota_js_1__default['default'].Converter.hexToBytes(message.payload.data);
 	                // We have a minimum size for the message payload
 	                if (data.length > 100) {
@@ -1556,7 +1570,7 @@
 	                        const parsed = parser.parseMessage(msg, root, sideKey);
 	                        return Object.assign(Object.assign({ root }, parsed), { tag });
 	                    }
-	                    catch (_a) { }
+	                    catch (_b) { }
 	                }
 	            }
 	        }

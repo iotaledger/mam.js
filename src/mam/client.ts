@@ -1,4 +1,4 @@
-import { IClient, IIndexationPayload, IMessage, IMessagesResponse, Converter } from "@iota/iota.js";
+import { IClient, IIndexationPayload, IMessage, IMessagesResponse, Converter, Blake2b, INDEXATION_PAYLOAD_TYPE } from "@iota/iota.js";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
@@ -35,17 +35,15 @@ export async function mamAttach(
     }
     data.set(Converter.asciiToBytes(mamMessage.payload), 1 + tagLength);
 
+    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.asciiToBytes(mamMessage.address)));
+
     const indexationPayload: IIndexationPayload = {
         type: 2,
-        index: mamMessage.address,
+        index: hashedAddress,
         data: Converter.bytesToHex(data)
     };
 
-    const tips = await client.tips();
-
     const message: IMessage = {
-        parent1MessageId: tips.tip1MessageId,
-        parent2MessageId: tips.tip2MessageId,
         payload: indexationPayload
     };
 
@@ -75,8 +73,10 @@ export async function mamFetch(
 
     const messageAddress = decodeAddress(root, mode);
 
+    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.asciiToBytes(messageAddress)));
+
     try {
-        const messagesResponse: IMessagesResponse = await client.messagesFind(messageAddress);
+        const messagesResponse: IMessagesResponse = await client.messagesFind(hashedAddress);
 
         const messages: IMessage[] = [];
 
@@ -160,7 +160,7 @@ export async function decodeMessages(
 
     for (const message of messages) {
         // We only use indexation payload for storing mam messages
-        if (message.payload && message.payload.type === 2) {
+        if (message.payload?.type === INDEXATION_PAYLOAD_TYPE && message.payload.data) {
             const data = Converter.hexToBytes(message.payload.data);
 
             // We have a minimum size for the message payload
@@ -179,7 +179,7 @@ export async function decodeMessages(
                         ...parsed,
                         tag
                     };
-                } catch {}
+                } catch { }
             }
         }
     }

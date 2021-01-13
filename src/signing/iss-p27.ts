@@ -153,15 +153,29 @@ export function signature(hashTrits: Int8Array, key: Int8Array): Int8Array {
  * @internal
  */
 export function checksumSecurity(hash: Int8Array): number {
-    if (hash.slice(0, Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
+    const dataSum1 = hash.slice(0, Curl.HASH_LENGTH / 3);
+    let sum1 = 0;
+    for (let i = 0; i < dataSum1.length; i++) {
+        sum1 += dataSum1[i];
+    }
+    if (sum1 === 0) {
         return 1;
     }
 
-    if (hash.slice(0, 2 * Curl.HASH_LENGTH / 3).reduce((a, b) => a + b, 0) === 0) {
+    const dataSum2 = hash.slice(0, 2 * Curl.HASH_LENGTH / 3);
+    let sum2 = 0;
+    for (let i = 0; i < dataSum2.length; i++) {
+        sum2 += dataSum2[i];
+    }
+    if (sum2 === 0) {
         return 2;
     }
 
-    return hash.reduce((a, b) => a + b, 0) === 0 ? 3 : 0;
+    let sum3 = 0;
+    for (let i = 0; i < hash.length; i++) {
+        sum3 += hash[i];
+    }
+    return sum3 === 0 ? 3 : 0;
 }
 
 /**
