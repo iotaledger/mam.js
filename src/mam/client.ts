@@ -31,11 +31,11 @@ export async function mamAttach(
     const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
     data[0] = tagLength;
     if (tag) {
-        data.set(Converter.asciiToBytes(tag), 1);
+        data.set(Converter.utf8ToBytes(tag), 1);
     }
-    data.set(Converter.asciiToBytes(mamMessage.payload), 1 + tagLength);
+    data.set(Converter.utf8ToBytes(mamMessage.payload), 1 + tagLength);
 
-    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.asciiToBytes(mamMessage.address)));
+    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.utf8ToBytes(mamMessage.address)));
 
     const indexationPayload: IIndexationPayload = {
         type: 2,
@@ -73,7 +73,7 @@ export async function mamFetch(
 
     const messageAddress = decodeAddress(root, mode);
 
-    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.asciiToBytes(messageAddress)));
+    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.utf8ToBytes(messageAddress)));
 
     try {
         const messagesResponse: IMessagesResponse = await client.messagesFind(hashedAddress);
@@ -169,8 +169,8 @@ export async function decodeMessages(
                 if (tagLength === 0 || tagLength > 27) {
                     return;
                 }
-                const tag = Converter.bytesToAscii(data.slice(1, 1 + tagLength));
-                const msg = Converter.bytesToAscii(data.slice(1 + tagLength));
+                const tag = Converter.bytesToUtf8(data.slice(1, 1 + tagLength));
+                const msg = Converter.bytesToUtf8(data.slice(1 + tagLength));
 
                 try {
                     const parsed = parseMessage(msg, root, sideKey);

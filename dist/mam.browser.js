@@ -1446,10 +1446,10 @@
 	        const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
 	        data[0] = tagLength;
 	        if (tag) {
-	            data.set(iota_js_1__default['default'].Converter.asciiToBytes(tag), 1);
+	            data.set(iota_js_1__default['default'].Converter.utf8ToBytes(tag), 1);
 	        }
-	        data.set(iota_js_1__default['default'].Converter.asciiToBytes(mamMessage.payload), 1 + tagLength);
-	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.asciiToBytes(mamMessage.address)));
+	        data.set(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.payload), 1 + tagLength);
+	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.address)));
 	        const indexationPayload = {
 	            type: 2,
 	            index: hashedAddress,
@@ -1479,7 +1479,7 @@
 	    return __awaiter(this, void 0, void 0, function* () {
 	        guards.validateModeKey(mode, sideKey);
 	        const messageAddress = decodeAddress(root, mode);
-	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.asciiToBytes(messageAddress)));
+	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(messageAddress)));
 	        try {
 	            const messagesResponse = yield client.messagesFind(hashedAddress);
 	            const messages = [];
@@ -1564,8 +1564,8 @@
 	                    if (tagLength === 0 || tagLength > 27) {
 	                        return;
 	                    }
-	                    const tag = iota_js_1__default['default'].Converter.bytesToAscii(data.slice(1, 1 + tagLength));
-	                    const msg = iota_js_1__default['default'].Converter.bytesToAscii(data.slice(1 + tagLength));
+	                    const tag = iota_js_1__default['default'].Converter.bytesToUtf8(data.slice(1, 1 + tagLength));
+	                    const msg = iota_js_1__default['default'].Converter.bytesToUtf8(data.slice(1 + tagLength));
 	                    try {
 	                        const parsed = parser.parseMessage(msg, root, sideKey);
 	                        return Object.assign(Object.assign({ root }, parsed), { tag });
