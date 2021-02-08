@@ -1,9 +1,6 @@
 {
-    "mainNetNodes": [
-        MAIN-NET-NODES
-    ],
-    "devNetNodes": [
-        DEV-NET-NODES
+    "chrysalisNodes": [
+        CHRYSALIS-NODES
     ],
     "allowedDomains": [
         "ALLOWED-DOMAIN"

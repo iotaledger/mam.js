@@ -98,12 +98,9 @@ export async function executeRoute(
         }
 
         if (route.func) {
-            let modulePath;
-            if (route.folder) {
-                modulePath = path.join(__dirname, "..", "routes", route.folder, route.func);
-            } else {
-                modulePath = path.join(__dirname, "..", "routes", route.func);
-            }
+            const modulePath = route.folder
+                ? path.join(__dirname, "..", "routes", route.folder, route.func)
+                : path.join(__dirname, "..", "routes", route.func);
             let mod;
             try {
                 // eslint-disable-next-line @typescript-eslint/no-require-imports

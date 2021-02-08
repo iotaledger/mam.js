@@ -3,7 +3,7 @@
  */
 export interface IConfiguration {
     /**
-     * The providers to use for IOTA communication on mainnet.
+     * The providers to use for IOTA communication.
      */
     nodes: {
         [network: string]: string;

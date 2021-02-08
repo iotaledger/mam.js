@@ -48,7 +48,7 @@ async function run(asciiMessage) {
 
     // So far we have shown how to create and parse a message
     // but now we actually want to attach the message to the tangle
-    const client = new SingleNodeClient("http://localhost:14265");
+    const client = new SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
     const explorerRoot = "https://explorer.iota.org/chrysalis";
 
     // Attach the message.

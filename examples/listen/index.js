@@ -3,7 +3,7 @@ const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota
 const fs = require('fs');
 
 async function run(root, mode, sideKey, interval) {
-    const client = new SingleNodeClient("http://localhost:14265");
+    const client = new SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
 
     setInterval(async () => {
         console.log('Fetching from tangle, please wait...');

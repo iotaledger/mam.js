@@ -14,22 +14,9 @@ import { ValidationHelper } from "../../utils/validationHelper";
 export async function publish(config: IConfiguration, request: IPublishRequest): Promise<IPublishResponse> {
     ValidationHelper.string("provider", request.provider);
 
-    if (request.provider !== "devnet" &&
-        request.provider !== "mainnet" &&
+    if (request.provider !== "chrysalis" &&
         !request.provider.startsWith("http")) {
-        throw new Error("The provider must be either mainnet, devnet or the url for a node starting http/https.");
-    }
-
-    if (request.provider.startsWith("http")) {
-        if (request.depth === undefined || request.depth === null) {
-            throw new Error("The depth must be provided if you are using a url for provider.");
-        }
-        ValidationHelper.number("depth", request.depth);
-
-        if (request.mwm === undefined || request.mwm === null) {
-            throw new Error("The mwm must be provided if you are using a url for provider.");
-        }
-        ValidationHelper.number("mwm", request.mwm);
+        throw new Error("The provider must be either chrysalis or the url for a node starting http/https.");
     }
 
     ValidationHelper.oneOf("mode", request.mode, ["public", "private", "restricted"]);

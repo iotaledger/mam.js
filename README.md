@@ -43,7 +43,7 @@ const mamMessage = createMessage(channelState, 'MY9MESSAGE');
 const decodedMessage = parseMessage(mamMessage.payload, mamMessage.root, sideKey);
 
 // If we want to attach the message to the tangle we first compose the API
-const client = SingleNodeClient("https://altnodes.devnet.iota.org:443");
+const client = SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
 // And then attach the message, tagging it if required.
 // Attaching will return the actual transactions attached to the tangle if you need them.
 await mamAttach(api, mamMessage, "MY9MAM");
@@ -70,7 +70,7 @@ const fetched = await mamFetchCombined(api, channels);
 
 ## API Reference
 
-See the API reference for the Javascript implementation [here](./docs/api.md).
+See the API reference for the JavaScript implementation [here](./docs/README.md).
 
 ## Examples
 
@@ -78,4 +78,4 @@ To see the MAMv0 in action demonstration code using this library can be found in
 
 ## License
 
-MIT License - Copyright (c) 2020 IOTA Stiftung
+Apache License Version 2.0 - Copyright (c) 2021 IOTA Stiftung

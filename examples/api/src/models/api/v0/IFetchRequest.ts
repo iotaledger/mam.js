@@ -2,7 +2,7 @@ export interface IFetchRequest {
     /**
      * What provider are we using to publish.
      */
-    provider: string | "mainnet" | "devnet";
+    provider: string | "chrysalis";
 
     /**
      * The mode for publishing the message.

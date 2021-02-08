@@ -48,13 +48,13 @@ async function run(payload) {
 
     // So far we have shown how to create and parse a message
     // but now we actually want to attach the message to the tangle
-    const client = new SingleNodeClient("http://localhost:14265");
+    const client = new SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
 
     // Attach the message.
     console.log('Attaching to tangle, please wait...')
     const { messageId } = await mamAttach(client, mamMessage, "MY9MAM");
     console.log(`Message Id`, messageId);
-    console.log(`You can view the mam channel here https://explorer.iota.org/devnet/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
+    console.log(`You can view the mam channel here https://explorer.iota.org/chrysalis/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
 
     // Try fetching it as well.
     console.log('Fetching from tangle, please wait...');

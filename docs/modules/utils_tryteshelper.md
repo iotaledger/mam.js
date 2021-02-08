@@ -1,0 +1,9 @@
+[@iota/mam-chrysalis.js](../README.md) / utils/trytesHelper
+
+# Module: utils/trytesHelper
+
+## Table of contents
+
+### Classes
+
+- [TrytesHelper](../classes/utils_tryteshelper.tryteshelper.md)

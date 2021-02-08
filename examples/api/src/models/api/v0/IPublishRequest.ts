@@ -2,17 +2,7 @@ export interface IPublishRequest {
     /**
      * What provider are we using to publish.
      */
-    provider: string | "mainnet" | "devnet";
-
-    /**
-     * What depth are we using for attaching.
-     */
-    depth?: number;
-
-    /**
-     * What mwm are we using for attaching.
-     */
-    mwm?: number;
+    provider: string | "chrysalis";
 
     /**
      * The mode for publishing the message.
