@@ -94,4 +94,19 @@ describe("The trytestHelper", () => {
         expect(TrytesHelper.objectFromTrytes("GAODKCGAPCKCGADBVAWAXAQAKCGAQCKCGADBHDFDIDTCQDGA"))
             .toEqual("{\"a\":123,\"b\":true}");
     });
+
+    test("packTrytes can pack and unpack trytes", () => {
+        const packed = TrytesHelper.packTrytes("MY9MAM");
+        const unpacked = TrytesHelper.unpackTrytes(packed);
+        expect(unpacked).toEqual("MY9MAM");
+    });
+
+    test("packTrytes can pack and unpack trytes of different length", () => {
+        for (let i = 0; i < TrytesHelper.ALPHABET.length; i++) {
+            const trytes = TrytesHelper.ALPHABET.slice(0, i);
+            const packed = TrytesHelper.packTrytes(trytes);
+            const unpacked = TrytesHelper.unpackTrytes(packed);
+            expect(unpacked).toEqual(trytes);
+        }
+    });
 });

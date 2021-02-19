@@ -241,7 +241,12 @@
 	                .toString(2)
 	                .padStart(5, "0"));
 	        }
-	        return iota_js_1__default['default'].Converter.binaryToBytes(trytesBits.join(""));
+	        let allBits = trytesBits.join("");
+	        const remainder = allBits.length % 8;
+	        if (remainder > 0) {
+	            allBits += "1".repeat(8 - remainder);
+	        }
+	        return iota_js_1__default['default'].Converter.binaryToBytes(allBits);
 	    }
 	    /**
 	     * Unpack bytes into trytes
@@ -252,7 +257,11 @@
 	        const allBits = iota_js_1__default['default'].Converter.bytesToBinary(packed);
 	        const trytes = [];
 	        for (let i = 0; i < allBits.length; i += 5) {
-	            trytes.push(TrytesHelper.ALPHABET[Number.parseInt(allBits.slice(i, i + 5), 2)]);
+	            const charBits = allBits.slice(i, i + 5);
+	            if (charBits.length < 5 || charBits === "111111") {
+	                break;
+	            }
+	            trytes.push(TrytesHelper.ALPHABET[Number.parseInt(charBits, 2)]);
 	        }
 	        return trytes.join("");
 	    }

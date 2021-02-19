@@ -252,7 +252,14 @@ export class TrytesHelper {
             );
         }
 
-        return Converter.binaryToBytes(trytesBits.join(""));
+        let allBits = trytesBits.join("");
+        const remainder = allBits.length % 8;
+
+        if (remainder > 0) {
+            allBits += "1".repeat(8 - remainder);
+        }
+
+        return Converter.binaryToBytes(allBits);
     }
 
     /**
@@ -265,7 +272,11 @@ export class TrytesHelper {
 
         const trytes: string[] = [];
         for (let i = 0; i < allBits.length; i += 5) {
-            trytes.push(TrytesHelper.ALPHABET[Number.parseInt(allBits.slice(i, i + 5), 2)]);
+            const charBits = allBits.slice(i, i + 5);
+            if (charBits.length < 5 || charBits === "111111") {
+                break;
+            }
+            trytes.push(TrytesHelper.ALPHABET[Number.parseInt(charBits, 2)]);
         }
 
         return trytes.join("");
