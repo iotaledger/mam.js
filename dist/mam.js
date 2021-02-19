@@ -65,6 +65,7 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.TrytesHelper = void 0;
 
+
 	/**
 	 * Helper functions for use with trytes.
 	 */
@@ -225,6 +226,35 @@
 	        }
 	        const ascii = TrytesHelper.toAscii(trimmed);
 	        return textHelper.TextHelper.decodeNonASCII(ascii);
+	    }
+	    /**
+	     * Pack trytes into bytes
+	     * @param trytes The trytes to pack.
+	     * @returns The packed trytes.
+	     */
+	    static packTrytes(trytes) {
+	        const trytesBits = [];
+	        for (const tryte of trytes) {
+	            trytesBits.push(TrytesHelper
+	                .ALPHABET
+	                .indexOf(tryte)
+	                .toString(2)
+	                .padStart(5, "0"));
+	        }
+	        return iota_js_1__default['default'].Converter.binaryToBytes(trytesBits.join(""));
+	    }
+	    /**
+	     * Unpack bytes into trytes
+	     * @param packed The packed trytes to unpack.
+	     * @returns The unpacked trytes.
+	     */
+	    static unpackTrytes(packed) {
+	        const allBits = iota_js_1__default['default'].Converter.bytesToBinary(packed);
+	        const trytes = [];
+	        for (let i = 0; i < allBits.length; i += 5) {
+	            trytes.push(TrytesHelper.ALPHABET[Number.parseInt(allBits.slice(i, i + 5), 2)]);
+	        }
+	        return trytes.join("");
 	    }
 	}
 	exports.TrytesHelper = TrytesHelper;
@@ -1437,12 +1467,15 @@
 	        if (tagLength > 27) {
 	            throw new Error("The tag length is too long");
 	        }
-	        const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
-	        data[0] = tagLength;
-	        if (tag) {
-	            data.set(iota_js_1__default['default'].Converter.utf8ToBytes(tag), 1);
+	        const packedTag = tag ? trytesHelper.TrytesHelper.packTrytes(tag) : undefined;
+	        const packedTaglength = packedTag ? packedTag.length : 0;
+	        const packedData = trytesHelper.TrytesHelper.packTrytes(mamMessage.payload);
+	        const data = new Uint8Array(1 + packedTaglength + packedData.length);
+	        data[0] = packedTaglength;
+	        if (packedTag) {
+	            data.set(packedTag, 1);
 	        }
-	        data.set(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.payload), 1 + tagLength);
+	        data.set(packedData, 1 + packedTaglength);
 	        const hashedAddress = iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.address));
 	        const indexationPayload = {
 	            type: iota_js_1__default['default'].INDEXATION_PAYLOAD_TYPE,
@@ -1553,17 +1586,16 @@
 	        for (const message of messages) {
 	            // We only use indexation payload for storing mam messages
 	            if (((_a = message.payload) === null || _a === void 0 ? void 0 : _a.type) === iota_js_1__default['default'].INDEXATION_PAYLOAD_TYPE && message.payload.data) {
-	                const data = iota_js_1__default['default'].Converter.hexToBytes(message.payload.data);
+	                const payloadBytes = iota_js_1__default['default'].Converter.hexToBytes(message.payload.data);
 	                // We have a minimum size for the message payload
-	                if (data.length > 100) {
-	                    const tagLength = data[0];
-	                    if (tagLength === 0 || tagLength > 27) {
-	                        return;
-	                    }
-	                    const tag = iota_js_1__default['default'].Converter.bytesToUtf8(data.slice(1, 1 + tagLength));
-	                    const msg = iota_js_1__default['default'].Converter.bytesToUtf8(data.slice(1 + tagLength));
+	                if (payloadBytes.length > 100) {
+	                    const packedTagLength = payloadBytes[0];
+	                    const packedTag = packedTagLength > 0 ? payloadBytes.slice(1, 1 + packedTagLength) : undefined;
+	                    const packedData = payloadBytes.slice(1 + packedTagLength);
+	                    const tag = packedTag ? trytesHelper.TrytesHelper.unpackTrytes(packedTag) : "";
+	                    const data = trytesHelper.TrytesHelper.unpackTrytes(packedData);
 	                    try {
-	                        const parsed = parser.parseMessage(msg, root, sideKey);
+	                        const parsed = parser.parseMessage(data, root, sideKey);
 	                        return Object.assign(Object.assign({ root }, parsed), { tag });
 	                    }
 	                    catch (_b) { }

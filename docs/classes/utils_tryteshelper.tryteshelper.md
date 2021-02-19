@@ -25,11 +25,13 @@ Helper functions for use with trytes.
 - [isTrytes](utils_tryteshelper.tryteshelper.md#istrytes)
 - [objectFromTrytes](utils_tryteshelper.tryteshelper.md#objectfromtrytes)
 - [objectToTrytes](utils_tryteshelper.tryteshelper.md#objecttotrytes)
+- [packTrytes](utils_tryteshelper.tryteshelper.md#packtrytes)
 - [stringFromTrytes](utils_tryteshelper.tryteshelper.md#stringfromtrytes)
 - [stringToTrytes](utils_tryteshelper.tryteshelper.md#stringtotrytes)
 - [toAscii](utils_tryteshelper.tryteshelper.md#toascii)
 - [toTrits](utils_tryteshelper.tryteshelper.md#totrits)
 - [tritsValue](utils_tryteshelper.tryteshelper.md#tritsvalue)
+- [unpackTrytes](utils_tryteshelper.tryteshelper.md#unpacktrytes)
 
 ## Constructors
 
@@ -181,6 +183,24 @@ The encoded trytes value.
 
 ___
 
+### packTrytes
+
+▸ `Static`**packTrytes**(`trytes`: *string*): *Uint8Array*
+
+Pack trytes into bytes
+
+#### Parameters:
+
+Name | Type | Description |
+:------ | :------ | :------ |
+`trytes` | *string* | The trytes to pack.   |
+
+**Returns:** *Uint8Array*
+
+The packed trytes.
+
+___
+
 ### stringFromTrytes
 
 ▸ `Static`**stringFromTrytes**(`trytes`: *string*): *undefined* \| *string*
@@ -268,3 +288,21 @@ Name | Type | Description |
 **Returns:** *number*
 
 The trits converted to number.
+
+___
+
+### unpackTrytes
+
+▸ `Static`**unpackTrytes**(`packed`: *Uint8Array*): *string*
+
+Unpack bytes into trytes
+
+#### Parameters:
+
+Name | Type | Description |
+:------ | :------ | :------ |
+`packed` | *Uint8Array* | The packed trytes to unpack.   |
+
+**Returns:** *string*
+
+The unpacked trytes.

@@ -1,3 +1,4 @@
+import { Converter } from "@iota/iota.js";
 import { TextHelper } from "./textHelper";
 
 /**
@@ -232,5 +233,41 @@ export class TrytesHelper {
         const ascii = TrytesHelper.toAscii(trimmed);
 
         return TextHelper.decodeNonASCII(ascii);
+    }
+
+    /**
+     * Pack trytes into bytes
+     * @param trytes The trytes to pack.
+     * @returns The packed trytes.
+     */
+    public static packTrytes(trytes: string): Uint8Array {
+        const trytesBits: string[] = [];
+
+        for (const tryte of trytes) {
+            trytesBits.push(TrytesHelper
+                .ALPHABET
+                .indexOf(tryte)
+                .toString(2)
+                .padStart(5, "0")
+            );
+        }
+
+        return Converter.binaryToBytes(trytesBits.join(""));
+    }
+
+    /**
+     * Unpack bytes into trytes
+     * @param packed The packed trytes to unpack.
+     * @returns The unpacked trytes.
+     */
+    public static unpackTrytes(packed: Uint8Array): string {
+        const allBits = Converter.bytesToBinary(packed);
+
+        const trytes: string[] = [];
+        for (let i = 0; i < allBits.length; i += 5) {
+            trytes.push(TrytesHelper.ALPHABET[Number.parseInt(allBits.slice(i, i + 5), 2)]);
+        }
+
+        return trytes.join("");
     }
 }

@@ -28,12 +28,17 @@ export async function mamAttach(
     if (tagLength > 27) {
         throw new Error("The tag length is too long");
     }
-    const data = new Uint8Array(1 + tagLength + mamMessage.payload.length);
-    data[0] = tagLength;
-    if (tag) {
-        data.set(Converter.utf8ToBytes(tag), 1);
+
+    const packedTag = tag ? TrytesHelper.packTrytes(tag) : undefined;
+    const packedTaglength = packedTag ? packedTag.length : 0;
+    const packedData = TrytesHelper.packTrytes(mamMessage.payload);
+
+    const data = new Uint8Array(1 + packedTaglength + packedData.length);
+    data[0] = packedTaglength;
+    if (packedTag) {
+        data.set(packedTag, 1);
     }
-    data.set(Converter.utf8ToBytes(mamMessage.payload), 1 + tagLength);
+    data.set(packedData, 1 + packedTaglength);
 
     const hashedAddress = Blake2b.sum256(Converter.utf8ToBytes(mamMessage.address));
 
@@ -163,19 +168,19 @@ export async function decodeMessages(
     for (const message of messages) {
         // We only use indexation payload for storing mam messages
         if (message.payload?.type === INDEXATION_PAYLOAD_TYPE && message.payload.data) {
-            const data = Converter.hexToBytes(message.payload.data);
+            const payloadBytes = Converter.hexToBytes(message.payload.data);
 
             // We have a minimum size for the message payload
-            if (data.length > 100) {
-                const tagLength = data[0];
-                if (tagLength === 0 || tagLength > 27) {
-                    return;
-                }
-                const tag = Converter.bytesToUtf8(data.slice(1, 1 + tagLength));
-                const msg = Converter.bytesToUtf8(data.slice(1 + tagLength));
+            if (payloadBytes.length > 100) {
+                const packedTagLength = payloadBytes[0];
+                const packedTag = packedTagLength > 0 ? payloadBytes.slice(1, 1 + packedTagLength) : undefined;
+                const packedData = payloadBytes.slice(1 + packedTagLength);
+
+                const tag = packedTag ? TrytesHelper.unpackTrytes(packedTag) : "";
+                const data = TrytesHelper.unpackTrytes(packedData);
 
                 try {
-                    const parsed = parseMessage(msg, root, sideKey);
+                    const parsed = parseMessage(data, root, sideKey);
                     return {
                         root,
                         ...parsed,

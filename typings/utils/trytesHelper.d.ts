@@ -78,4 +78,16 @@ export declare class TrytesHelper {
      * @returns The decoded string.
      */
     static stringFromTrytes(trytes: string): string | undefined;
+    /**
+     * Pack trytes into bytes
+     * @param trytes The trytes to pack.
+     * @returns The packed trytes.
+     */
+    static packTrytes(trytes: string): Uint8Array;
+    /**
+     * Unpack bytes into trytes
+     * @param packed The packed trytes to unpack.
+     * @returns The unpacked trytes.
+     */
+    static unpackTrytes(packed: Uint8Array): string;
 }
