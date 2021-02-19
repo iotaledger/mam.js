@@ -6,10 +6,6 @@
 
 Helper functions for use with text.
 
-## Hierarchy
-
-* **TextHelper**
-
 ## Table of contents
 
 ### Constructors
@@ -40,7 +36,7 @@ Decode escaped Non ASCII characters.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `value` | *undefined* \| *string* | The value to decode.   |
 
 **Returns:** *undefined* \| *string*
@@ -58,7 +54,7 @@ Encode Non ASCII characters to escaped characters.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `value` | *undefined* \| *string* | The value to encode.   |
 
 **Returns:** *undefined* \| *string*

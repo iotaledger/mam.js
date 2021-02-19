@@ -1,4 +1,3 @@
-import { SingleNodeClient } from "@iota/iota.js";
 import { mamFetch, TrytesHelper } from "@iota/mam-chrysalis.js";
 import { HttpError } from "../../errors/httpError";
 import { IFetchRequest } from "../../models/api/v0/IFetchRequest";
@@ -36,11 +35,9 @@ export async function fetch(config: IConfiguration, request: IFetchRequest): Pro
 
     ValidationHelper.oneOf("dataType", request.dataType, ["trytes", "text", "json"]);
 
-    const client = new SingleNodeClient(
-        request.provider.startsWith("http") ? request.provider : config.nodes[request.provider]
-    );
+    const node = request.provider.startsWith("http") ? request.provider : config.nodes[request.provider];
 
-    const response = await mamFetch(client, request.root, request.mode, request.key);
+    const response = await mamFetch(node, request.root, request.mode, request.key);
 
     if (response) {
         let data;

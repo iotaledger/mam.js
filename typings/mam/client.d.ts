@@ -4,12 +4,12 @@ import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
 /**
  * Attach the mam message to the tangle.
- * @param client The client to use for sending.
+ * @param client The client or node endpoint to use for sending.
  * @param mamMessage The message to attach.
  * @param tag Optional tag for the transactions.
  * @returns The transactions that were attached.
  */
-export declare function mamAttach(client: IClient, mamMessage: IMamMessage, tag?: string): Promise<{
+export declare function mamAttach(client: IClient | string, mamMessage: IMamMessage, tag?: string): Promise<{
     messageId: string;
     message: IMessage;
 }>;
@@ -22,7 +22,7 @@ export declare function mamAttach(client: IClient, mamMessage: IMamMessage, tag?
  * @returns The decoded message and the nextRoot if successful, undefined if no messages found,
  * throws exception if transactions found on address are invalid.
  */
-export declare function mamFetch(client: IClient, root: string, mode: MamMode, sideKey?: string): Promise<IMamFetchedMessage | undefined>;
+export declare function mamFetch(client: IClient | string, root: string, mode: MamMode, sideKey?: string): Promise<IMamFetchedMessage | undefined>;
 /**
  * Decodes the root to its associated address.
  * @param root The root to device.

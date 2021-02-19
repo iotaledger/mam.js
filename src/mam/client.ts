@@ -1,4 +1,4 @@
-import { IClient, IIndexationPayload, IMessage, IMessagesResponse, Converter, Blake2b, INDEXATION_PAYLOAD_TYPE } from "@iota/iota.js";
+import { Blake2b, Converter, IClient, IIndexationPayload, IMessage, IMessagesResponse, INDEXATION_PAYLOAD_TYPE, SingleNodeClient } from "@iota/iota.js";
 import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import { IMamMessage } from "../models/IMamMessage";
 import { MamMode } from "../models/mamMode";
@@ -9,13 +9,13 @@ import { parseMessage } from "./parser";
 
 /**
  * Attach the mam message to the tangle.
- * @param client The client to use for sending.
+ * @param client The client or node endpoint to use for sending.
  * @param mamMessage The message to attach.
  * @param tag Optional tag for the transactions.
  * @returns The transactions that were attached.
  */
 export async function mamAttach(
-    client: IClient,
+    client: IClient | string,
     mamMessage: IMamMessage,
     tag?: string): Promise<{
         messageId: string;
@@ -35,11 +35,11 @@ export async function mamAttach(
     }
     data.set(Converter.utf8ToBytes(mamMessage.payload), 1 + tagLength);
 
-    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.utf8ToBytes(mamMessage.address)));
+    const hashedAddress = Blake2b.sum256(Converter.utf8ToBytes(mamMessage.address));
 
     const indexationPayload: IIndexationPayload = {
-        type: 2,
-        index: hashedAddress,
+        type: INDEXATION_PAYLOAD_TYPE,
+        index: Converter.bytesToHex(hashedAddress),
         data: Converter.bytesToHex(data)
     };
 
@@ -47,7 +47,8 @@ export async function mamAttach(
         payload: indexationPayload
     };
 
-    const messageId = await client.messageSubmit(message);
+    const localClient = typeof client === "string" ? new SingleNodeClient(client) : client;
+    const messageId = await localClient.messageSubmit(message);
 
     return {
         message,
@@ -65,24 +66,25 @@ export async function mamAttach(
  * throws exception if transactions found on address are invalid.
  */
 export async function mamFetch(
-    client: IClient,
+    client: IClient | string,
     root: string,
     mode: MamMode,
     sideKey?: string): Promise<IMamFetchedMessage | undefined> {
     validateModeKey(mode, sideKey);
+    const localClient = typeof client === "string" ? new SingleNodeClient(client) : client;
 
     const messageAddress = decodeAddress(root, mode);
 
-    const hashedAddress = Converter.bytesToHex(Blake2b.sum256(Converter.utf8ToBytes(messageAddress)));
+    const hashedAddress = Blake2b.sum256(Converter.utf8ToBytes(messageAddress));
 
     try {
-        const messagesResponse: IMessagesResponse = await client.messagesFind(hashedAddress);
+        const messagesResponse: IMessagesResponse = await localClient.messagesFind(hashedAddress);
 
         const messages: IMessage[] = [];
 
         for (const messageId of messagesResponse.messageIds) {
             try {
-                const message = await client.message(messageId);
+                const message = await localClient.message(messageId);
                 messages.push(message);
             } catch { }
         }

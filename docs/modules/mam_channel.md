@@ -21,7 +21,7 @@ Get the root of the channel.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `channelState` | [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md) | The channel state to get the root.   |
 
 **Returns:** *string*
@@ -39,7 +39,7 @@ Create a new channel object.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `seed` | *string* | The seed for the channel.   |
 `security` | *number* | The security level for the channel.   |
 `mode` | MamMode | The mode for the channel.   |
@@ -60,7 +60,7 @@ Prepare a message on the mam channel.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `channelState` | [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md) | The channel to prepare the message for.   |
 `message` | *string* | The trytes to include in the message.   |
 

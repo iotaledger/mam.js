@@ -1423,7 +1423,7 @@
 
 	/**
 	 * Attach the mam message to the tangle.
-	 * @param client The client to use for sending.
+	 * @param client The client or node endpoint to use for sending.
 	 * @param mamMessage The message to attach.
 	 * @param tag Optional tag for the transactions.
 	 * @returns The transactions that were attached.
@@ -1443,16 +1443,17 @@
 	            data.set(iota_js_1__default['default'].Converter.utf8ToBytes(tag), 1);
 	        }
 	        data.set(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.payload), 1 + tagLength);
-	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.address)));
+	        const hashedAddress = iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(mamMessage.address));
 	        const indexationPayload = {
-	            type: 2,
-	            index: hashedAddress,
+	            type: iota_js_1__default['default'].INDEXATION_PAYLOAD_TYPE,
+	            index: iota_js_1__default['default'].Converter.bytesToHex(hashedAddress),
 	            data: iota_js_1__default['default'].Converter.bytesToHex(data)
 	        };
 	        const message = {
 	            payload: indexationPayload
 	        };
-	        const messageId = yield client.messageSubmit(message);
+	        const localClient = typeof client === "string" ? new iota_js_1__default['default'].SingleNodeClient(client) : client;
+	        const messageId = yield localClient.messageSubmit(message);
 	        return {
 	            message,
 	            messageId
@@ -1472,14 +1473,15 @@
 	function mamFetch(client, root, mode, sideKey) {
 	    return __awaiter(this, void 0, void 0, function* () {
 	        guards.validateModeKey(mode, sideKey);
+	        const localClient = typeof client === "string" ? new iota_js_1__default['default'].SingleNodeClient(client) : client;
 	        const messageAddress = decodeAddress(root, mode);
-	        const hashedAddress = iota_js_1__default['default'].Converter.bytesToHex(iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(messageAddress)));
+	        const hashedAddress = iota_js_1__default['default'].Blake2b.sum256(iota_js_1__default['default'].Converter.utf8ToBytes(messageAddress));
 	        try {
-	            const messagesResponse = yield client.messagesFind(hashedAddress);
+	            const messagesResponse = yield localClient.messagesFind(hashedAddress);
 	            const messages = [];
 	            for (const messageId of messagesResponse.messageIds) {
 	                try {
-	                    const message = yield client.message(messageId);
+	                    const message = yield localClient.message(messageId);
 	                    messages.push(message);
 	                }
 	                catch (_a) { }
@@ -1606,9 +1608,6 @@
 	    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.SingleNodeClient = void 0;
-
-	Object.defineProperty(exports, "SingleNodeClient", { enumerable: true, get: function () { return iota_js_1__default['default'].SingleNodeClient; } });
 	__exportStar(channel, exports);
 	__exportStar(client, exports);
 	__exportStar(parser, exports);

@@ -1,4 +1,3 @@
-import { SingleNodeClient } from "@iota/iota.js";
 import { createChannel, createMessage, mamAttach, TrytesHelper } from "@iota/mam-chrysalis.js";
 import { IPublishRequest } from "../../models/api/v0/IPublishRequest";
 import { IPublishResponse } from "../../models/api/v0/IPublishResponse";
@@ -48,9 +47,7 @@ export async function publish(config: IConfiguration, request: IPublishRequest):
         throw new Error("The tag field must only contain trytes.");
     }
 
-    const client = new SingleNodeClient(
-        request.provider.startsWith("http") ? request.provider : config.nodes[request.provider]
-    );
+    const node = request.provider.startsWith("http") ? request.provider : config.nodes[request.provider];
 
     const channelState = createChannel(request.seed, 2, request.mode, request.key);
 
@@ -69,7 +66,7 @@ export async function publish(config: IConfiguration, request: IPublishRequest):
 
     const mamMessage = createMessage(channelState, data);
 
-    await mamAttach(client, mamMessage, request.tag);
+    await mamAttach(node, mamMessage, request.tag);
 
     return {
         nextIndex: channelState.start,

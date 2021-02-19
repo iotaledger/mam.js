@@ -6,10 +6,6 @@
 
 Definition of a channel object.
 
-## Hierarchy
-
-* **IMamChannelState**
-
 ## Table of contents
 
 ### Properties

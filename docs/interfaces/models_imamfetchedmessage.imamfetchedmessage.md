@@ -6,10 +6,6 @@
 
 Definition of fetch messages.
 
-## Hierarchy
-
-* **IMamFetchedMessage**
-
 ## Table of contents
 
 ### Properties

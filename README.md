@@ -19,7 +19,6 @@ If you want to use this module in a browser `<script>` tag see the example Brows
 ## Example Usage
 
 ```js
-const { SingleNodeClient } = require('@iota/iota.js');
 const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam-chrysalis.js');
 
 // Setup the details for the channel.
@@ -43,21 +42,21 @@ const mamMessage = createMessage(channelState, 'MY9MESSAGE');
 const decodedMessage = parseMessage(mamMessage.payload, mamMessage.root, sideKey);
 
 // If we want to attach the message to the tangle we first compose the API
-const client = SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
+const node = "https://api.hornet-0.testnet.chrysalis2.com";
 // And then attach the message, tagging it if required.
 // Attaching will return the actual transactions attached to the tangle if you need them.
 await mamAttach(api, mamMessage, "MY9MAM");
 
 // We can also fetch a message given its root and channel details.
 // The fetched data will contain the nextRoot and the message.
-const fetched = await mamFetch(client, mamMessage.root, mode, sideKey)
+const fetched = await mamFetch(node, mamMessage.root, mode, sideKey)
 
 // If you want to fetch multiple messages from a channel
 // you need either its initial root (or start from another root).
 const channelState = createChannel(seed, 2, mode, sideKey);
 const initialRoot = channelRoot(channelState);
 const chunkSize = 4;
-const chunk = await mamFetchAll(client, initialRoot, mode, sideKey, chunkSize);
+const chunk = await mamFetchAll(node, initialRoot, mode, sideKey, chunkSize);
 
 // If you want to fetch the next message from a list of channels
 const channels = [

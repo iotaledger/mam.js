@@ -6,10 +6,6 @@
 
 Definition for MAM message.
 
-## Hierarchy
-
-* **IMamMessage**
-
 ## Table of contents
 
 ### Properties

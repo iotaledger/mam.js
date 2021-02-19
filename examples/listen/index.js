@@ -1,13 +1,12 @@
-const { SingleNodeClient } = require("@iota/iota.js");
 const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam-chrysalis.js');
 const fs = require('fs');
 
 async function run(root, mode, sideKey, interval) {
-    const client = new SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
+    const node = "https://api.hornet-0.testnet.chrysalis2.com";
 
     setInterval(async () => {
         console.log('Fetching from tangle, please wait...');
-        const fetched = await mamFetchAll(client, root, mode, sideKey);
+        const fetched = await mamFetchAll(node, root, mode, sideKey);
         if (fetched && fetched.length > 0) {
             for (let i = 0; i < fetched.length; i++) {
                 console.log('Fetched', TrytesHelper.toAscii(fetched[i].message));

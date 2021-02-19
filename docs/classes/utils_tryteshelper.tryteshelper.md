@@ -6,10 +6,6 @@
 
 Helper functions for use with trytes.
 
-## Hierarchy
-
-* **TrytesHelper**
-
 ## Table of contents
 
 ### Constructors
@@ -62,7 +58,7 @@ Convert a string value into trytes.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `value` | *string* | value to convert into trytes.   |
 
 **Returns:** *string*
@@ -80,7 +76,7 @@ Get trytes from trits array.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trits` | *Int8Array* | The trits to convert to trytes.   |
 
 **Returns:** *string*
@@ -98,7 +94,7 @@ Is the string trytes length 81.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trytes` | *string* | The trytes to test.   |
 
 **Returns:** *boolean*
@@ -116,7 +112,7 @@ Is the string trytes length 27.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trytes` | *string* | The trytes to test.   |
 
 **Returns:** *boolean*
@@ -134,7 +130,7 @@ Is the string trytes of any length.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trytes` | *string* | The trytes to test.   |
 
 **Returns:** *boolean*
@@ -152,13 +148,13 @@ Convert an object from Trytes.
 #### Type parameters:
 
 Name |
------- |
+:------ |
 `T` |
 
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trytes` | *string* | The trytes to decode.   |
 
 **Returns:** *undefined* \| T
@@ -176,7 +172,7 @@ Convert an object to Trytes.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `obj` | *unknown* | The obj to encode.   |
 
 **Returns:** *string*
@@ -194,7 +190,7 @@ Convert a string from Trytes.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trytes` | *string* | The trytes to decode.   |
 
 **Returns:** *undefined* \| *string*
@@ -212,7 +208,7 @@ Convert a string to Trytes.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `str` | *string* | The string to encode.   |
 
 **Returns:** *string*
@@ -230,7 +226,7 @@ Convert trytes into a string value.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trytes` | *string* | to convert into a string value.   |
 
 **Returns:** *string*
@@ -248,7 +244,7 @@ Create a trits array from trytes.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `value` | *string* | Trytes used to create trits.   |
 
 **Returns:** *Int8Array*
@@ -266,7 +262,7 @@ Convert trits to an integer.
 #### Parameters:
 
 Name | Type | Description |
------- | ------ | ------ |
+:------ | :------ | :------ |
 `trits` | *Int8Array* | The trits to convert.   |
 
 **Returns:** *number*
