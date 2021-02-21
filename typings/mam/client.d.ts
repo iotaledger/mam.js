@@ -15,7 +15,7 @@ export declare function mamAttach(client: IClient | string, mamMessage: IMamMess
 }>;
 /**
  * Fetch a mam message from a channel.
- * @param client The client to use for fetching.
+ * @param client The client or node endpoint to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
@@ -35,14 +35,14 @@ export declare function decodeAddress(root: string, mode: MamMode): string;
  * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
  * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
  * same amount of messages as your limit you should probably read again.
- * @param client The client to use for fetching.
+ * @param client The client or node endpoint to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
  * @param limit Limit the number of messages retrieved.
  * @returns The array of retrieved messages.
  */
-export declare function mamFetchAll(client: IClient, root: string, mode: MamMode, sideKey?: string, limit?: number): Promise<IMamFetchedMessage[]>;
+export declare function mamFetchAll(client: IClient | string, root: string, mode: MamMode, sideKey?: string, limit?: number): Promise<IMamFetchedMessage[]>;
 /**
  * Decode messages from an address to try and find a MAM message.
  * @param messages The objects returned from the fetch.

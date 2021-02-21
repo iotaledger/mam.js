@@ -84,7 +84,7 @@ Fetch a mam message from a channel.
 
 Name | Type | Description |
 :------ | :------ | :------ |
-`client` | IClient \| *string* | The client to use for fetching.   |
+`client` | IClient \| *string* | The client or node endpoint to use for fetching.   |
 `root` | *string* | The root within the mam channel to fetch the message.   |
 `mode` | MamMode | The mode to use for fetching.   |
 `sideKey?` | *string* | The sideKey if mode is restricted.   |
@@ -98,7 +98,7 @@ ___
 
 ### mamFetchAll
 
-▸ **mamFetchAll**(`client`: IClient, `root`: *string*, `mode`: MamMode, `sideKey?`: *string*, `limit?`: *number*): *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md)[]\>
+▸ **mamFetchAll**(`client`: IClient \| *string*, `root`: *string*, `mode`: MamMode, `sideKey?`: *string*, `limit?`: *number*): *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md)[]\>
 
 Fetch all the mam message from a channel.
 If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
@@ -109,7 +109,7 @@ same amount of messages as your limit you should probably read again.
 
 Name | Type | Description |
 :------ | :------ | :------ |
-`client` | IClient | The client to use for fetching.   |
+`client` | IClient \| *string* | The client or node endpoint to use for fetching.   |
 `root` | *string* | The root within the mam channel to fetch the message.   |
 `mode` | MamMode | The mode to use for fetching.   |
 `sideKey?` | *string* | The sideKey if mode is restricted.   |

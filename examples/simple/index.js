@@ -1,3 +1,4 @@
+const { SingleNodeClient } = require("@iota/iota.js")
 const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam-chrysalis.js');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -52,7 +53,7 @@ async function run(asciiMessage) {
 
     // Attach the message.
     console.log('Attaching to tangle, please wait...')
-    const { messageId } = await mamAttach(node, mamMessage, "MY9MAM");
+    const { messageId } = await mamAttach(new SingleNodeClient(node), mamMessage, "MY9MAM");
     console.log(`Message Id`, messageId);
     console.log(`You can view the stored message here ${explorerRoot}/message/${messageId}`);
     console.log(`You can view the mam channel here ${explorerRoot}/streams/0/${mamMessage.root}/${mode}/${sideKey}`);

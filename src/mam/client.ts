@@ -63,7 +63,7 @@ export async function mamAttach(
 
 /**
  * Fetch a mam message from a channel.
- * @param client The client to use for fetching.
+ * @param client The client or node endpoint to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
@@ -115,7 +115,7 @@ export function decodeAddress(root: string, mode: MamMode): string {
  * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
  * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
  * same amount of messages as your limit you should probably read again.
- * @param client The client to use for fetching.
+ * @param client The client or node endpoint to use for fetching.
  * @param root The root within the mam channel to fetch the message.
  * @param mode The mode to use for fetching.
  * @param sideKey The sideKey if mode is restricted.
@@ -123,11 +123,12 @@ export function decodeAddress(root: string, mode: MamMode): string {
  * @returns The array of retrieved messages.
  */
 export async function mamFetchAll(
-    client: IClient,
+    client: IClient | string,
     root: string,
     mode: MamMode,
     sideKey?: string,
     limit?: number): Promise<IMamFetchedMessage[]> {
+    const localClient = typeof client === "string" ? new SingleNodeClient(client) : client;
     validateModeKey(mode, sideKey);
 
     const localLimit = limit === undefined ? Number.MAX_VALUE : limit;
@@ -136,7 +137,7 @@ export async function mamFetchAll(
     let fetchRoot: string | undefined = root;
 
     do {
-        const fetched: IMamFetchedMessage | undefined = await mamFetch(client, fetchRoot, mode, sideKey);
+        const fetched: IMamFetchedMessage | undefined = await mamFetch(localClient, fetchRoot, mode, sideKey);
         if (fetched) {
             messages.push(fetched);
             fetchRoot = fetched.nextRoot;

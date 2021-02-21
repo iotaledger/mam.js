@@ -1505,7 +1505,7 @@
 	exports.mamAttach = mamAttach;
 	/**
 	 * Fetch a mam message from a channel.
-	 * @param client The client to use for fetching.
+	 * @param client The client or node endpoint to use for fetching.
 	 * @param root The root within the mam channel to fetch the message.
 	 * @param mode The mode to use for fetching.
 	 * @param sideKey The sideKey if mode is restricted.
@@ -1551,7 +1551,7 @@
 	 * If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
 	 * It is preferable to specify the limit so you read the data in chunks, then if you read and get the
 	 * same amount of messages as your limit you should probably read again.
-	 * @param client The client to use for fetching.
+	 * @param client The client or node endpoint to use for fetching.
 	 * @param root The root within the mam channel to fetch the message.
 	 * @param mode The mode to use for fetching.
 	 * @param sideKey The sideKey if mode is restricted.
@@ -1560,12 +1560,13 @@
 	 */
 	function mamFetchAll(client, root, mode, sideKey, limit) {
 	    return __awaiter(this, void 0, void 0, function* () {
+	        const localClient = typeof client === "string" ? new iota_js_1__default['default'].SingleNodeClient(client) : client;
 	        guards.validateModeKey(mode, sideKey);
 	        const localLimit = limit === undefined ? Number.MAX_VALUE : limit;
 	        const messages = [];
 	        let fetchRoot = root;
 	        do {
-	            const fetched = yield mamFetch(client, fetchRoot, mode, sideKey);
+	            const fetched = yield mamFetch(localClient, fetchRoot, mode, sideKey);
 	            if (fetched) {
 	                messages.push(fetched);
 	                fetchRoot = fetched.nextRoot;
