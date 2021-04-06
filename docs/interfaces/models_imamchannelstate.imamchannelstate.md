@@ -56,7 +56,7 @@ ___
 
 ### nextRoot
 
-• `Optional` **nextRoot**: *undefined* \| *string*
+• `Optional` **nextRoot**: *string*
 
 The next root for the channel.
 
@@ -80,7 +80,7 @@ ___
 
 ### sideKey
 
-• `Optional` **sideKey**: *undefined* \| *string*
+• `Optional` **sideKey**: *string*
 
 Side key used for restricted mode.
 
