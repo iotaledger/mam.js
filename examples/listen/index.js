@@ -1,8 +1,8 @@
-const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam-chrysalis.js');
+const { createChannel, channelRoot, mamFetchAll, TrytesHelper } = require('@iota/mam.js');
 const fs = require('fs');
 
 async function run(root, mode, sideKey, interval) {
-    const node = "https://api.hornet-0.testnet.chrysalis2.com";
+    const node = "https://chrysalis-nodes.iota.org";
 
     setInterval(async () => {
         console.log('Fetching from tangle, please wait...');

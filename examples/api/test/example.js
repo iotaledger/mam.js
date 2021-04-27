@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const API_ENDPOINT = 'https://mam-api.dag.sh';
 const SEED = 'AAAAAAAAB'.repeat(9) // 81 Trytes;
 
-const provider = "chrysalis";
+const provider = "mainnet";
 const mode = "restricted";
 const key = "ABCDEFG9ABCDEFG";
 

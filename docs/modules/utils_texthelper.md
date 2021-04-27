@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / utils/textHelper
+[@iota/mam.js](../README.md) / utils/textHelper
 
 # Module: utils/textHelper
 

@@ -1,6 +1,6 @@
-@iota/mam-chrysalis.js
+@iota/mam.js
 
-# @iota/mam-chrysalis.js
+# @iota/mam.js
 
 ## Table of contents
 

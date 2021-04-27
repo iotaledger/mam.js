@@ -1,5 +1,5 @@
 const { SingleNodeClient } = require("@iota/iota.js")
-const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam-chrysalis.js');
+const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam.js');
 const crypto = require('crypto');
 const fs = require('fs');
 
@@ -48,8 +48,8 @@ async function run(asciiMessage) {
 
     // So far we have shown how to create and parse a message
     // but now we actually want to attach the message to the tangle
-    const node = "https://api.hornet-0.testnet.chrysalis2.com";
-    const explorerRoot = "https://explorer.iota.org/chrysalis";
+    const node = "https://chrysalis-nodes.iota.org";
+    const explorerRoot = "https://explorer.iota.org/mainnet";
 
     // Attach the message.
     console.log('Attaching to tangle, please wait...')

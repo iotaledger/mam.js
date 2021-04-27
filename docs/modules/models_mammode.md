@@ -1,3 +1,3 @@
-[@iota/mam-chrysalis.js](../README.md) / models/mamMode
+[@iota/mam.js](../README.md) / models/mamMode
 
 # Module: models/mamMode

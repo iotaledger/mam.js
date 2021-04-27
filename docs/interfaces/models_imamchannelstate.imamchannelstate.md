@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / [models/IMamChannelState](../modules/models_imamchannelstate.md) / IMamChannelState
+[@iota/mam.js](../README.md) / [models/IMamChannelState](../modules/models_imamchannelstate.md) / IMamChannelState
 
 # Interface: IMamChannelState
 

@@ -1,20 +1,20 @@
-### Chrysalis Public
+### Mainnet Public
 GET http://localhost:4000/v0/fetch HTTP/1.1
 content-type: application/json
 
 {
-    "provider": "chrysalis",
+    "provider": "mainnet",
     "mode": "public",
     "root": "GOF9GMUIOXHOWFLDWXLHNYUUVTAATXUM9XETNATRDCCOJUD9BUISAZSHUCIWIOKXFHYQXORUNSPALUMIF",
     "dataType": "trytes"
 }
 
-### Chrysalis Private
+### Mainnet Private
 GET http://localhost:4000/v0/fetch HTTP/1.1
 content-type: application/json
 
 {
-    "provider": "chrysalis",
+    "provider": "mainnet",
     "mode": "private",
     "root": "PUGCDPTVRLGCIEMYYNOR9PZ9HBFIPDUJCACKSHNIOGMDXRMYITKGGCR9GJCXOVDIWNUUVXKIGJELWPQPF",
     "dataType": "text"
@@ -26,7 +26,7 @@ GET http://localhost:4000/v0/fetch HTTP/1.1
 content-type: application/json
 
 {
-    "provider": "https://nodes.iota.cafe:443",
+    "provider": "https://chrysalis-nodes.iota.org",
     "mode": "restricted",
     "key": "ABCDEFG",
     "root": "GGBRHMCZFTZZITMBTOBUMM9MWDVMTAJZUZARMJFNHY9VRSYZNKMUXTESZETWWHKHONMCZGJYS9PBZQILT",

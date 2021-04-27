@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / [utils/textHelper](../modules/utils_texthelper.md) / TextHelper
+[@iota/mam.js](../README.md) / [utils/textHelper](../modules/utils_texthelper.md) / TextHelper
 
 # Class: TextHelper
 
@@ -35,9 +35,9 @@ Decode escaped Non ASCII characters.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`value` | *undefined* \| *string* | The value to decode.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `value` | *undefined* \| *string* | The value to decode. |
 
 **Returns:** *undefined* \| *string*
 
@@ -53,9 +53,9 @@ Encode Non ASCII characters to escaped characters.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`value` | *undefined* \| *string* | The value to encode.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `value` | *undefined* \| *string* | The value to encode. |
 
 **Returns:** *undefined* \| *string*
 

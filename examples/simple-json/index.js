@@ -1,4 +1,4 @@
-const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam-chrysalis.js');
+const { createChannel, createMessage, parseMessage, mamAttach, mamFetch, TrytesHelper } = require('@iota/mam.js');
 const crypto = require('crypto');
 const fs = require('fs');
 
@@ -47,13 +47,13 @@ async function run(payload) {
 
     // So far we have shown how to create and parse a message
     // but now we actually want to attach the message to the tangle
-    const node = "https://api.hornet-0.testnet.chrysalis2.com";
+    const node = "https://chrysalis-nodes.iota.org";
 
     // Attach the message.
     console.log('Attaching to tangle, please wait...')
     const { messageId } = await mamAttach(node, mamMessage, "MY9MAM");
     console.log(`Message Id`, messageId);
-    console.log(`You can view the mam channel here https://explorer.iota.org/chrysalis/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
+    console.log(`You can view the mam channel here https://explorer.iota.org/mainnet/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
 
     // Try fetching it as well.
     console.log('Fetching from tangle, please wait...');

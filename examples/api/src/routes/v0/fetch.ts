@@ -1,4 +1,4 @@
-import { mamFetch, TrytesHelper } from "@iota/mam-chrysalis.js";
+import { mamFetch, TrytesHelper } from "@iota/mam.js";
 import { HttpError } from "../../errors/httpError";
 import { IFetchRequest } from "../../models/api/v0/IFetchRequest";
 import { IFetchResponse } from "../../models/api/v0/IFetchResponse";
@@ -14,9 +14,9 @@ import { ValidationHelper } from "../../utils/validationHelper";
 export async function fetch(config: IConfiguration, request: IFetchRequest): Promise<IFetchResponse> {
     ValidationHelper.string("provider", request.provider);
 
-    if (request.provider !== "chrysalis" &&
+    if (request.provider !== "mainnet" &&
         !request.provider.startsWith("http")) {
-        throw new Error("The provider must be either chrysalis or the url for a node starting http/https.");
+        throw new Error("The provider must be either mainnet or the url for a node starting http/https.");
     }
 
     ValidationHelper.oneOf("mode", request.mode, ["public", "private", "restricted"]);

@@ -1,4 +1,4 @@
-import { createChannel, createMessage, mamAttach, TrytesHelper } from "@iota/mam-chrysalis.js";
+import { createChannel, createMessage, mamAttach, TrytesHelper } from "@iota/mam.js";
 import { IPublishRequest } from "../../models/api/v0/IPublishRequest";
 import { IPublishResponse } from "../../models/api/v0/IPublishResponse";
 import { IConfiguration } from "../../models/configuration/IConfiguration";
@@ -13,9 +13,9 @@ import { ValidationHelper } from "../../utils/validationHelper";
 export async function publish(config: IConfiguration, request: IPublishRequest): Promise<IPublishResponse> {
     ValidationHelper.string("provider", request.provider);
 
-    if (request.provider !== "chrysalis" &&
+    if (request.provider !== "mainnet" &&
         !request.provider.startsWith("http")) {
-        throw new Error("The provider must be either chrysalis or the url for a node starting http/https.");
+        throw new Error("The provider must be either mainnet or the url for a node starting http/https.");
     }
 
     ValidationHelper.oneOf("mode", request.mode, ["public", "private", "restricted"]);

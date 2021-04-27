@@ -1,9 +1,9 @@
-### Chrysalis Public
+### Mainnet Public
 POST http://localhost:4000/v0/publish HTTP/1.1
 content-type: application/json
 
 {
-    "provider": "chrysalis",
+    "provider": "mainnet",
     "mode": "public",
     "seed": "MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MCCC",
     "dataType": "trytes",
@@ -11,12 +11,12 @@ content-type: application/json
     "tag": "FOO"
 }
 
-### Chrysalis Private
+### Mainnet Private
 POST http://localhost:4000/v0/publish HTTP/1.1
 content-type: application/json
 
 {
-    "provider": "chrysalis",
+    "provider": "mainnet",
     "mode": "private",
     "seed": "MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MCCD",
     "dataType": "text",
@@ -30,7 +30,7 @@ POST http://localhost:4000/v0/publish HTTP/1.1
 content-type: application/json
 
 {
-    "provider": "https://nodes.iota.cafe:443",
+    "provider": "https://chrysalis-nodes.iota.org",
     "mode": "restricted",
     "key": "ABCDEFG",
     "seed": "MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MAMAPI9MCCE",

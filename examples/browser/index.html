@@ -81,14 +81,14 @@
 
             // So far we have shown how to create and parse a message
             // but now we actually want to attach the message to the tangle
-            const client = new mam.SingleNodeClient("https://api.hornet-0.testnet.chrysalis2.com");
+            const client = new mam.SingleNodeClient("https://chrysalis-nodes.iota.org");
 
             // Attach the message.
             consoleLog('Attaching to tangle, please wait...')
             const { messageId } = await mam.mamAttach(client, mamMessage, "MY9MAM");
             console.log(`Message Id`, messageId);
             consoleLog(`You can view the latest message in the mam channel here`);
-            consoleLink(`https://explorer.iota.org/chrysalis/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
+            consoleLink(`https://explorer.iota.org/mainnet/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
 
             // Initial root
             const initialRoot = mam.channelRoot({
@@ -98,7 +98,7 @@
 
             if (initialRoot !== mamMessage.root) {
                 consoleLog(`You can view all the messages in the mam channel here`);
-                consoleLink(`https://explorer.iota.org/chrysalis/streams/0/${initialRoot}/${mode}/${sideKey}`);
+                consoleLink(`https://explorer.iota.org/mainnet/streams/0/${initialRoot}/${mode}/${sideKey}`);
             }
 
             // Try fetching it as well.

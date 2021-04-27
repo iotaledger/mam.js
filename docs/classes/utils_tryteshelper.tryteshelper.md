@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / [utils/trytesHelper](../modules/utils_tryteshelper.md) / TrytesHelper
+[@iota/mam.js](../README.md) / [utils/trytesHelper](../modules/utils_tryteshelper.md) / TrytesHelper
 
 # Class: TrytesHelper
 
@@ -59,9 +59,9 @@ Convert a string value into trytes.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`value` | *string* | value to convert into trytes.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `value` | *string* | value to convert into trytes. |
 
 **Returns:** *string*
 
@@ -77,9 +77,9 @@ Get trytes from trits array.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trits` | *Int8Array* | The trits to convert to trytes.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trits` | *Int8Array* | The trits to convert to trytes. |
 
 **Returns:** *string*
 
@@ -95,9 +95,9 @@ Is the string trytes length 81.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | The trytes to test.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | The trytes to test. |
 
 **Returns:** *boolean*
 
@@ -113,9 +113,9 @@ Is the string trytes length 27.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | The trytes to test.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | The trytes to test. |
 
 **Returns:** *boolean*
 
@@ -131,9 +131,9 @@ Is the string trytes of any length.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | The trytes to test.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | The trytes to test. |
 
 **Returns:** *boolean*
 
@@ -149,15 +149,15 @@ Convert an object from Trytes.
 
 #### Type parameters:
 
-Name |
-:------ |
-`T` |
+| Name |
+| :------ |
+| `T` |
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | The trytes to decode.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | The trytes to decode. |
 
 **Returns:** *undefined* \| T
 
@@ -173,9 +173,9 @@ Convert an object to Trytes.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`obj` | *unknown* | The obj to encode.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `obj` | *unknown* | The obj to encode. |
 
 **Returns:** *string*
 
@@ -191,9 +191,9 @@ Pack trytes into bytes
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | The trytes to pack.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | The trytes to pack. |
 
 **Returns:** *Uint8Array*
 
@@ -209,9 +209,9 @@ Convert a string from Trytes.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | The trytes to decode.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | The trytes to decode. |
 
 **Returns:** *undefined* \| *string*
 
@@ -227,9 +227,9 @@ Convert a string to Trytes.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`str` | *string* | The string to encode.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `str` | *string* | The string to encode. |
 
 **Returns:** *string*
 
@@ -245,9 +245,9 @@ Convert trytes into a string value.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trytes` | *string* | to convert into a string value.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trytes` | *string* | to convert into a string value. |
 
 **Returns:** *string*
 
@@ -263,9 +263,9 @@ Create a trits array from trytes.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`value` | *string* | Trytes used to create trits.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `value` | *string* | Trytes used to create trits. |
 
 **Returns:** *Int8Array*
 
@@ -281,9 +281,9 @@ Convert trits to an integer.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`trits` | *Int8Array* | The trits to convert.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `trits` | *Int8Array* | The trits to convert. |
 
 **Returns:** *number*
 
@@ -299,9 +299,9 @@ Unpack bytes into trytes
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`packed` | *Uint8Array* | The packed trytes to unpack.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `packed` | *Uint8Array* | The packed trytes to unpack. |
 
 **Returns:** *string*
 

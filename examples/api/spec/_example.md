@@ -9,7 +9,7 @@ const API_ENDPOINT = 'https://mam-api.dag.sh';
 
 const SEED = 'YOUR_SEED_HERE' // 81 Trytes;
 
-const provider = "chrysalis";
+const provider = "mainnet";
 const mode = "restricted";
 const key = "ABCDEFG9ABCDEFG";
 

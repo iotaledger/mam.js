@@ -1,3 +1,3 @@
-[@iota/mam-chrysalis.js](../README.md) / pearlDiver/hammingDiver
+[@iota/mam.js](../README.md) / pearlDiver/hammingDiver
 
 # Module: pearlDiver/hammingDiver

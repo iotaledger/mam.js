@@ -100,8 +100,8 @@
                                 "properties": {
                                     "provider": {
                                         "type": "string",
-                                        "description": "This can either be either of the constants chrysalis or the url of a node e.g. https://nodes.thetangle.org:443",
-                                        "example": "chrysalis"
+                                        "description": "This can either be either of the constants mainnet or the url of a node e.g. https://chrysalis-nodes.iota.org",
+                                        "example": "mainnet"
                                     },
                                     "mode": {
                                         "type": "string",
@@ -249,12 +249,12 @@
                     {
                         "in": "query",
                         "name": "provider",
-                        "description": "This can either be either of the constants chrysalis or the url of a node e.g. https://nodes.thetangle.org:443",
+                        "description": "This can either be either of the constants mainnet or the url of a node e.g. https://chrysalis-nodes.iota.org",
                         "required": true,
                         "schema": {
                             "type": "string"
                         },
-                        "example": "chrysalis"
+                        "example": "mainnet"
                     },
                     {
                         "in": "query",

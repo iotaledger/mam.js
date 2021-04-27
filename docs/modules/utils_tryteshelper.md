@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / utils/trytesHelper
+[@iota/mam.js](../README.md) / utils/trytesHelper
 
 # Module: utils/trytesHelper
 

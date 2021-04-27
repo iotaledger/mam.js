@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / mam/client
+[@iota/mam.js](../README.md) / mam/client
 
 # Module: mam/client
 
@@ -22,10 +22,10 @@ Decodes the root to its associated address.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`root` | *string* | The root to device.   |
-`mode` | MamMode | The mode for the channel.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `root` | *string* | The root to device. |
+| `mode` | MamMode | The mode for the channel. |
 
 **Returns:** *string*
 
@@ -41,11 +41,11 @@ Decode messages from an address to try and find a MAM message.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`messages` | IMessage[] | The objects returned from the fetch.   |
-`root` | *string* | The root within the mam channel to fetch the message.   |
-`sideKey?` | *string* | The sideKey if mode is restricted.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `messages` | IMessage[] | The objects returned from the fetch. |
+| `root` | *string* | The root within the mam channel to fetch the message. |
+| `sideKey?` | *string* | The sideKey if mode is restricted. |
 
 **Returns:** *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md) \| undefined\>
 
@@ -62,11 +62,11 @@ Attach the mam message to the tangle.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`client` | IClient \| *string* | The client or node endpoint to use for sending.   |
-`mamMessage` | [*IMamMessage*](../interfaces/models_imammessage.imammessage.md) | The message to attach.   |
-`tag?` | *string* | Optional tag for the transactions.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `client` | IClient \| *string* | The client or node endpoint to use for sending. |
+| `mamMessage` | [*IMamMessage*](../interfaces/models_imammessage.imammessage.md) | The message to attach. |
+| `tag?` | *string* | Optional tag for the transactions. |
 
 **Returns:** *Promise*<{}\>
 
@@ -82,12 +82,12 @@ Fetch a mam message from a channel.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`client` | IClient \| *string* | The client or node endpoint to use for fetching.   |
-`root` | *string* | The root within the mam channel to fetch the message.   |
-`mode` | MamMode | The mode to use for fetching.   |
-`sideKey?` | *string* | The sideKey if mode is restricted.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `client` | IClient \| *string* | The client or node endpoint to use for fetching. |
+| `root` | *string* | The root within the mam channel to fetch the message. |
+| `mode` | MamMode | The mode to use for fetching. |
+| `sideKey?` | *string* | The sideKey if mode is restricted. |
 
 **Returns:** *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md) \| undefined\>
 
@@ -107,13 +107,13 @@ same amount of messages as your limit you should probably read again.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`client` | IClient \| *string* | The client or node endpoint to use for fetching.   |
-`root` | *string* | The root within the mam channel to fetch the message.   |
-`mode` | MamMode | The mode to use for fetching.   |
-`sideKey?` | *string* | The sideKey if mode is restricted.   |
-`limit?` | *number* | Limit the number of messages retrieved.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `client` | IClient \| *string* | The client or node endpoint to use for fetching. |
+| `root` | *string* | The root within the mam channel to fetch the message. |
+| `mode` | MamMode | The mode to use for fetching. |
+| `sideKey?` | *string* | The sideKey if mode is restricted. |
+| `limit?` | *number* | Limit the number of messages retrieved. |
 
 **Returns:** *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md)[]\>
 

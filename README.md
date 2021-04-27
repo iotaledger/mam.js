@@ -2,16 +2,14 @@
 
 > We strongly advise that you update your apps to use [IOTA Streams](https://github.com/iotaledger/streams) - this package is unlikely to be maintained.
 
-Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA Chrysalis.
-
-The package name has been changed to `@iota/mam-chrysalis.js` to allow for side-by-side usage with the current `@iota/mam.js`
+Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA network.
 
 ## Installing
 
 Install this package using the following commands:
 
 ```shell
-npm install iotaledger/mam.js#chrysalis
+npm install @iota/mam.js
 ```
 
 If you want to use this module in a browser `<script>` tag see the example Browser [./examples/browser/index.html](./examples/browser/index.html)
@@ -19,7 +17,7 @@ If you want to use this module in a browser `<script>` tag see the example Brows
 ## Example Usage
 
 ```js
-const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam-chrysalis.js');
+const { channelRoot, createChannel, createMessage, parseMessage, mamAttach, mamFetch, mamFetchAll } = require('@iota/mam.js');
 
 // Setup the details for the channel.
 const seed = 'ENTER A SEED';
@@ -42,7 +40,7 @@ const mamMessage = createMessage(channelState, 'MY9MESSAGE');
 const decodedMessage = parseMessage(mamMessage.payload, mamMessage.root, sideKey);
 
 // If we want to attach the message to the tangle we first compose the API
-const node = "https://api.hornet-0.testnet.chrysalis2.com";
+const node = "https://chrysalis-nodes.iota.org";
 // And then attach the message, tagging it if required.
 // Attaching will return the actual transactions attached to the tangle if you need them.
 await mamAttach(api, mamMessage, "MY9MAM");

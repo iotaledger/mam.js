@@ -1,6 +1,6 @@
 {
-    "chrysalisNodes": [
-        CHRYSALIS-NODES
+    "nodes": [
+        NODES
     ],
     "allowedDomains": [
         "ALLOWED-DOMAIN"

@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / models/IMamFetchedMessage
+[@iota/mam.js](../README.md) / models/IMamFetchedMessage
 
 # Module: models/IMamFetchedMessage
 

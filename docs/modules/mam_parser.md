@@ -1,4 +1,4 @@
-[@iota/mam-chrysalis.js](../README.md) / mam/parser
+[@iota/mam.js](../README.md) / mam/parser
 
 # Module: mam/parser
 
@@ -18,17 +18,17 @@ Parse the trytes back to the original message.
 
 #### Parameters:
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`payload` | *string* | The trytes to decode.   |
-`root` | *string* | The root for the message.   |
-`channelKey?` | *string* | The key used to encode the data.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `payload` | *string* | The trytes to decode. |
+| `root` | *string* | The root for the message. |
+| `channelKey?` | *string* | The key used to encode the data. |
 
 **Returns:** *object*
 
-Name | Type | Description |
-:------ | :------ | :------ |
-`message` | *string* | The decoded message.   |
-`nextRoot` | *string* | The next root.   |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `message` | *string* | The decoded message. |
+| `nextRoot` | *string* | The next root. |
 
 The decoded message.
