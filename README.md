@@ -2,7 +2,7 @@
 
 > We strongly advise that you update your apps to use [IOTA Streams](https://github.com/iotaledger/streams) - this package is unlikely to be maintained.
 
-Implementation of Masked Authentication Messaging v0 for IOTA in pure JavaScript, for use with IOTA network.
+Implementation of Masked Authentication Messaging v0 for IOTA in JavaScript, for use with IOTA network.
 
 ## Installing
 
