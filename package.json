@@ -1,7 +1,7 @@
 {
     "name": "@iota/mam.js",
     "version": "1.5.0",
-    "description": "Pure JavaScript implementation of Masked Authentication Message v0 for IOTA",
+    "description": "JavaScript implementation of Masked Authentication Message v0 for IOTA",
     "scripts": {
         "build-clean": "rimraf ./es/",
         "build-compile": "tsc",
@@ -24,7 +24,7 @@
     "author": "Martyn Janes <martyn.janes@iota.org>",
     "license": "MIT",
     "dependencies": {
-        "@iota/iota.js": "github:iotaledger/iota.js#2dad22c0484f60d0278b5c7ad6caa630e970e918",
+        "@iota/iota.js": "^1.5.0",
         "big-integer": "^1.6.48"
     },
     "devDependencies": {
