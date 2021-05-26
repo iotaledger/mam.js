@@ -40,7 +40,7 @@ ___
 
 ### mode
 
-• **mode**: MamMode
+• **mode**: [*MamMode*](../modules/models_mammode.md#mammode)
 
 The mode for the channel.
 

@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 /**
  * Concatentate a list of arrays.
  * @param arrays The arrays to concatenate.

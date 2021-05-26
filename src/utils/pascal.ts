@@ -1,11 +1,13 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { TrytesHelper } from "./trytesHelper";
 
 /* eslint-disable no-bitwise */
-/* @internal */
+// @internal
 const ZERO = new Int8Array([1, 0, 0, -1]);
-/* @internal */
+// @internal
 const RADIX: number = 3;
-/* @internal */
+// @internal
 const TRITS_PER_TRYTE: number = 3;
 
 /**

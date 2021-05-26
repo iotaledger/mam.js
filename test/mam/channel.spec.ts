@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { channelRoot, createChannel, createMessage } from "../../src/mam/channel";
 
 test("createChannel() fails with empty seed", () => {

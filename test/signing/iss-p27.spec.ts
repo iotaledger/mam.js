@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 /* eslint-disable max-len */
 import { address, checksumSecurity, digestFromSignature, digestFromSubseed, privateKeyFromSubseed, signature, subseed } from "../../src/signing/iss-p27";
 import { TrytesHelper } from "../../src/utils/trytesHelper";

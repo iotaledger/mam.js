@@ -29,11 +29,11 @@ Helper functions for use with text.
 
 ### decodeNonASCII
 
-▸ `Static`**decodeNonASCII**(`value`: *undefined* \| *string*): *undefined* \| *string*
+▸ `Static` **decodeNonASCII**(`value`: *undefined* \| *string*): *undefined* \| *string*
 
 Decode escaped Non ASCII characters.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -47,11 +47,11 @@ ___
 
 ### encodeNonASCII
 
-▸ `Static`**encodeNonASCII**(`value`: *undefined* \| *string*): *undefined* \| *string*
+▸ `Static` **encodeNonASCII**(`value`: *undefined* \| *string*): *undefined* \| *string*
 
 Encode Non ASCII characters to escaped characters.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |

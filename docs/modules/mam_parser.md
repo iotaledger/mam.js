@@ -16,7 +16,7 @@
 
 Parse the trytes back to the original message.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |

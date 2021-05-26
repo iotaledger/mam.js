@@ -1,7 +1,9 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { Curl } from "@iota/iota.js";
 
 const PRIVATE_KEY_NUM_FRAGMENTS: number = 27;
-/* @internal */
+// @internal
 export const PRIVATE_KEY_FRAGMENT_LENGTH: number = PRIVATE_KEY_NUM_FRAGMENTS * Curl.HASH_LENGTH;
 const MIN_TRYTE_VALUE: number = -13;
 const MAX_TRYTE_VALUE: number = 13;

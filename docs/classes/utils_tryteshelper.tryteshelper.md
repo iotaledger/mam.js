@@ -53,15 +53,15 @@ All the characters that can be used in trytes.
 
 ### fromAscii
 
-▸ `Static`**fromAscii**(`value`: *string*): *string*
+▸ `Static` **fromAscii**(`value`: *string*): *string*
 
 Convert a string value into trytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `value` | *string* | value to convert into trytes. |
+| `value` | *string* | The value to convert into trytes. |
 
 **Returns:** *string*
 
@@ -71,11 +71,11 @@ ___
 
 ### fromTrits
 
-▸ `Static`**fromTrits**(`trits`: *Int8Array*): *string*
+▸ `Static` **fromTrits**(`trits`: *Int8Array*): *string*
 
 Get trytes from trits array.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -89,11 +89,11 @@ ___
 
 ### isHash
 
-▸ `Static`**isHash**(`trytes`: *string*): *boolean*
+▸ `Static` **isHash**(`trytes`: *string*): *boolean*
 
 Is the string trytes length 81.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -107,11 +107,11 @@ ___
 
 ### isTag
 
-▸ `Static`**isTag**(`trytes`: *string*): *boolean*
+▸ `Static` **isTag**(`trytes`: *string*): *boolean*
 
 Is the string trytes length 27.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -125,11 +125,11 @@ ___
 
 ### isTrytes
 
-▸ `Static`**isTrytes**(`trytes`: *string*): *boolean*
+▸ `Static` **isTrytes**(`trytes`: *string*): *boolean*
 
 Is the string trytes of any length.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -143,17 +143,17 @@ ___
 
 ### objectFromTrytes
 
-▸ `Static`**objectFromTrytes**<T\>(`trytes`: *string*): *undefined* \| T
+▸ `Static` **objectFromTrytes**<T\>(`trytes`: *string*): *undefined* \| T
 
 Convert an object from Trytes.
 
-#### Type parameters:
+#### Type parameters
 
 | Name |
 | :------ |
 | `T` |
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -167,11 +167,11 @@ ___
 
 ### objectToTrytes
 
-▸ `Static`**objectToTrytes**(`obj`: *unknown*): *string*
+▸ `Static` **objectToTrytes**(`obj`: *unknown*): *string*
 
 Convert an object to Trytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -185,11 +185,11 @@ ___
 
 ### packTrytes
 
-▸ `Static`**packTrytes**(`trytes`: *string*): *Uint8Array*
+▸ `Static` **packTrytes**(`trytes`: *string*): *Uint8Array*
 
-Pack trytes into bytes
+Pack trytes into bytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -203,11 +203,11 @@ ___
 
 ### stringFromTrytes
 
-▸ `Static`**stringFromTrytes**(`trytes`: *string*): *undefined* \| *string*
+▸ `Static` **stringFromTrytes**(`trytes`: *string*): *undefined* \| *string*
 
 Convert a string from Trytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -221,11 +221,11 @@ ___
 
 ### stringToTrytes
 
-▸ `Static`**stringToTrytes**(`str`: *string*): *string*
+▸ `Static` **stringToTrytes**(`str`: *string*): *string*
 
 Convert a string to Trytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -239,15 +239,15 @@ ___
 
 ### toAscii
 
-▸ `Static`**toAscii**(`trytes`: *string*): *string*
+▸ `Static` **toAscii**(`trytes`: *string*): *string*
 
 Convert trytes into a string value.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | to convert into a string value. |
+| `trytes` | *string* | The trytes to convert into a string value. |
 
 **Returns:** *string*
 
@@ -257,11 +257,11 @@ ___
 
 ### toTrits
 
-▸ `Static`**toTrits**(`value`: *string*): *Int8Array*
+▸ `Static` **toTrits**(`value`: *string*): *Int8Array*
 
 Create a trits array from trytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -275,11 +275,11 @@ ___
 
 ### tritsValue
 
-▸ `Static`**tritsValue**(`trits`: *Int8Array*): *number*
+▸ `Static` **tritsValue**(`trits`: *Int8Array*): *number*
 
 Convert trits to an integer.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -293,11 +293,11 @@ ___
 
 ### unpackTrytes
 
-▸ `Static`**unpackTrytes**(`packed`: *Uint8Array*): *string*
+▸ `Static` **unpackTrytes**(`packed`: *Uint8Array*): *string*
 
-Unpack bytes into trytes
+Unpack bytes into trytes.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |

@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { Curl } from "@iota/iota.js";
 import bigInt from "big-integer";
 import { roundThird } from "../utils/pascal";
@@ -19,47 +21,47 @@ export class HammingDiver {
     private static readonly MIN_VALUE: bigInt.BigInteger = bigInt("0000000000000000", 16);
 
     /**
-     * High 0
+     * High 0.
      */
     private static readonly HIGH_0: bigInt.BigInteger = bigInt("B6DB6DB6DB6DB6DB", 16);
 
     /**
-     * High 1
+     * High 1.
      */
     private static readonly HIGH_1: bigInt.BigInteger = bigInt("8FC7E3F1F8FC7E3F", 16);
 
     /**
-     * High 2
+     * High 2.
      */
     private static readonly HIGH_2: bigInt.BigInteger = bigInt("FFC01FFFF803FFFF", 16);
 
     /**
-     * High 3
+     * High 3.
      */
     private static readonly HIGH_3: bigInt.BigInteger = bigInt("003FFFFFFFFFFFFF", 16);
 
     /**
-     * Low 0
+     * Low 0.
      */
     private static readonly LOW_0: bigInt.BigInteger = bigInt("DB6DB6DB6DB6DB6D", 16);
 
     /**
-     * Low 1
+     * Low 1.
      */
     private static readonly LOW_1: bigInt.BigInteger = bigInt("F1F8FC7E3F1F8FC7", 16);
 
     /**
-     * Low 2
+     * Low 2.
      */
     private static readonly LOW_2: bigInt.BigInteger = bigInt("7FFFE00FFFFC01FF", 16);
 
     /**
-     * Low 3
+     * Low 3.
      */
     private static readonly LOW_3: bigInt.BigInteger = bigInt("FFC0000007FFFFFF", 16);
 
     /**
-     * Number of rounds
+     * Number of rounds.
      */
     private static readonly ROUNDS: number = 27;
 
@@ -161,7 +163,7 @@ export class HammingDiver {
      * Increment the state values.
      * @param states The state to increment.
      * @param fromIndex The index to start from.
-     * @param toIndex The index to end at,
+     * @param toIndex The index to end at.
      * @returns The increment length.
      */
     private increment(states: PearlDiverSearchStates, fromIndex: number, toIndex: number): number {

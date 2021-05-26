@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import bigInt from "big-integer";
 
 /**
@@ -6,7 +8,7 @@ import bigInt from "big-integer";
  */
 export interface PearlDiverSearchStates {
     /**
-     * The low bits of the state
+     * The low bits of the state.
      */
     low: bigInt.BigInteger[];
 

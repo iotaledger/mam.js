@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { Converter } from "@iota/iota.js";
 import { TextHelper } from "./textHelper";
 
@@ -129,7 +131,7 @@ export class TrytesHelper {
 
     /**
      * Convert a string value into trytes.
-     * @param value value to convert into trytes.
+     * @param value The value to convert into trytes.
      * @returns The trytes representation of the value.
      */
     public static fromAscii(value: string): string {
@@ -149,7 +151,7 @@ export class TrytesHelper {
 
     /**
      * Convert trytes into a string value.
-     * @param trytes to convert into a string value.
+     * @param trytes The trytes to convert into a string value.
      * @returns The string value converted from the trytes.
      */
     public static toAscii(trytes: string): string {
@@ -236,7 +238,7 @@ export class TrytesHelper {
     }
 
     /**
-     * Pack trytes into bytes
+     * Pack trytes into bytes.
      * @param trytes The trytes to pack.
      * @returns The packed trytes.
      */
@@ -263,7 +265,7 @@ export class TrytesHelper {
     }
 
     /**
-     * Unpack bytes into trytes
+     * Unpack bytes into trytes.
      * @param packed The packed trytes to unpack.
      * @returns The unpacked trytes.
      */

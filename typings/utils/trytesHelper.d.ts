@@ -44,13 +44,13 @@ export declare class TrytesHelper {
     static tritsValue(trits: Int8Array): number;
     /**
      * Convert a string value into trytes.
-     * @param value value to convert into trytes.
+     * @param value The value to convert into trytes.
      * @returns The trytes representation of the value.
      */
     static fromAscii(value: string): string;
     /**
      * Convert trytes into a string value.
-     * @param trytes to convert into a string value.
+     * @param trytes The trytes to convert into a string value.
      * @returns The string value converted from the trytes.
      */
     static toAscii(trytes: string): string;
@@ -79,13 +79,13 @@ export declare class TrytesHelper {
      */
     static stringFromTrytes(trytes: string): string | undefined;
     /**
-     * Pack trytes into bytes
+     * Pack trytes into bytes.
      * @param trytes The trytes to pack.
      * @returns The packed trytes.
      */
     static packTrytes(trytes: string): Uint8Array;
     /**
-     * Unpack bytes into trytes
+     * Unpack bytes into trytes.
      * @param packed The packed trytes to unpack.
      * @returns The unpacked trytes.
      */

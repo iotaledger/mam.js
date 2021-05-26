@@ -16,16 +16,16 @@
 
 ### decodeAddress
 
-▸ **decodeAddress**(`root`: *string*, `mode`: MamMode): *string*
+▸ **decodeAddress**(`root`: *string*, `mode`: [*MamMode*](models_mammode.md#mammode)): *string*
 
 Decodes the root to its associated address.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `root` | *string* | The root to device. |
-| `mode` | MamMode | The mode for the channel. |
+| `mode` | [*MamMode*](models_mammode.md#mammode) | The mode for the channel. |
 
 **Returns:** *string*
 
@@ -39,7 +39,7 @@ ___
 
 Decode messages from an address to try and find a MAM message.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -60,7 +60,7 @@ ___
 
 Attach the mam message to the tangle.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -76,17 +76,17 @@ ___
 
 ### mamFetch
 
-▸ **mamFetch**(`client`: IClient \| *string*, `root`: *string*, `mode`: MamMode, `sideKey?`: *string*): *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md) \| undefined\>
+▸ **mamFetch**(`client`: IClient \| *string*, `root`: *string*, `mode`: [*MamMode*](models_mammode.md#mammode), `sideKey?`: *string*): *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md) \| undefined\>
 
 Fetch a mam message from a channel.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `client` | IClient \| *string* | The client or node endpoint to use for fetching. |
 | `root` | *string* | The root within the mam channel to fetch the message. |
-| `mode` | MamMode | The mode to use for fetching. |
+| `mode` | [*MamMode*](models_mammode.md#mammode) | The mode to use for fetching. |
 | `sideKey?` | *string* | The sideKey if mode is restricted. |
 
 **Returns:** *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md) \| undefined\>
@@ -98,20 +98,20 @@ ___
 
 ### mamFetchAll
 
-▸ **mamFetchAll**(`client`: IClient \| *string*, `root`: *string*, `mode`: MamMode, `sideKey?`: *string*, `limit?`: *number*): *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md)[]\>
+▸ **mamFetchAll**(`client`: IClient \| *string*, `root`: *string*, `mode`: [*MamMode*](models_mammode.md#mammode), `sideKey?`: *string*, `limit?`: *number*): *Promise*<[*IMamFetchedMessage*](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md)[]\>
 
 Fetch all the mam message from a channel.
 If limit is undefined we use Number.MAX_VALUE, this could potentially take a long time to complete.
 It is preferable to specify the limit so you read the data in chunks, then if you read and get the
 same amount of messages as your limit you should probably read again.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `client` | IClient \| *string* | The client or node endpoint to use for fetching. |
 | `root` | *string* | The root within the mam channel to fetch the message. |
-| `mode` | MamMode | The mode to use for fetching. |
+| `mode` | [*MamMode*](models_mammode.md#mammode) | The mode to use for fetching. |
 | `sideKey?` | *string* | The sideKey if mode is restricted. |
 | `limit?` | *number* | Limit the number of messages retrieved. |
 

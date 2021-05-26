@@ -18,7 +18,7 @@
 
 Get the root of the channel.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
@@ -32,17 +32,17 @@ ___
 
 ### createChannel
 
-▸ **createChannel**(`seed`: *string*, `security`: *number*, `mode`: MamMode, `sideKey?`: *string*): [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md)
+▸ **createChannel**(`seed`: *string*, `security`: *number*, `mode`: [*MamMode*](models_mammode.md#mammode), `sideKey?`: *string*): [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md)
 
 Create a new channel object.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `seed` | *string* | The seed for the channel. |
 | `security` | *number* | The security level for the channel. |
-| `mode` | MamMode | The mode for the channel. |
+| `mode` | [*MamMode*](models_mammode.md#mammode) | The mode for the channel. |
 | `sideKey?` | *string* | The side key to use for restricted mode. |
 
 **Returns:** [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md)
@@ -57,7 +57,7 @@ ___
 
 Prepare a message on the mam channel.
 
-#### Parameters:
+#### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |

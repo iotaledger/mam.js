@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { pascalDecode, pascalEncode } from "../../src/utils/pascal";
 
 test("pascalEncode() with 0 returns fixed array", () => {

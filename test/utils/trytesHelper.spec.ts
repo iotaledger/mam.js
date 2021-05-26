@@ -1,3 +1,5 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
 import { TrytesHelper } from "../../src/utils/trytesHelper";
 
 describe("The trytestHelper", () => {
