@@ -3,7 +3,6 @@
     "version": "1.0.0",
     "main": "index.js",
     "dependencies": {
-        "@iota/iota.js": "github:iotaledger/iota.js#cdb088e8cf70af3e004bbed1befa4e496130f3a7",
         "@iota/mam.js": "file:../.."
     }
 }

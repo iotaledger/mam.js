@@ -18,7 +18,7 @@ Definition for MAM message.
 
 ### address
 
-• **address**: *string*
+• **address**: `string`
 
 The address for the message.
 
@@ -26,7 +26,7 @@ ___
 
 ### payload
 
-• **payload**: *string*
+• **payload**: `string`
 
 The trytes payload for the message.
 
@@ -34,6 +34,6 @@ ___
 
 ### root
 
-• **root**: *string*
+• **root**: `string`
 
 The root for the message.

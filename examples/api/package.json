@@ -24,7 +24,7 @@
         "docs-api": "api2html -o src/docs/index.html -l http,shell,javascript--nodejs spec/api.json -b -c spec/logo.png -u https://www.iota.org -i ../../../../spec/example,../../../../spec/changelog"
     },
     "engines": {
-        "node": "10.x.x"
+        "node": "14.x.x"
     },
     "dependencies": {
         "@iota/mam.js": "file:../..",
@@ -32,20 +32,20 @@
         "express": "^4.17.1"
     },
     "devDependencies": {
-        "@types/express": "^4.17.11",
-        "@types/node": "^15.0.2",
-        "@typescript-eslint/eslint-plugin": "^4.22.1",
-        "@typescript-eslint/parser": "^4.22.1",
+        "@types/express": "^4.17.12",
+        "@types/node": "^15.9.0",
+        "@typescript-eslint/eslint-plugin": "^4.26.0",
+        "@typescript-eslint/parser": "^4.26.0",
         "api2html": "^0.4.0",
         "copyfiles": "^2.4.0",
-        "eslint": "^7.25.0",
-        "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-jsdoc": "^33.0.0",
-        "eslint-plugin-unicorn": "^31.0.0",
+        "eslint": "^7.27.0",
+        "eslint-plugin-import": "^2.23.4",
+        "eslint-plugin-jsdoc": "^35.1.2",
+        "eslint-plugin-unicorn": "^33.0.0",
         "nodemon": "^2.0.7",
         "npm-run-all": "^4.1.5",
         "rimraf": "^3.0.2",
-        "ts-jest": "^26.5.5",
-        "typescript": "^4.2.4"
+        "ts-jest": "^27.0.2",
+        "typescript": "^4.3.2"
     }
 }

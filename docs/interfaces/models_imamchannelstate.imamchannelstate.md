@@ -24,7 +24,7 @@ Definition of a channel object.
 
 ### count
 
-• **count**: *number*
+• **count**: `number`
 
 The count for the channel.
 
@@ -32,7 +32,7 @@ ___
 
 ### index
 
-• **index**: *number*
+• **index**: `number`
 
 The index for the channel.
 
@@ -40,7 +40,7 @@ ___
 
 ### mode
 
-• **mode**: [*MamMode*](../modules/models_mammode.md#mammode)
+• **mode**: [MamMode](../modules/models_mammode.md#mammode)
 
 The mode for the channel.
 
@@ -48,7 +48,7 @@ ___
 
 ### nextCount
 
-• **nextCount**: *number*
+• **nextCount**: `number`
 
 The next count for the channel.
 
@@ -56,7 +56,7 @@ ___
 
 ### nextRoot
 
-• `Optional` **nextRoot**: *string*
+• `Optional` **nextRoot**: `string`
 
 The next root for the channel.
 
@@ -64,7 +64,7 @@ ___
 
 ### security
 
-• **security**: *number*
+• **security**: `number`
 
 The security level for the channel.
 
@@ -72,7 +72,7 @@ ___
 
 ### seed
 
-• **seed**: *string*
+• **seed**: `string`
 
 The seed for the channel.
 
@@ -80,7 +80,7 @@ ___
 
 ### sideKey
 
-• `Optional` **sideKey**: *string*
+• `Optional` **sideKey**: `string`
 
 Side key used for restricted mode.
 
@@ -88,6 +88,6 @@ ___
 
 ### start
 
-• **start**: *number*
+• **start**: `number`
 
 The start index for the channel.

@@ -12,7 +12,7 @@
 
 ### parseMessage
 
-▸ **parseMessage**(`payload`: *string*, `root`: *string*, `channelKey?`: *string*): *object*
+▸ **parseMessage**(`payload`, `root`, `channelKey?`): `Object`
 
 Parse the trytes back to the original message.
 
@@ -20,15 +20,17 @@ Parse the trytes back to the original message.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `payload` | *string* | The trytes to decode. |
-| `root` | *string* | The root for the message. |
-| `channelKey?` | *string* | The key used to encode the data. |
+| `payload` | `string` | The trytes to decode. |
+| `root` | `string` | The root for the message. |
+| `channelKey?` | `string` | The key used to encode the data. |
 
-**Returns:** *object*
+#### Returns
+
+`Object`
+
+The decoded message.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | *string* | The decoded message. |
-| `nextRoot` | *string* | The next root. |
-
-The decoded message.
+| `message` | `string` | The decoded message. |
+| `nextRoot` | `string` | The next root. |

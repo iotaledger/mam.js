@@ -19,7 +19,7 @@ Definition of fetch messages.
 
 ### message
 
-• **message**: *string*
+• **message**: `string`
 
 The message content fetched.
 
@@ -27,7 +27,7 @@ ___
 
 ### nextRoot
 
-• **nextRoot**: *string*
+• **nextRoot**: `string`
 
 The next root for the message.
 
@@ -35,7 +35,7 @@ ___
 
 ### root
 
-• **root**: *string*
+• **root**: `string`
 
 The root the message was fetched from.
 
@@ -43,6 +43,6 @@ ___
 
 ### tag
 
-• **tag**: *string*
+• **tag**: `string`
 
 The tag of the transactions.

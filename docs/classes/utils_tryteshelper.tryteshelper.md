@@ -37,15 +37,13 @@ Helper functions for use with trytes.
 
 ### constructor
 
-\+ **new TrytesHelper**(): [*TrytesHelper*](utils_tryteshelper.tryteshelper.md)
-
-**Returns:** [*TrytesHelper*](utils_tryteshelper.tryteshelper.md)
+• **new TrytesHelper**()
 
 ## Properties
 
 ### ALPHABET
 
-▪ `Static` **ALPHABET**: *string*= "9ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+▪ `Static` **ALPHABET**: `string` = "9ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 All the characters that can be used in trytes.
 
@@ -53,7 +51,7 @@ All the characters that can be used in trytes.
 
 ### fromAscii
 
-▸ `Static` **fromAscii**(`value`: *string*): *string*
+▸ `Static` **fromAscii**(`value`): `string`
 
 Convert a string value into trytes.
 
@@ -61,9 +59,11 @@ Convert a string value into trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `value` | *string* | The value to convert into trytes. |
+| `value` | `string` | The value to convert into trytes. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 The trytes representation of the value.
 
@@ -71,7 +71,7 @@ ___
 
 ### fromTrits
 
-▸ `Static` **fromTrits**(`trits`: *Int8Array*): *string*
+▸ `Static` **fromTrits**(`trits`): `string`
 
 Get trytes from trits array.
 
@@ -79,9 +79,11 @@ Get trytes from trits array.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trits` | *Int8Array* | The trits to convert to trytes. |
+| `trits` | `Int8Array` | The trits to convert to trytes. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 Trytes.
 
@@ -89,7 +91,7 @@ ___
 
 ### isHash
 
-▸ `Static` **isHash**(`trytes`: *string*): *boolean*
+▸ `Static` **isHash**(`trytes`): `boolean`
 
 Is the string trytes length 81.
 
@@ -97,9 +99,11 @@ Is the string trytes length 81.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to test. |
+| `trytes` | `string` | The trytes to test. |
 
-**Returns:** *boolean*
+#### Returns
+
+`boolean`
 
 True if it is trytes 81 chars long.
 
@@ -107,7 +111,7 @@ ___
 
 ### isTag
 
-▸ `Static` **isTag**(`trytes`: *string*): *boolean*
+▸ `Static` **isTag**(`trytes`): `boolean`
 
 Is the string trytes length 27.
 
@@ -115,9 +119,11 @@ Is the string trytes length 27.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to test. |
+| `trytes` | `string` | The trytes to test. |
 
-**Returns:** *boolean*
+#### Returns
+
+`boolean`
 
 True if it is trytes 27 chars long.
 
@@ -125,7 +131,7 @@ ___
 
 ### isTrytes
 
-▸ `Static` **isTrytes**(`trytes`: *string*): *boolean*
+▸ `Static` **isTrytes**(`trytes`): `boolean`
 
 Is the string trytes of any length.
 
@@ -133,9 +139,11 @@ Is the string trytes of any length.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to test. |
+| `trytes` | `string` | The trytes to test. |
 
-**Returns:** *boolean*
+#### Returns
+
+`boolean`
 
 True if it is trytes.
 
@@ -143,7 +151,7 @@ ___
 
 ### objectFromTrytes
 
-▸ `Static` **objectFromTrytes**<T\>(`trytes`: *string*): *undefined* \| T
+▸ `Static` **objectFromTrytes**<T\>(`trytes`): `undefined` \| `T`
 
 Convert an object from Trytes.
 
@@ -157,9 +165,11 @@ Convert an object from Trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to decode. |
+| `trytes` | `string` | The trytes to decode. |
 
-**Returns:** *undefined* \| T
+#### Returns
+
+`undefined` \| `T`
 
 The decoded object.
 
@@ -167,7 +177,7 @@ ___
 
 ### objectToTrytes
 
-▸ `Static` **objectToTrytes**(`obj`: *unknown*): *string*
+▸ `Static` **objectToTrytes**(`obj`): `string`
 
 Convert an object to Trytes.
 
@@ -175,9 +185,11 @@ Convert an object to Trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `obj` | *unknown* | The obj to encode. |
+| `obj` | `unknown` | The obj to encode. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 The encoded trytes value.
 
@@ -185,7 +197,7 @@ ___
 
 ### packTrytes
 
-▸ `Static` **packTrytes**(`trytes`: *string*): *Uint8Array*
+▸ `Static` **packTrytes**(`trytes`): `Uint8Array`
 
 Pack trytes into bytes.
 
@@ -193,9 +205,11 @@ Pack trytes into bytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to pack. |
+| `trytes` | `string` | The trytes to pack. |
 
-**Returns:** *Uint8Array*
+#### Returns
+
+`Uint8Array`
 
 The packed trytes.
 
@@ -203,7 +217,7 @@ ___
 
 ### stringFromTrytes
 
-▸ `Static` **stringFromTrytes**(`trytes`: *string*): *undefined* \| *string*
+▸ `Static` **stringFromTrytes**(`trytes`): `undefined` \| `string`
 
 Convert a string from Trytes.
 
@@ -211,9 +225,11 @@ Convert a string from Trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to decode. |
+| `trytes` | `string` | The trytes to decode. |
 
-**Returns:** *undefined* \| *string*
+#### Returns
+
+`undefined` \| `string`
 
 The decoded string.
 
@@ -221,7 +237,7 @@ ___
 
 ### stringToTrytes
 
-▸ `Static` **stringToTrytes**(`str`: *string*): *string*
+▸ `Static` **stringToTrytes**(`str`): `string`
 
 Convert a string to Trytes.
 
@@ -229,9 +245,11 @@ Convert a string to Trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `str` | *string* | The string to encode. |
+| `str` | `string` | The string to encode. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 The encoded trytes value.
 
@@ -239,7 +257,7 @@ ___
 
 ### toAscii
 
-▸ `Static` **toAscii**(`trytes`: *string*): *string*
+▸ `Static` **toAscii**(`trytes`): `string`
 
 Convert trytes into a string value.
 
@@ -247,9 +265,11 @@ Convert trytes into a string value.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trytes` | *string* | The trytes to convert into a string value. |
+| `trytes` | `string` | The trytes to convert into a string value. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 The string value converted from the trytes.
 
@@ -257,7 +277,7 @@ ___
 
 ### toTrits
 
-▸ `Static` **toTrits**(`value`: *string*): *Int8Array*
+▸ `Static` **toTrits**(`value`): `Int8Array`
 
 Create a trits array from trytes.
 
@@ -265,9 +285,11 @@ Create a trits array from trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `value` | *string* | Trytes used to create trits. |
+| `value` | `string` | Trytes used to create trits. |
 
-**Returns:** *Int8Array*
+#### Returns
+
+`Int8Array`
 
 The trits array.
 
@@ -275,7 +297,7 @@ ___
 
 ### tritsValue
 
-▸ `Static` **tritsValue**(`trits`: *Int8Array*): *number*
+▸ `Static` **tritsValue**(`trits`): `number`
 
 Convert trits to an integer.
 
@@ -283,9 +305,11 @@ Convert trits to an integer.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `trits` | *Int8Array* | The trits to convert. |
+| `trits` | `Int8Array` | The trits to convert. |
 
-**Returns:** *number*
+#### Returns
+
+`number`
 
 The trits converted to number.
 
@@ -293,7 +317,7 @@ ___
 
 ### unpackTrytes
 
-▸ `Static` **unpackTrytes**(`packed`: *Uint8Array*): *string*
+▸ `Static` **unpackTrytes**(`packed`): `string`
 
 Unpack bytes into trytes.
 
@@ -301,8 +325,10 @@ Unpack bytes into trytes.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `packed` | *Uint8Array* | The packed trytes to unpack. |
+| `packed` | `Uint8Array` | The packed trytes to unpack. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 The unpacked trytes.

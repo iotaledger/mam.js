@@ -14,7 +14,7 @@
 
 ### channelRoot
 
-▸ **channelRoot**(`channelState`: [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md)): *string*
+▸ **channelRoot**(`channelState`): `string`
 
 Get the root of the channel.
 
@@ -22,9 +22,11 @@ Get the root of the channel.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `channelState` | [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md) | The channel state to get the root. |
+| `channelState` | [IMamChannelState](../interfaces/models_imamchannelstate.imamchannelstate.md) | The channel state to get the root. |
 
-**Returns:** *string*
+#### Returns
+
+`string`
 
 The root.
 
@@ -32,7 +34,7 @@ ___
 
 ### createChannel
 
-▸ **createChannel**(`seed`: *string*, `security`: *number*, `mode`: [*MamMode*](models_mammode.md#mammode), `sideKey?`: *string*): [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md)
+▸ **createChannel**(`seed`, `security`, `mode`, `sideKey?`): [IMamChannelState](../interfaces/models_imamchannelstate.imamchannelstate.md)
 
 Create a new channel object.
 
@@ -40,12 +42,14 @@ Create a new channel object.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `seed` | *string* | The seed for the channel. |
-| `security` | *number* | The security level for the channel. |
-| `mode` | [*MamMode*](models_mammode.md#mammode) | The mode for the channel. |
-| `sideKey?` | *string* | The side key to use for restricted mode. |
+| `seed` | `string` | The seed for the channel. |
+| `security` | `number` | The security level for the channel. |
+| `mode` | [MamMode](models_mammode.md#mammode) | The mode for the channel. |
+| `sideKey?` | `string` | The side key to use for restricted mode. |
 
-**Returns:** [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md)
+#### Returns
+
+[IMamChannelState](../interfaces/models_imamchannelstate.imamchannelstate.md)
 
 The new channel state.
 
@@ -53,7 +57,7 @@ ___
 
 ### createMessage
 
-▸ **createMessage**(`channelState`: [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md), `message`: *string*): [*IMamMessage*](../interfaces/models_imammessage.imammessage.md)
+▸ **createMessage**(`channelState`, `message`): [IMamMessage](../interfaces/models_imammessage.imammessage.md)
 
 Prepare a message on the mam channel.
 
@@ -61,9 +65,11 @@ Prepare a message on the mam channel.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `channelState` | [*IMamChannelState*](../interfaces/models_imamchannelstate.imamchannelstate.md) | The channel to prepare the message for. |
-| `message` | *string* | The trytes to include in the message. |
+| `channelState` | [IMamChannelState](../interfaces/models_imamchannelstate.imamchannelstate.md) | The channel to prepare the message for. |
+| `message` | `string` | The trytes to include in the message. |
 
-**Returns:** [*IMamMessage*](../interfaces/models_imammessage.imammessage.md)
+#### Returns
+
+[IMamMessage](../interfaces/models_imammessage.imammessage.md)
 
 The prepared message, the channel state will also be updated.

@@ -21,15 +21,13 @@ Helper functions for use with text.
 
 ### constructor
 
-\+ **new TextHelper**(): [*TextHelper*](utils_texthelper.texthelper.md)
-
-**Returns:** [*TextHelper*](utils_texthelper.texthelper.md)
+• **new TextHelper**()
 
 ## Methods
 
 ### decodeNonASCII
 
-▸ `Static` **decodeNonASCII**(`value`: *undefined* \| *string*): *undefined* \| *string*
+▸ `Static` **decodeNonASCII**(`value`): `undefined` \| `string`
 
 Decode escaped Non ASCII characters.
 
@@ -37,9 +35,11 @@ Decode escaped Non ASCII characters.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `value` | *undefined* \| *string* | The value to decode. |
+| `value` | `undefined` \| `string` | The value to decode. |
 
-**Returns:** *undefined* \| *string*
+#### Returns
+
+`undefined` \| `string`
 
 The decoded value.
 
@@ -47,7 +47,7 @@ ___
 
 ### encodeNonASCII
 
-▸ `Static` **encodeNonASCII**(`value`: *undefined* \| *string*): *undefined* \| *string*
+▸ `Static` **encodeNonASCII**(`value`): `undefined` \| `string`
 
 Encode Non ASCII characters to escaped characters.
 
@@ -55,8 +55,10 @@ Encode Non ASCII characters to escaped characters.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `value` | *undefined* \| *string* | The value to encode. |
+| `value` | `undefined` \| `string` | The value to encode. |
 
-**Returns:** *undefined* \| *string*
+#### Returns
+
+`undefined` \| `string`
 
 The encoded value.
