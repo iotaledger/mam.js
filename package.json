@@ -24,7 +24,7 @@
     "author": "Martyn Janes <martyn.janes@iota.org>",
     "license": "MIT",
     "dependencies": {
-        "@iota/iota.js": "^1.5.3",
+        "@iota/iota.js": "^1.5.4",
         "big-integer": "^1.6.48"
     },
     "devDependencies": {
