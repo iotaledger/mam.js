@@ -43,7 +43,7 @@ const decodedMessage = parseMessage(mamMessage.payload, mamMessage.root, sideKey
 const node = "https://chrysalis-nodes.iota.org";
 // And then attach the message, tagging it if required.
 // Attaching will return the actual transactions attached to the tangle if you need them.
-await mamAttach(api, mamMessage, "MY9MAM");
+await mamAttach(node, mamMessage, "MY9MAM");
 
 // We can also fetch a message given its root and channel details.
 // The fetched data will contain the nextRoot and the message.
@@ -62,7 +62,7 @@ const channels = [
   { root: initialRoot2, mode: "public" },
 ];
 // One message for each channel will be retrieved
-const fetched = await mamFetchCombined(api, channels);
+const fetched = await mamFetchCombined(node, channels);
 ```
 
 ## API Reference
