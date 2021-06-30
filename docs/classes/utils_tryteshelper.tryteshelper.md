@@ -43,7 +43,7 @@ Helper functions for use with trytes.
 
 ### ALPHABET
 
-▪ `Static` **ALPHABET**: `string` = "9ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+▪ `Static` **ALPHABET**: `string` = `"9ABCDEFGHIJKLMNOPQRSTUVWXYZ"`
 
 All the characters that can be used in trytes.
 
@@ -151,7 +151,7 @@ ___
 
 ### objectFromTrytes
 
-▸ `Static` **objectFromTrytes**<T\>(`trytes`): `undefined` \| `T`
+▸ `Static` **objectFromTrytes**<`T`\>(`trytes`): `undefined` \| `T`
 
 Convert an object from Trytes.
 

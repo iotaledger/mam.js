@@ -608,8 +608,7 @@
 	        if (this.root.size === 1) {
 	            return {
 	                key: ((_a = this.root.left) === null || _a === void 0 ? void 0 : _a.privateKeyTrits)
-	                    ? this.root.left.privateKeyTrits : new Int8Array(),
-	                leaves: []
+	                    ? this.root.left.privateKeyTrits : new Int8Array(), leaves: []
 	            };
 	        }
 	        const leaves = [];
