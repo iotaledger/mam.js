@@ -1,8 +1,8 @@
-[@iota/mam.js](../README.md) / [models/IMamMessage](../modules/models_imammessage.md) / IMamMessage
+[@iota/mam.js](../README.md) / [models/IMamMessage](../modules/models_IMamMessage.md) / IMamMessage
 
 # Interface: IMamMessage
 
-[models/IMamMessage](../modules/models_imammessage.md).IMamMessage
+[models/IMamMessage](../modules/models_IMamMessage.md).IMamMessage
 
 Definition for MAM message.
 
@@ -10,9 +10,9 @@ Definition for MAM message.
 
 ### Properties
 
-- [address](models_imammessage.imammessage.md#address)
-- [payload](models_imammessage.imammessage.md#payload)
-- [root](models_imammessage.imammessage.md#root)
+- [address](models_IMamMessage.IMamMessage.md#address)
+- [payload](models_IMamMessage.IMamMessage.md#payload)
+- [root](models_IMamMessage.IMamMessage.md#root)
 
 ## Properties
 

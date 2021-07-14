@@ -6,7 +6,7 @@
 
 ### Type aliases
 
-- [MamMode](models_mammode.md#mammode)
+- [MamMode](models_mamMode.md#mammode)
 
 ## Type aliases
 

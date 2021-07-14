@@ -6,4 +6,4 @@
 
 ### Classes
 
-- [TrytesHelper](../classes/utils_tryteshelper.tryteshelper.md)
+- [TrytesHelper](../classes/utils_trytesHelper.TrytesHelper.md)

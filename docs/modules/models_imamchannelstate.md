@@ -6,4 +6,4 @@
 
 ### Interfaces
 
-- [IMamChannelState](../interfaces/models_imamchannelstate.imamchannelstate.md)
+- [IMamChannelState](../interfaces/models_IMamChannelState.IMamChannelState.md)

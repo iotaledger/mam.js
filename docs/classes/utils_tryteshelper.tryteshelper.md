@@ -1,8 +1,8 @@
-[@iota/mam.js](../README.md) / [utils/trytesHelper](../modules/utils_tryteshelper.md) / TrytesHelper
+[@iota/mam.js](../README.md) / [utils/trytesHelper](../modules/utils_trytesHelper.md) / TrytesHelper
 
 # Class: TrytesHelper
 
-[utils/trytesHelper](../modules/utils_tryteshelper.md).TrytesHelper
+[utils/trytesHelper](../modules/utils_trytesHelper.md).TrytesHelper
 
 Helper functions for use with trytes.
 
@@ -10,28 +10,28 @@ Helper functions for use with trytes.
 
 ### Constructors
 
-- [constructor](utils_tryteshelper.tryteshelper.md#constructor)
+- [constructor](utils_trytesHelper.TrytesHelper.md#constructor)
 
 ### Properties
 
-- [ALPHABET](utils_tryteshelper.tryteshelper.md#alphabet)
+- [ALPHABET](utils_trytesHelper.TrytesHelper.md#alphabet)
 
 ### Methods
 
-- [fromAscii](utils_tryteshelper.tryteshelper.md#fromascii)
-- [fromTrits](utils_tryteshelper.tryteshelper.md#fromtrits)
-- [isHash](utils_tryteshelper.tryteshelper.md#ishash)
-- [isTag](utils_tryteshelper.tryteshelper.md#istag)
-- [isTrytes](utils_tryteshelper.tryteshelper.md#istrytes)
-- [objectFromTrytes](utils_tryteshelper.tryteshelper.md#objectfromtrytes)
-- [objectToTrytes](utils_tryteshelper.tryteshelper.md#objecttotrytes)
-- [packTrytes](utils_tryteshelper.tryteshelper.md#packtrytes)
-- [stringFromTrytes](utils_tryteshelper.tryteshelper.md#stringfromtrytes)
-- [stringToTrytes](utils_tryteshelper.tryteshelper.md#stringtotrytes)
-- [toAscii](utils_tryteshelper.tryteshelper.md#toascii)
-- [toTrits](utils_tryteshelper.tryteshelper.md#totrits)
-- [tritsValue](utils_tryteshelper.tryteshelper.md#tritsvalue)
-- [unpackTrytes](utils_tryteshelper.tryteshelper.md#unpacktrytes)
+- [fromAscii](utils_trytesHelper.TrytesHelper.md#fromascii)
+- [fromTrits](utils_trytesHelper.TrytesHelper.md#fromtrits)
+- [isHash](utils_trytesHelper.TrytesHelper.md#ishash)
+- [isTag](utils_trytesHelper.TrytesHelper.md#istag)
+- [isTrytes](utils_trytesHelper.TrytesHelper.md#istrytes)
+- [objectFromTrytes](utils_trytesHelper.TrytesHelper.md#objectfromtrytes)
+- [objectToTrytes](utils_trytesHelper.TrytesHelper.md#objecttotrytes)
+- [packTrytes](utils_trytesHelper.TrytesHelper.md#packtrytes)
+- [stringFromTrytes](utils_trytesHelper.TrytesHelper.md#stringfromtrytes)
+- [stringToTrytes](utils_trytesHelper.TrytesHelper.md#stringtotrytes)
+- [toAscii](utils_trytesHelper.TrytesHelper.md#toascii)
+- [toTrits](utils_trytesHelper.TrytesHelper.md#totrits)
+- [tritsValue](utils_trytesHelper.TrytesHelper.md#tritsvalue)
+- [unpackTrytes](utils_trytesHelper.TrytesHelper.md#unpacktrytes)
 
 ## Constructors
 

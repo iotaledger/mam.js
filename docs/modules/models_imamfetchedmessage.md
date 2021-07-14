@@ -6,4 +6,4 @@
 
 ### Interfaces
 
-- [IMamFetchedMessage](../interfaces/models_imamfetchedmessage.imamfetchedmessage.md)
+- [IMamFetchedMessage](../interfaces/models_IMamFetchedMessage.IMamFetchedMessage.md)

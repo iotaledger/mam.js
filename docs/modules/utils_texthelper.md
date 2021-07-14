@@ -6,4 +6,4 @@
 
 ### Classes
 
-- [TextHelper](../classes/utils_texthelper.texthelper.md)
+- [TextHelper](../classes/utils_textHelper.TextHelper.md)

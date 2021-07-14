@@ -1,8 +1,8 @@
-[@iota/mam.js](../README.md) / [models/IMamFetchedMessage](../modules/models_imamfetchedmessage.md) / IMamFetchedMessage
+[@iota/mam.js](../README.md) / [models/IMamFetchedMessage](../modules/models_IMamFetchedMessage.md) / IMamFetchedMessage
 
 # Interface: IMamFetchedMessage
 
-[models/IMamFetchedMessage](../modules/models_imamfetchedmessage.md).IMamFetchedMessage
+[models/IMamFetchedMessage](../modules/models_IMamFetchedMessage.md).IMamFetchedMessage
 
 Definition of fetch messages.
 
@@ -10,10 +10,10 @@ Definition of fetch messages.
 
 ### Properties
 
-- [message](models_imamfetchedmessage.imamfetchedmessage.md#message)
-- [nextRoot](models_imamfetchedmessage.imamfetchedmessage.md#nextroot)
-- [root](models_imamfetchedmessage.imamfetchedmessage.md#root)
-- [tag](models_imamfetchedmessage.imamfetchedmessage.md#tag)
+- [message](models_IMamFetchedMessage.IMamFetchedMessage.md#message)
+- [nextRoot](models_IMamFetchedMessage.IMamFetchedMessage.md#nextroot)
+- [root](models_IMamFetchedMessage.IMamFetchedMessage.md#root)
+- [tag](models_IMamFetchedMessage.IMamFetchedMessage.md#tag)
 
 ## Properties
 

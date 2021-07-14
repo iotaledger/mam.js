@@ -6,4 +6,4 @@
 
 ### Interfaces
 
-- [IMamMessage](../interfaces/models_imammessage.imammessage.md)
+- [IMamMessage](../interfaces/models_IMamMessage.IMamMessage.md)

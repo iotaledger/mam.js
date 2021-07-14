@@ -1,8 +1,8 @@
-[@iota/mam.js](../README.md) / [models/IMamChannelState](../modules/models_imamchannelstate.md) / IMamChannelState
+[@iota/mam.js](../README.md) / [models/IMamChannelState](../modules/models_IMamChannelState.md) / IMamChannelState
 
 # Interface: IMamChannelState
 
-[models/IMamChannelState](../modules/models_imamchannelstate.md).IMamChannelState
+[models/IMamChannelState](../modules/models_IMamChannelState.md).IMamChannelState
 
 Definition of a channel object.
 
@@ -10,15 +10,15 @@ Definition of a channel object.
 
 ### Properties
 
-- [count](models_imamchannelstate.imamchannelstate.md#count)
-- [index](models_imamchannelstate.imamchannelstate.md#index)
-- [mode](models_imamchannelstate.imamchannelstate.md#mode)
-- [nextCount](models_imamchannelstate.imamchannelstate.md#nextcount)
-- [nextRoot](models_imamchannelstate.imamchannelstate.md#nextroot)
-- [security](models_imamchannelstate.imamchannelstate.md#security)
-- [seed](models_imamchannelstate.imamchannelstate.md#seed)
-- [sideKey](models_imamchannelstate.imamchannelstate.md#sidekey)
-- [start](models_imamchannelstate.imamchannelstate.md#start)
+- [count](models_IMamChannelState.IMamChannelState.md#count)
+- [index](models_IMamChannelState.IMamChannelState.md#index)
+- [mode](models_IMamChannelState.IMamChannelState.md#mode)
+- [nextCount](models_IMamChannelState.IMamChannelState.md#nextcount)
+- [nextRoot](models_IMamChannelState.IMamChannelState.md#nextroot)
+- [security](models_IMamChannelState.IMamChannelState.md#security)
+- [seed](models_IMamChannelState.IMamChannelState.md#seed)
+- [sideKey](models_IMamChannelState.IMamChannelState.md#sidekey)
+- [start](models_IMamChannelState.IMamChannelState.md#start)
 
 ## Properties
 
@@ -40,7 +40,7 @@ ___
 
 ### mode
 
-• **mode**: [`MamMode`](../modules/models_mammode.md#mammode)
+• **mode**: [`MamMode`](../modules/models_mamMode.md#mammode)
 
 The mode for the channel.
 

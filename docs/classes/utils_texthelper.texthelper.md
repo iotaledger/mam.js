@@ -1,8 +1,8 @@
-[@iota/mam.js](../README.md) / [utils/textHelper](../modules/utils_texthelper.md) / TextHelper
+[@iota/mam.js](../README.md) / [utils/textHelper](../modules/utils_textHelper.md) / TextHelper
 
 # Class: TextHelper
 
-[utils/textHelper](../modules/utils_texthelper.md).TextHelper
+[utils/textHelper](../modules/utils_textHelper.md).TextHelper
 
 Helper functions for use with text.
 
@@ -10,12 +10,12 @@ Helper functions for use with text.
 
 ### Constructors
 
-- [constructor](utils_texthelper.texthelper.md#constructor)
+- [constructor](utils_textHelper.TextHelper.md#constructor)
 
 ### Methods
 
-- [decodeNonASCII](utils_texthelper.texthelper.md#decodenonascii)
-- [encodeNonASCII](utils_texthelper.texthelper.md#encodenonascii)
+- [decodeNonASCII](utils_textHelper.TextHelper.md#decodenonascii)
+- [encodeNonASCII](utils_textHelper.TextHelper.md#encodenonascii)
 
 ## Constructors
 
