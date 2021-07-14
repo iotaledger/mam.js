@@ -6,6 +6,7 @@
 
 ### Modules
 
+- [index](modules/index.md)
 - [mam/channel](modules/mam_channel.md)
 - [mam/client](modules/mam_client.md)
 - [mam/parser](modules/mam_parser.md)

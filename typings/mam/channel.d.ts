@@ -1,6 +1,6 @@
-import { IMamChannelState } from "../models/IMamChannelState";
-import { IMamMessage } from "../models/IMamMessage";
-import { MamMode } from "../models/mamMode";
+import type { IMamChannelState } from "../models/IMamChannelState";
+import type { IMamMessage } from "../models/IMamMessage";
+import type { MamMode } from "../models/mamMode";
 /**
  * Create a new channel object.
  * @param seed The seed for the channel.

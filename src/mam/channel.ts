@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import { Curl } from "@iota/iota.js";
 import { MerkleTree } from "../merkle/merkleTree";
-import { IMamChannelState } from "../models/IMamChannelState";
-import { IMamMessage } from "../models/IMamMessage";
-import { MamMode } from "../models/mamMode";
+import type { IMamChannelState } from "../models/IMamChannelState";
+import type { IMamMessage } from "../models/IMamMessage";
+import type { MamMode } from "../models/mamMode";
 import { HammingDiver } from "../pearlDiver/hammingDiver";
 import { signature } from "../signing/iss-p27";
 import { concatenate } from "../utils/arrayHelper";

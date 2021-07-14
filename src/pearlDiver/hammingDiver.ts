@@ -3,7 +3,7 @@
 import { Curl } from "@iota/iota.js";
 import bigInt from "big-integer";
 import { roundThird } from "../utils/pascal";
-import { PearlDiverSearchStates } from "./pearlDiverSearchStates";
+import type { PearlDiverSearchStates } from "./pearlDiverSearchStates";
 
 /**
  * Class to perform Hamming calculation for nonce.

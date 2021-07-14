@@ -1,16 +1,17 @@
 {
-    "compilerOptions": {
-      "target": "es6",
-      "strict": true,
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "outDir": "./es",
-      "esModuleInterop": true,
-      "inlineSourceMap": true,
-      "stripInternal": true
-    },
-    "include": [
-      "src"
-    ]
-  }
-  
+  "compilerOptions": {
+    "target": "es2019",
+    "strict": true,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "importsNotUsedAsValues": "error",
+    "outDir": "./es",
+    "inlineSourceMap": true,
+    "esModuleInterop": true,
+    "stripInternal": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationDir": "typings"
+  },
+  "include": ["src"]
+}

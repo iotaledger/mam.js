@@ -1,4 +1,4 @@
-import { MamMode } from "./mamMode";
+import type { MamMode } from "./mamMode";
 /**
  * Definition of a channel object.
  */

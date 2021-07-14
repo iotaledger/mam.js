@@ -1,6 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import bigInt from "big-integer";
+import type bigInt from "big-integer";
 
 /**
  * PearDiverSearchStates for storing states during search.

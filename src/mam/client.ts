@@ -1,9 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import { Blake2b, Converter, IClient, IIndexationPayload, IMessage, IMessagesResponse, INDEXATION_PAYLOAD_TYPE, SingleNodeClient } from "@iota/iota.js";
-import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
-import { IMamMessage } from "../models/IMamMessage";
-import { MamMode } from "../models/mamMode";
+import type { IMamFetchedMessage } from "../models/IMamFetchedMessage";
+import type { IMamMessage } from "../models/IMamMessage";
+import type { MamMode } from "../models/mamMode";
 import { validateModeKey } from "../utils/guards";
 import { maskHash } from "../utils/mask";
 import { TrytesHelper } from "../utils/trytesHelper";

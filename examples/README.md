@@ -28,7 +28,7 @@ See [./listen/index.js](./listen/index.js) for more details.
 
 ## Browser
 
-This example makes use of the variant of the library which includes the iota lib dependencies `mam.browser.js`, you still need to include the `big-integer` package externally from a CDN.
+This example makes use of the variant of the library which built for the browser `index-browser.js`, you need to include the `@iota/iota.js` and  `big-integer` packages externally.
 
 Demonstrates a simple publish and fetch of ascii text data using MAM v0, the channel state is stored in `window.localStorage` between each execution.
 

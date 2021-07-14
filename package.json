@@ -1,28 +1,31 @@
 {
     "name": "@iota/mam.js",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "JavaScript implementation of Masked Authentication Message v0 for IOTA",
+    "author": "Martyn Janes <martyn.janes@iota.org>",
+    "license": "MIT",
     "scripts": {
-        "build-clean": "rimraf ./es/",
+        "build-clean": "rimraf ./es/* ./typings/*",
+        "build-lint": "eslint src --ext .ts",
         "build-compile": "tsc",
         "build-watch": "tsc --watch",
-        "build-lint": "eslint src --ext .ts",
-        "build": "npm-run-all build-clean build-compile build-lint",
-        "test": "jest",
+        "build": "run-s build-clean build-lint build-compile",
+        "test-lint": "eslint test --ext .ts",
+        "test-run": "jest",
+        "test": "run-s test-lint test-run",
+        "package-clean": "rimraf ./dist/*",
+        "package-esm": "copyfiles -u 1 es/**/* dist/esm",
+        "package-esm-rename": "node esm-modules.js ./dist/esm",
         "package-umd": "rollup --config rollup.config.js",
         "package-umd-min": "rollup --config rollup.config.js --environment MINIFY:true",
         "package-umd-browser": "rollup --config rollup.config.js --environment BROWSER:true",
         "package-umd-browser-min": "rollup --config rollup.config.js --environment BROWSER:true --environment MINIFY:true",
-        "package": "run-s package-umd package-umd-min package-umd-browser package-umd-browser-min",
-        "dist-clean": "rimraf ./dist/* ./typings/*",
-        "typings": "tsc --emitDeclarationOnly --declaration true --declarationDir typings",
+        "package": "run-s package-clean package-esm package-esm-rename package-umd package-umd-min package-umd-browser package-umd-browser-min",
         "docs-clean": "rimraf ./docs/*",
-        "docs-build": "typedoc --disableSources --excludePrivate --excludeNotDocumented --theme markdown --readme none --hideGenerator --exclude ./**/src/index.ts --out ./docs ./src",
+        "docs-build": "typedoc --disableSources --excludePrivate --excludeNotDocumented --theme markdown --readme none --hideGenerator --exclude ./**/src/index.ts,./**/src/index.*.ts,./**/src/polyfill.*.ts --out ./docs ./src",
         "docs": "npm-run-all docs-clean docs-build",
-        "dist": "run-s dist-clean build test package typings docs"
+        "dist": "run-s build test package docs"
     },
-    "author": "Martyn Janes <martyn.janes@iota.org>",
-    "license": "MIT",
     "dependencies": {
         "@iota/iota.js": "^1.6.1",
         "big-integer": "^1.6.48"
@@ -33,6 +36,7 @@
         "@types/jest": "^26.0.24",
         "@typescript-eslint/eslint-plugin": "^4.28.3",
         "@typescript-eslint/parser": "^4.28.3",
+        "copyfiles": "^2.4.1",
         "eslint": "^7.30.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-import": "^2.23.4",
@@ -48,9 +52,21 @@
         "typedoc-plugin-markdown": "^3.10.3",
         "typescript": "^4.3.5"
     },
-    "main": "dist/mam.js",
-    "module": "es/index.js",
-    "browser": "dist/mam.browser.js",
+    "main": "dist/cjs/index-node.js",
+    "browser": "dist/cjs/index-browser.js",
+    "exports": {
+        ".": {
+            "node": {
+                "import": "./dist/esm/index-node.mjs",
+                "require": "./dist/cjs/index-node.js"
+            },
+            "browser": {
+                "import": "./dist/esm/index-browser.mjs",
+                "require": "./dist/cjs/index-browser.js"
+            }
+        },
+        "./package.json": "./package.json"
+    },
     "typings": "typings/index.d.ts",
     "files": [
         "dist",

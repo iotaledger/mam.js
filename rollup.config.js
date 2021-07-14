@@ -16,9 +16,9 @@ if (process.env.MINIFY) {
 export default {
     input: './es/index.js',
     output: {
-        file: `dist/mam${process.env.BROWSER ? '.browser' : ''}${process.env.MINIFY ? '.min' : ''}.js`,
+        file: `dist/cjs/index${process.env.BROWSER ? '-browser' : '-node'}${process.env.MINIFY ? '.min' : ''}.js`,
         format: 'umd',
-        name: 'mam',
+        name: 'Mam',
         compact: process.env.MINIFY,
         globals: {
             "big-integer": "bigInt",

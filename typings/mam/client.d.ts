@@ -1,7 +1,7 @@
 import { IClient, IMessage } from "@iota/iota.js";
-import { IMamFetchedMessage } from "../models/IMamFetchedMessage";
-import { IMamMessage } from "../models/IMamMessage";
-import { MamMode } from "../models/mamMode";
+import type { IMamFetchedMessage } from "../models/IMamFetchedMessage";
+import type { IMamMessage } from "../models/IMamMessage";
+import type { MamMode } from "../models/mamMode";
 /**
  * Attach the mam message to the tangle.
  * @param client The client or node endpoint to use for sending.

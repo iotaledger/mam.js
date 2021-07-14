@@ -1,6 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { MamMode } from "../models/mamMode";
+import type { MamMode } from "../models/mamMode";
 import { TrytesHelper } from "./trytesHelper";
 
 /**

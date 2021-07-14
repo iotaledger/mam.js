@@ -8,8 +8,8 @@
     <h1>mam.js Simple Browser Example</h1>
     <pre id="console"></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big-integer/1.6.48/BigInteger.min.js"></script>
-    <script src="../../node_modules/@iota/iota.js/dist/iota.browser.js"></script>
-    <script src="../../dist/mam.browser.js"></script>
+    <script src="../../node_modules/@iota/iota.js/dist/cjs/index-browser.js"></script>
+    <script src="../../dist/cjs/index-browser.js"></script>
     <script>
         function consoleLog(message, obj) {
             const con = document.getElementById("console");
@@ -52,11 +52,11 @@
 
             // If we couldn't load the details then create a new channel.
             if (!channelState) {
-                channelState = mam.createChannel(generateSeed(81), 2, mode, sideKey)
+                channelState = Mam.createChannel(generateSeed(81), 2, mode, sideKey)
             }
 
             // Create a MAM message using the channel state.
-            const mamMessage = mam.createMessage(channelState, mam.TrytesHelper.fromAscii(asciiMessage));
+            const mamMessage = Mam.createMessage(channelState, Mam.TrytesHelper.fromAscii(asciiMessage));
 
             // Display the details for the MAM message.
             consoleLog('Seed:', channelState.seed);
@@ -66,7 +66,7 @@
 
             // Decode the message using the root and sideKey.
             // The decode is for demonstration purposes, there is no reason to decode at this point.
-            const decodedMessage = mam.parseMessage(mamMessage.payload, mamMessage.root, sideKey);
+            const decodedMessage = Mam.parseMessage(mamMessage.payload, mamMessage.root, sideKey);
 
             // Display the decoded data.
             consoleLog('Decoded NextRoot', decodedMessage.nextRoot);
@@ -81,17 +81,17 @@
 
             // So far we have shown how to create and parse a message
             // but now we actually want to attach the message to the tangle
-            const client = new mam.SingleNodeClient("https://chrysalis-nodes.iota.org");
+            const client = new Iota.SingleNodeClient("https://chrysalis-nodes.iota.org");
 
             // Attach the message.
             consoleLog('Attaching to tangle, please wait...')
-            const { messageId } = await mam.mamAttach(client, mamMessage, "MY9MAM");
+            const { messageId } = await Mam.mamAttach(client, mamMessage, "MY9MAM");
             console.log(`Message Id`, messageId);
             consoleLog(`You can view the latest message in the mam channel here`);
             consoleLink(`https://explorer.iota.org/mainnet/streams/0/${mamMessage.root}/${mode}/${sideKey}`);
 
             // Initial root
-            const initialRoot = mam.channelRoot({
+            const initialRoot = Mam.channelRoot({
                 ...channelState,
                 start: 0
             });
@@ -103,9 +103,9 @@
 
             // Try fetching it as well.
             consoleLog('Fetching from tangle, please wait...');
-            const fetched = await mam.mamFetch(client, mamMessage.root, mode, sideKey)
+            const fetched = await Mam.mamFetch(client, mamMessage.root, mode, sideKey)
             if (fetched) {
-                consoleLog('Fetched', mam.TrytesHelper.toAscii(fetched.message));
+                consoleLog('Fetched', Mam.TrytesHelper.toAscii(fetched.message));
             } else {
                 consoleLog('Nothing was fetched from the MAM channel');
             }

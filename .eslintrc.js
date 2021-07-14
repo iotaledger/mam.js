@@ -32,6 +32,14 @@ module.exports = {
             "mode": "typescript"
         }
     },
+    "ignorePatterns": [
+        ".eslintrc.js",
+        "rollup.config.js",
+        "jest.config.js",
+        "dist/**/*",
+        "es/**/*",
+        "typings/**/*"
+    ],
     "rules": {
         "@typescript-eslint/adjacent-overload-signatures": [
             "error"
@@ -124,6 +132,9 @@ module.exports = {
             "error"
         ],
         "@typescript-eslint/no-dupe-class-members": [
+            "error"
+        ],
+        "@typescript-eslint/no-duplicate-imports": [
             "error"
         ],
         "@typescript-eslint/no-dynamic-delete": [
@@ -648,7 +659,7 @@ module.exports = {
             "error"
         ],
         "no-control-regex": [
-            "error"
+            "off"
         ],
         "no-debugger": [
             "error"
@@ -672,10 +683,10 @@ module.exports = {
             "off"
         ],
         "no-duplicate-case": [
-            "error"
+            "off"
         ],
         "no-duplicate-imports": [
-            "error"
+            "off"
         ],
         "no-else-return": [
             "error"
@@ -1157,6 +1168,9 @@ module.exports = {
         "unicorn/custom-error-definition": [
             "off"
         ],
+        "unicorn/empty-brace-spaces": [
+            "off"
+        ],
         "unicorn/error-message": [
             "error"
         ],
@@ -1170,7 +1184,7 @@ module.exports = {
             "error"
         ],
         "unicorn/explicit-length-check": [
-            "error"
+            "off"
         ],
         "unicorn/filename-case": [
             "off"
@@ -1189,6 +1203,9 @@ module.exports = {
         ],
         "unicorn/no-array-instanceof": [
             "error"
+        ],
+        "unicorn/no-array-push-push": [
+            "off"
         ],
         "unicorn/no-console-spaces": [
             "error"
@@ -1238,6 +1255,9 @@ module.exports = {
         "unicorn/number-literal-case": [
             "error"
         ],
+        "unicorn/numeric-separators-style": [
+            "off"
+        ],
         "unicorn/prefer-add-event-listener": [
             "error"
         ],
@@ -1256,6 +1276,9 @@ module.exports = {
         "unicorn/prefer-modern-dom-apis": [
             "error"
         ],
+        "unicorn/prefer-module": [
+            "off"
+        ],
         "unicorn/prefer-negative-index": [
             "error"
         ],
@@ -1264,6 +1287,9 @@ module.exports = {
         ],
         "unicorn/prefer-node-remove": [
             "error"
+        ],
+        "unicorn/prefer-node-protocol": [
+            "off"
         ],
         "unicorn/prefer-number-properties": [
             "error"
@@ -1291,6 +1317,9 @@ module.exports = {
         ],
         "unicorn/prefer-string-slice": [
             "error"
+        ],
+        "unicorn/prefer-switch": [
+            "off"
         ],
         "unicorn/prefer-text-content": [
             "error"
