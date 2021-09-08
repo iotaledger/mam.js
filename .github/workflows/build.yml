@@ -2,7 +2,7 @@ name: Library Build Main/Develop
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     paths:
       - "src/**"
       - ".github/workflows/build.yml"
