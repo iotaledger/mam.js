@@ -5,12 +5,12 @@ on:
     branches: [main]
     paths:
       - "src/**"
-      - ".github/workflows/main.yml"
+      - ".github/workflows/build.yml"
   pull_request:
-    branches: [develop]
+    branches: [dev]
     paths:
       - "src/**"
-      - ".github/workflows/develop.yml"
+      - ".github/workflows/build.yml"
 
 
 jobs:
