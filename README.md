@@ -67,7 +67,7 @@ const fetched = await mamFetchCombined(node, channels);
 
 ## API Reference
 
-See the API reference for the JavaScript implementation [here](./docs/README.md).
+See the API reference for the JavaScript implementation [here](./docs/api.md).
 
 ## Examples
 
