@@ -1,6 +1,6 @@
 {
     "name": "@iota/mam.js",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "JavaScript implementation of Masked Authentication Message v0 for IOTA",
     "author": "Martyn Janes <martyn.janes@iota.org>",
     "license": "MIT",
@@ -27,8 +27,7 @@
         "dist": "run-s build test package docs"
     },
     "dependencies": {
-        "@iota/iota.js": "^1.6.1",
-        "big-integer": "^1.6.48"
+        "@iota/iota.js": "^1.6.3"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^20.0.0",
@@ -54,6 +53,7 @@
     },
     "main": "dist/cjs/index-node.js",
     "browser": "dist/cjs/index-browser.js",
+    "module": "dist/esm/index-browser.mjs",
     "exports": {
         ".": {
             "node": {
