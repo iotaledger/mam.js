@@ -2,7 +2,7 @@
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@iota/iota.js'), require('big-integer')) :
     typeof define === 'function' && define.amd ? define(['exports', '@iota/iota.js', 'big-integer'], factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Mam = {}, global.Iota, global.bigInt));
-}(this, (function (exports, iota_js, bigInt) { 'use strict';
+})(this, (function (exports, iota_js, bigInt) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -910,8 +910,8 @@
          */
         bitWiseNot(value) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return bigInt__default['default'](1).shiftLeft(64)
-                .subtract(bigInt__default['default'](1))
+            return bigInt__default["default"](1).shiftLeft(64)
+                .subtract(bigInt__default["default"](1))
                 .subtract(value);
         }
         /**
@@ -926,7 +926,7 @@
                 let sum = 0;
                 for (let j = 0; j < securityLevel; j++) {
                     for (let k = j * 243 / 3; k < (j + 1) * 243 / 3; k++) {
-                        const bIndex = bigInt__default['default'](1).shiftLeft(i);
+                        const bIndex = bigInt__default["default"](1).shiftLeft(i);
                         if (low[k].and(bIndex).equals(0)) {
                             sum--;
                         }
@@ -956,7 +956,7 @@
         trinaryGet(low, high, arrLength, index) {
             const result = new Int8Array(arrLength);
             for (let i = 0; i < arrLength; i++) {
-                const bIndex = bigInt__default['default'](index);
+                const bIndex = bigInt__default["default"](index);
                 const l = low[i].shiftRight(bIndex).and(1);
                 const h = high[i].shiftRight(bIndex).and(1);
                 if (l.equals(1) && h.equals(0)) {
@@ -975,43 +975,43 @@
     /**
      * Max 64 bit value.
      */
-    HammingDiver.MAX_VALUE = bigInt__default['default']("FFFFFFFFFFFFFFFF", 16);
+    HammingDiver.MAX_VALUE = bigInt__default["default"]("FFFFFFFFFFFFFFFF", 16);
     /**
      * Min 64 bit value.
      */
-    HammingDiver.MIN_VALUE = bigInt__default['default']("0000000000000000", 16);
+    HammingDiver.MIN_VALUE = bigInt__default["default"]("0000000000000000", 16);
     /**
      * High 0.
      */
-    HammingDiver.HIGH_0 = bigInt__default['default']("B6DB6DB6DB6DB6DB", 16);
+    HammingDiver.HIGH_0 = bigInt__default["default"]("B6DB6DB6DB6DB6DB", 16);
     /**
      * High 1.
      */
-    HammingDiver.HIGH_1 = bigInt__default['default']("8FC7E3F1F8FC7E3F", 16);
+    HammingDiver.HIGH_1 = bigInt__default["default"]("8FC7E3F1F8FC7E3F", 16);
     /**
      * High 2.
      */
-    HammingDiver.HIGH_2 = bigInt__default['default']("FFC01FFFF803FFFF", 16);
+    HammingDiver.HIGH_2 = bigInt__default["default"]("FFC01FFFF803FFFF", 16);
     /**
      * High 3.
      */
-    HammingDiver.HIGH_3 = bigInt__default['default']("003FFFFFFFFFFFFF", 16);
+    HammingDiver.HIGH_3 = bigInt__default["default"]("003FFFFFFFFFFFFF", 16);
     /**
      * Low 0.
      */
-    HammingDiver.LOW_0 = bigInt__default['default']("DB6DB6DB6DB6DB6D", 16);
+    HammingDiver.LOW_0 = bigInt__default["default"]("DB6DB6DB6DB6DB6D", 16);
     /**
      * Low 1.
      */
-    HammingDiver.LOW_1 = bigInt__default['default']("F1F8FC7E3F1F8FC7", 16);
+    HammingDiver.LOW_1 = bigInt__default["default"]("F1F8FC7E3F1F8FC7", 16);
     /**
      * Low 2.
      */
-    HammingDiver.LOW_2 = bigInt__default['default']("7FFFE00FFFFC01FF", 16);
+    HammingDiver.LOW_2 = bigInt__default["default"]("7FFFE00FFFFC01FF", 16);
     /**
      * Low 3.
      */
-    HammingDiver.LOW_3 = bigInt__default['default']("FFC0000007FFFFFF", 16);
+    HammingDiver.LOW_3 = bigInt__default["default"]("FFC0000007FFFFFF", 16);
     /**
      * Number of rounds.
      */
@@ -1476,4 +1476,4 @@
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
