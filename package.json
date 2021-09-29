@@ -27,7 +27,7 @@
         "dist": "run-s build test package docs"
     },
     "dependencies": {
-        "@iota/iota.js": "^1.6.3"
+        "@iota/iota.js": "^1.7.0"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^20.0.0",
