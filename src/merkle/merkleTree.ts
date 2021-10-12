@@ -1,6 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Curl } from "@iota/iota.js";
+import { Curl } from "@iota/crypto.js";
 import { TrytesHelper } from "../utils/trytesHelper";
 import { generateAddress } from "./merkleHashGenerator";
 import { MerkleNode } from "./merkleNode";

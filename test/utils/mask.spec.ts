@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable max-len */
-import { Curl } from "@iota/iota.js";
+import { Curl } from "@iota/crypto.js";
 import * as crypto from "crypto";
 import { mask, maskHash, unmask } from "../../src/utils/mask";
 import { TrytesHelper } from "../../src/utils/trytesHelper";

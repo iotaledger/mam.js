@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Blake2b, Converter, IClient, IIndexationPayload, IMessage, IMessagesResponse, INDEXATION_PAYLOAD_TYPE, SingleNodeClient } from "@iota/iota.js";
+import { Blake2b } from "@iota/crypto.js";
+import { IClient, IIndexationPayload, IMessage, IMessagesResponse, INDEXATION_PAYLOAD_TYPE, SingleNodeClient } from "@iota/iota.js";
+import { Converter } from "@iota/util.js";
 import type { IMamFetchedMessage } from "../models/IMamFetchedMessage";
 import type { IMamMessage } from "../models/IMamMessage";
 import type { MamMode } from "../models/mamMode";

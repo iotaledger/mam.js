@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@iota/iota.js'), require('big-integer')) :
-    typeof define === 'function' && define.amd ? define(['exports', '@iota/iota.js', 'big-integer'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Mam = {}, global.Iota, global.bigInt));
-})(this, (function (exports, iota_js, bigInt) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@iota/crypto.js'), require('@iota/util.js'), require('big-integer'), require('@iota/iota.js')) :
+    typeof define === 'function' && define.amd ? define(['exports', '@iota/crypto.js', '@iota/util.js', 'big-integer', '@iota/iota.js'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Mam = {}, global.IotaCrypto, global.IotaUtil, global.bigInt, global.Iota));
+})(this, (function (exports, crypto_js, util_js, bigInt, iota_js) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -217,7 +217,7 @@
             if (remainder > 0) {
                 allBits += "1".repeat(8 - remainder);
             }
-            return iota_js.Converter.binaryToBytes(allBits);
+            return util_js.Converter.binaryToBytes(allBits);
         }
         /**
          * Unpack bytes into trytes.
@@ -225,7 +225,7 @@
          * @returns The unpacked trytes.
          */
         static unpackTrytes(packed) {
-            const allBits = iota_js.Converter.bytesToBinary(packed);
+            const allBits = util_js.Converter.bytesToBinary(packed);
             const trytes = [];
             for (let i = 0; i < allBits.length; i += 5) {
                 const charBits = allBits.slice(i, i + 5);
@@ -278,7 +278,7 @@
     // Copyright 2021 IOTA Stiftung
     const PRIVATE_KEY_NUM_FRAGMENTS = 27;
     // @internal
-    const PRIVATE_KEY_FRAGMENT_LENGTH = PRIVATE_KEY_NUM_FRAGMENTS * iota_js.Curl.HASH_LENGTH;
+    const PRIVATE_KEY_FRAGMENT_LENGTH = PRIVATE_KEY_NUM_FRAGMENTS * crypto_js.Curl.HASH_LENGTH;
     const MIN_TRYTE_VALUE = -13;
     const MAX_TRYTE_VALUE = 13;
     const MIN_TRIT_VALUE = -1;
@@ -291,7 +291,7 @@
      * @internal
      */
     function subseed(seed, index) {
-        const sponge = new iota_js.Curl(27);
+        const sponge = new crypto_js.Curl(27);
         const subseedPreimage = seed.slice();
         let localIndex = index;
         while (localIndex-- > 0) {
@@ -305,7 +305,7 @@
             }
         }
         sponge.absorb(subseedPreimage, 0, subseedPreimage.length);
-        const ss = new Int8Array(iota_js.Curl.HASH_LENGTH);
+        const ss = new Int8Array(crypto_js.Curl.HASH_LENGTH);
         sponge.squeeze(ss, 0, ss.length);
         return ss;
     }
@@ -317,11 +317,11 @@
      * @internal
      */
     function digestFromSubseed(subSeed, securityLevel) {
-        const curl1 = new iota_js.Curl(27);
-        const curl2 = new iota_js.Curl(27);
-        const curl3 = new iota_js.Curl(27);
-        const length = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH / iota_js.Curl.HASH_LENGTH;
-        const digest = new Int8Array(iota_js.Curl.HASH_LENGTH);
+        const curl1 = new crypto_js.Curl(27);
+        const curl2 = new crypto_js.Curl(27);
+        const curl3 = new crypto_js.Curl(27);
+        const length = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH / crypto_js.Curl.HASH_LENGTH;
+        const digest = new Int8Array(crypto_js.Curl.HASH_LENGTH);
         curl1.absorb(subSeed, 0, subSeed.length);
         for (let i = 0; i < length; i++) {
             curl1.squeeze(digest, 0, digest.length);
@@ -342,9 +342,9 @@
      * @internal
      */
     function address(digests) {
-        const sponge = new iota_js.Curl(27);
+        const sponge = new crypto_js.Curl(27);
         sponge.absorb(digests, 0, digests.length);
-        const addressTrits = new Int8Array(iota_js.Curl.HASH_LENGTH);
+        const addressTrits = new Int8Array(crypto_js.Curl.HASH_LENGTH);
         sponge.squeeze(addressTrits, 0, addressTrits.length);
         return addressTrits;
     }
@@ -359,13 +359,13 @@
         const keyLength = securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH;
         const keyTrits = new Int8Array(keyLength);
         const actualKeyTrits = new Int8Array(keyLength);
-        const sponge = new iota_js.Curl(27);
+        const sponge = new crypto_js.Curl(27);
         sponge.absorb(subSeed, 0, subSeed.length);
         sponge.squeeze(keyTrits, 0, keyTrits.length);
-        for (let i = 0; i < keyLength / iota_js.Curl.HASH_LENGTH; i++) {
-            const offset = i * iota_js.Curl.HASH_LENGTH;
+        for (let i = 0; i < keyLength / crypto_js.Curl.HASH_LENGTH; i++) {
+            const offset = i * crypto_js.Curl.HASH_LENGTH;
             sponge.reset();
-            sponge.absorb(keyTrits, offset, iota_js.Curl.HASH_LENGTH);
+            sponge.absorb(keyTrits, offset, crypto_js.Curl.HASH_LENGTH);
             actualKeyTrits.set(sponge.rate(), offset);
         }
         return actualKeyTrits;
@@ -379,15 +379,15 @@
      */
     function signature(hashTrits, key) {
         const signatures = new Int8Array(key.length);
-        const sponge = new iota_js.Curl(27);
-        for (let i = 0; i < key.length / iota_js.Curl.HASH_LENGTH; i++) {
-            let buffer = key.subarray(i * iota_js.Curl.HASH_LENGTH, (i + 1) * iota_js.Curl.HASH_LENGTH);
+        const sponge = new crypto_js.Curl(27);
+        for (let i = 0; i < key.length / crypto_js.Curl.HASH_LENGTH; i++) {
+            let buffer = key.subarray(i * crypto_js.Curl.HASH_LENGTH, (i + 1) * crypto_js.Curl.HASH_LENGTH);
             for (let k = 0; k < MAX_TRYTE_VALUE - (hashTrits[i * 3] + (hashTrits[(i * 3) + 1] * 3) + (hashTrits[(i * 3) + 2] * 9)); k++) {
                 sponge.reset();
                 sponge.absorb(buffer, 0, buffer.length);
                 buffer = sponge.rate();
             }
-            signatures.set(buffer, i * iota_js.Curl.HASH_LENGTH);
+            signatures.set(buffer, i * crypto_js.Curl.HASH_LENGTH);
         }
         return signatures;
     }
@@ -398,7 +398,7 @@
      * @internal
      */
     function checksumSecurity(hash) {
-        const dataSum1 = hash.slice(0, iota_js.Curl.HASH_LENGTH / 3);
+        const dataSum1 = hash.slice(0, crypto_js.Curl.HASH_LENGTH / 3);
         let sum1 = 0;
         for (let i = 0; i < dataSum1.length; i++) {
             sum1 += dataSum1[i];
@@ -406,7 +406,7 @@
         if (sum1 === 0) {
             return 1;
         }
-        const dataSum2 = hash.slice(0, 2 * iota_js.Curl.HASH_LENGTH / 3);
+        const dataSum2 = hash.slice(0, 2 * crypto_js.Curl.HASH_LENGTH / 3);
         let sum2 = 0;
         for (let i = 0; i < dataSum2.length; i++) {
             sum2 += dataSum2[i];
@@ -428,16 +428,16 @@
      * @internal
      */
     function digestFromSignature(hash, sig) {
-        const sponge = new iota_js.Curl(27);
+        const sponge = new crypto_js.Curl(27);
         const bytes = new Int8Array(sig.length);
-        for (let i = 0; i < (sig.length / iota_js.Curl.HASH_LENGTH); i++) {
-            let innerBytes = sig.slice(i * iota_js.Curl.HASH_LENGTH, (i + 1) * iota_js.Curl.HASH_LENGTH);
+        for (let i = 0; i < (sig.length / crypto_js.Curl.HASH_LENGTH); i++) {
+            let innerBytes = sig.slice(i * crypto_js.Curl.HASH_LENGTH, (i + 1) * crypto_js.Curl.HASH_LENGTH);
             for (let j = 0; j < (hash[i * 3] + (hash[(i * 3) + 1] * 3) + (hash[(i * 3) + 2] * 9)) - MIN_TRYTE_VALUE; j++) {
                 sponge.reset();
                 sponge.absorb(innerBytes, 0, innerBytes.length);
                 innerBytes = sponge.rate();
             }
-            bytes.set(innerBytes, i * iota_js.Curl.HASH_LENGTH);
+            bytes.set(innerBytes, i * crypto_js.Curl.HASH_LENGTH);
         }
         sponge.reset();
         sponge.absorb(bytes, 0, bytes.length);
@@ -516,11 +516,11 @@
          * @returns The new sibling root.
          */
         static root(rate, siblings, index) {
-            const sponge = new iota_js.Curl(27);
+            const sponge = new crypto_js.Curl(27);
             let i = 1;
-            const numChunks = Math.ceil(siblings.length / iota_js.Curl.HASH_LENGTH);
+            const numChunks = Math.ceil(siblings.length / crypto_js.Curl.HASH_LENGTH);
             for (let c = 0; c < numChunks; c++) {
-                const chunk = siblings.slice(c * iota_js.Curl.HASH_LENGTH, (c + 1) * iota_js.Curl.HASH_LENGTH);
+                const chunk = siblings.slice(c * crypto_js.Curl.HASH_LENGTH, (c + 1) * crypto_js.Curl.HASH_LENGTH);
                 sponge.reset();
                 // eslint-disable-next-line no-bitwise
                 if ((i & index) === 0) {
@@ -590,10 +590,10 @@
                 const right = (i + 1 < leaves.length) ? leaves[i + 1] : undefined;
                 let addressTrits;
                 if (right) {
-                    const sponge = new iota_js.Curl(27);
+                    const sponge = new crypto_js.Curl(27);
                     sponge.absorb(left.addressTrits, 0, left.addressTrits.length);
                     sponge.absorb(right.addressTrits, 0, right.addressTrits.length);
-                    addressTrits = new Int8Array(iota_js.Curl.HASH_LENGTH);
+                    addressTrits = new Int8Array(crypto_js.Curl.HASH_LENGTH);
                     sponge.squeeze(addressTrits, 0, addressTrits.length);
                 }
                 else {
@@ -790,11 +790,11 @@
          */
         search(trits, securityLevel, length, offset) {
             const state = this.prepareTrits(trits, offset);
-            let size = Math.min(length, iota_js.Curl.HASH_LENGTH) - offset;
+            let size = Math.min(length, crypto_js.Curl.HASH_LENGTH) - offset;
             let index = 0;
             while (index === 0) {
                 const incrementResult = this.increment(state, offset + (size * 2 / 3), offset + size);
-                size = Math.min(roundThird(offset + (size * 2 / 3) + incrementResult), iota_js.Curl.HASH_LENGTH) - offset;
+                size = Math.min(roundThird(offset + (size * 2 / 3) + incrementResult), crypto_js.Curl.HASH_LENGTH) - offset;
                 const curlCopy = {
                     low: state.low.slice(),
                     high: state.high.slice()
@@ -811,7 +811,7 @@
          * @returns The prepared trits.
          */
         prepareTrits(trits, offset) {
-            const initialState = this.tritsToBigInt(trits, iota_js.Curl.STATE_LENGTH);
+            const initialState = this.tritsToBigInt(trits, crypto_js.Curl.STATE_LENGTH);
             initialState.low[offset] = HammingDiver.LOW_0;
             initialState.low[offset + 1] = HammingDiver.LOW_1;
             initialState.low[offset + 2] = HammingDiver.LOW_2;
@@ -885,10 +885,10 @@
             let curlScratchpadIndex = 0;
             for (let round = 0; round < HammingDiver.ROUNDS; round++) {
                 const curlScratchpad = {
-                    low: searchStates.low.slice(0, iota_js.Curl.STATE_LENGTH),
-                    high: searchStates.high.slice(0, iota_js.Curl.STATE_LENGTH)
+                    low: searchStates.low.slice(0, crypto_js.Curl.STATE_LENGTH),
+                    high: searchStates.high.slice(0, crypto_js.Curl.STATE_LENGTH)
                 };
-                for (let stateIndex = 0; stateIndex < iota_js.Curl.STATE_LENGTH; stateIndex++) {
+                for (let stateIndex = 0; stateIndex < crypto_js.Curl.STATE_LENGTH; stateIndex++) {
                     const alpha = curlScratchpad.low[curlScratchpadIndex];
                     const beta = curlScratchpad.high[curlScratchpadIndex];
                     curlScratchpadIndex += curlScratchpadIndex < 365 ? 364 : -365;
@@ -1073,9 +1073,9 @@
      * @internal
      */
     function maskHash(keyTrits) {
-        const sponge = new iota_js.Curl(81);
+        const sponge = new crypto_js.Curl(81);
         sponge.absorb(keyTrits, 0, keyTrits.length);
-        const finalKeyTrits = new Int8Array(iota_js.Curl.HASH_LENGTH);
+        const finalKeyTrits = new Int8Array(crypto_js.Curl.HASH_LENGTH);
         sponge.squeeze(finalKeyTrits, 0, finalKeyTrits.length);
         return finalKeyTrits;
     }
@@ -1088,13 +1088,13 @@
      */
     function mask(payload, sponge) {
         const keyChunk = sponge.rate();
-        const numChunks = Math.ceil(payload.length / iota_js.Curl.HASH_LENGTH);
+        const numChunks = Math.ceil(payload.length / crypto_js.Curl.HASH_LENGTH);
         for (let c = 0; c < numChunks; c++) {
-            const chunk = payload.slice(c * iota_js.Curl.HASH_LENGTH, (c + 1) * iota_js.Curl.HASH_LENGTH);
+            const chunk = payload.slice(c * crypto_js.Curl.HASH_LENGTH, (c + 1) * crypto_js.Curl.HASH_LENGTH);
             sponge.absorb(chunk, 0, chunk.length);
             const state = sponge.rate();
             for (let i = 0; i < chunk.length; i++) {
-                payload[(c * iota_js.Curl.HASH_LENGTH) + i] = tritSum(chunk[i], keyChunk[i]);
+                payload[(c * crypto_js.Curl.HASH_LENGTH) + i] = tritSum(chunk[i], keyChunk[i]);
                 keyChunk[i] = state[i];
             }
         }
@@ -1109,18 +1109,18 @@
      */
     function unmask(payload, sponge) {
         const unmasked = new Int8Array(payload);
-        const limit = Math.ceil(unmasked.length / iota_js.Curl.HASH_LENGTH) * iota_js.Curl.HASH_LENGTH;
+        const limit = Math.ceil(unmasked.length / crypto_js.Curl.HASH_LENGTH) * crypto_js.Curl.HASH_LENGTH;
         let state;
         for (let c = 0; c < limit; c++) {
-            const indexInChunk = c % iota_js.Curl.HASH_LENGTH;
+            const indexInChunk = c % crypto_js.Curl.HASH_LENGTH;
             if (indexInChunk === 0) {
                 state = sponge.rate();
             }
             if (state) {
                 unmasked[c] = tritSum(unmasked[c], -state[indexInChunk]);
             }
-            if (indexInChunk === iota_js.Curl.HASH_LENGTH - 1) {
-                sponge.absorb(unmasked, Math.floor(c / iota_js.Curl.HASH_LENGTH) * iota_js.Curl.HASH_LENGTH, iota_js.Curl.HASH_LENGTH);
+            if (indexInChunk === crypto_js.Curl.HASH_LENGTH - 1) {
+                sponge.absorb(unmasked, Math.floor(c / crypto_js.Curl.HASH_LENGTH) * crypto_js.Curl.HASH_LENGTH, crypto_js.Curl.HASH_LENGTH);
             }
         }
         return unmasked;
@@ -1211,7 +1211,7 @@
         const indexTrits = pascalEncode(channelState.index);
         const messageLengthTrits = pascalEncode(messageTrits.length);
         const subtree = tree.getSubtree(channelState.index);
-        const sponge = new iota_js.Curl(27);
+        const sponge = new crypto_js.Curl(27);
         const sideKeyTrits = TrytesHelper.toTrits((_a = channelState.sideKey) !== null && _a !== void 0 ? _a : "9".repeat(81));
         sponge.absorb(sideKeyTrits, 0, sideKeyTrits.length);
         sponge.absorb(tree.root.addressTrits, 0, tree.root.addressTrits.length);
@@ -1222,13 +1222,13 @@
         payload = concatenate([payload, maskedNextRoot]);
         // Calculate the nonce for the message so far
         const hammingDiver = new HammingDiver();
-        const nonceTrits = hammingDiver.search(sponge.rate(iota_js.Curl.STATE_LENGTH), channelState.security, iota_js.Curl.HASH_LENGTH / 3, 0);
+        const nonceTrits = hammingDiver.search(sponge.rate(crypto_js.Curl.STATE_LENGTH), channelState.security, crypto_js.Curl.HASH_LENGTH / 3, 0);
         mask(nonceTrits, sponge);
         payload = concatenate([payload, nonceTrits]);
         // Create the signature and add the sibling information
         const sig = signature(sponge.rate(), subtree.key);
         const subtreeTrits = concatenate(subtree.leaves.map(l => l.addressTrits));
-        const siblingsCount = subtreeTrits.length / iota_js.Curl.HASH_LENGTH;
+        const siblingsCount = subtreeTrits.length / crypto_js.Curl.HASH_LENGTH;
         const encryptedSignature = mask(concatenate([sig, pascalEncode(siblingsCount), subtreeTrits]), sponge);
         // Insert the signature and pad if necessary
         payload = concatenate([payload, encryptedSignature]);
@@ -1272,17 +1272,17 @@
         const messageData = pascalDecode(payloadTrits.slice(indexData.end));
         const messageLength = messageData.value;
         const nextRootStart = indexData.end + messageData.end;
-        const messageStart = nextRootStart + iota_js.Curl.HASH_LENGTH;
+        const messageStart = nextRootStart + crypto_js.Curl.HASH_LENGTH;
         const messageEnd = messageStart + messageLength;
         // Hash the key, root and payload
-        const sponge = new iota_js.Curl(27);
+        const sponge = new crypto_js.Curl(27);
         sponge.absorb(channelKeyTrits, 0, channelKeyTrits.length);
         sponge.absorb(rootTrits, 0, rootTrits.length);
         sponge.absorb(payloadTrits, 0, nextRootStart);
         // Decrypt the metadata
-        const nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + iota_js.Curl.HASH_LENGTH), sponge);
+        const nextRoot = unmask(payloadTrits.slice(nextRootStart, nextRootStart + crypto_js.Curl.HASH_LENGTH), sponge);
         const message = unmask(payloadTrits.slice(messageStart, messageStart + messageLength), sponge);
-        const nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + (iota_js.Curl.HASH_LENGTH / 3)), sponge);
+        const nonce = unmask(payloadTrits.slice(messageEnd, messageEnd + (crypto_js.Curl.HASH_LENGTH / 3)), sponge);
         const hmac = sponge.rate();
         // Check the security level is valid
         const securityLevel = checksumSecurity(hmac);
@@ -1302,7 +1302,7 @@
         let recalculatedRoot = sponge.rate();
         if (siblingsCount !== 0) {
             const siblingsStart = (securityLevel * PRIVATE_KEY_FRAGMENT_LENGTH) + siblingsCountData.end;
-            const siblings = decryptedMetadata.slice(siblingsStart, siblingsStart + (siblingsCount * iota_js.Curl.HASH_LENGTH));
+            const siblings = decryptedMetadata.slice(siblingsStart, siblingsStart + (siblingsCount * crypto_js.Curl.HASH_LENGTH));
             recalculatedRoot = MerkleTree.root(recalculatedRoot, siblings, index);
         }
         // Make sure the root matches the calculated one
@@ -1340,11 +1340,11 @@
             data.set(packedTag, 1);
         }
         data.set(packedData, 1 + packedTaglength);
-        const hashedAddress = iota_js.Blake2b.sum256(iota_js.Converter.utf8ToBytes(mamMessage.address));
+        const hashedAddress = crypto_js.Blake2b.sum256(util_js.Converter.utf8ToBytes(mamMessage.address));
         const indexationPayload = {
             type: iota_js.INDEXATION_PAYLOAD_TYPE,
-            index: iota_js.Converter.bytesToHex(hashedAddress),
-            data: iota_js.Converter.bytesToHex(data)
+            index: util_js.Converter.bytesToHex(hashedAddress),
+            data: util_js.Converter.bytesToHex(data)
         };
         const message = {
             payload: indexationPayload
@@ -1369,7 +1369,7 @@
         validateModeKey(mode, sideKey);
         const localClient = typeof client === "string" ? new iota_js.SingleNodeClient(client) : client;
         const messageAddress = decodeAddress(root, mode);
-        const hashedAddress = iota_js.Blake2b.sum256(iota_js.Converter.utf8ToBytes(messageAddress));
+        const hashedAddress = crypto_js.Blake2b.sum256(util_js.Converter.utf8ToBytes(messageAddress));
         try {
             const messagesResponse = await localClient.messagesFind(hashedAddress);
             const messages = [];
@@ -1441,7 +1441,7 @@
         for (const message of messages) {
             // We only use indexation payload for storing mam messages
             if (((_a = message.payload) === null || _a === void 0 ? void 0 : _a.type) === iota_js.INDEXATION_PAYLOAD_TYPE && message.payload.data) {
-                const payloadBytes = iota_js.Converter.hexToBytes(message.payload.data);
+                const payloadBytes = util_js.Converter.hexToBytes(message.payload.data);
                 // We have a minimum size for the message payload
                 if (payloadBytes.length > 100) {
                     const packedTagLength = payloadBytes[0];

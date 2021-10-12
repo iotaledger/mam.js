@@ -1,6 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Curl } from "@iota/iota.js";
+import { Curl } from "@iota/crypto.js";
 
 const PRIVATE_KEY_NUM_FRAGMENTS: number = 27;
 // @internal

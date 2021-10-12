@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Blake2b, Converter, INDEXATION_PAYLOAD_TYPE, SingleNodeClient } from "@iota/iota.js";
+import { Blake2b } from "@iota/crypto.js";
+import { INDEXATION_PAYLOAD_TYPE, SingleNodeClient } from "@iota/iota.js";
+import { Converter } from "@iota/util.js";
 import { validateModeKey } from "../utils/guards.mjs";
 import { maskHash } from "../utils/mask.mjs";
 import { TrytesHelper } from "../utils/trytesHelper.mjs";

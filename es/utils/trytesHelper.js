@@ -1,6 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Converter } from "@iota/iota.js";
+import { Converter } from "@iota/util.js";
 import { TextHelper } from "./textHelper";
 /**
  * Helper functions for use with trytes.

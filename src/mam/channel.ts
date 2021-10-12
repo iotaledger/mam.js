@@ -1,6 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Curl } from "@iota/iota.js";
+import { Curl } from "@iota/crypto.js";
 import { MerkleTree } from "../merkle/merkleTree";
 import type { IMamChannelState } from "../models/IMamChannelState";
 import type { IMamMessage } from "../models/IMamMessage";
