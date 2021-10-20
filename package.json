@@ -34,7 +34,7 @@
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^21.0.0",
-        "@rollup/plugin-node-resolve": "^13.0.5",
+        "@rollup/plugin-node-resolve": "^13.0.6",
         "@types/jest": "^27.0.2",
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
