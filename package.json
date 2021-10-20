@@ -33,7 +33,7 @@
         "big-integer": "^1.6.50"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^21.0.0",
+        "@rollup/plugin-commonjs": "^21.0.1",
         "@rollup/plugin-node-resolve": "^13.0.5",
         "@types/jest": "^27.0.2",
         "@typescript-eslint/eslint-plugin": "^5.1.0",
