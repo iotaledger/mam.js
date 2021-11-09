@@ -77,11 +77,11 @@ export async function executeRoute(
     verboseLogging: boolean): Promise<void> {
     let response: IResponse;
     const start = Date.now();
-    let filteredParams;
+    let filteredParams: { [id: string]: unknown };
     let status = HttpStatusCodes.BAD_REQUEST;
 
     try {
-        let params;
+        let params: { [id: string]: unknown };
         let body;
         if (route.dataBody) {
             body = req.body;
@@ -197,7 +197,7 @@ function logParams(obj: { [id: string]: unknown }): { [id: string]: unknown } {
             if (prop.constructor.name === "Object") {
                 newobj[key] = logParams(prop as { [id: string]: unknown });
             } else if (Array.isArray(prop)) {
-                newobj[key] = prop.map(item => logParams(item));
+                newobj[key] = prop.map((item: { [id: string]: unknown }) => logParams(item));
             } else {
                 newobj[key] = prop;
             }
@@ -227,7 +227,7 @@ export function cors(
     } else if (allowOrigins) {
         const requestOrigin = req.headers.origin;
         const origins = Array.isArray(allowOrigins) ? allowOrigins : allowOrigins.split(";");
-        let isAllowed;
+        let isAllowed: string;
         for (const origin of origins) {
             if (requestOrigin === origin || origin === "*") {
                 isAllowed = origin;

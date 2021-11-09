@@ -55,13 +55,13 @@ export async function publish(config: IConfiguration, request: IPublishRequest):
         channelState.start = request.index;
     }
 
-    let data;
+    let data: string;
     if (request.dataType === "json") {
         data = TrytesHelper.objectToTrytes(request.data);
     } else if (request.dataType === "text") {
         data = TrytesHelper.stringToTrytes(request.data as string);
     } else {
-        data = request.data;
+        data = request.data as string;
     }
 
     const mamMessage = createMessage(channelState, data);
