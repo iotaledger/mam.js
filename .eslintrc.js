@@ -1262,6 +1262,7 @@ module.exports = {
         "unicorn/prefer-add-event-listener": [
             "error"
         ],
+        "unicorn/prefer-code-point": ["off"],
         "unicorn/prefer-dataset": [
             "error"
         ],

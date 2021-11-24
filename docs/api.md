@@ -96,7 +96,7 @@ ___
 
 ### mamAttach
 
-▸ **mamAttach**(`client`, `mamMessage`, `tag?`): `Promise`<`Object`\>
+▸ **mamAttach**(`client`, `mamMessage`, `tag?`): `Promise`<{}\>
 
 Attach the mam message to the tangle.
 
@@ -110,7 +110,7 @@ Attach the mam message to the tangle.
 
 #### Returns
 
-`Promise`<`Object`\>
+`Promise`<{}\>
 
 The transactions that were attached.
 
