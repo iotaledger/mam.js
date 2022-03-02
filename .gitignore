@@ -4,3 +4,4 @@ coverage
 channelState.json
 dist
 es
+typings
