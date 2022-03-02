@@ -2,3 +2,5 @@
 node_modules
 coverage
 channelState.json
+dist
+es
